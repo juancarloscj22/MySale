@@ -1,0 +1,93 @@
+AVANCE DEL PROYECTO MYSALE
+
+Fecha: 29/09/2026
+
+1. RESUMEN
+Se consolidó la base del proyecto para una tienda en línea de vape shop con arquitectura propuesta en el documento de estructura del proyecto. Se creó una aplicación frontend con React + Vite, se configuró el entorno base y se preparó una estructura modular con vistas, servicios y contexto para carrito.
+
+2. RECURSOS Y ARCHIVOS DEL REPOSITORIO
+- README.md: documento inicial del proyecto.
+- Estructura_Proyecto_VapeShop_Corregida.docx: documento base con la arquitectura recomendada.
+- frontend/: aplicación principal desarrollada.
+
+3. TECNOLOGÍAS IMPLEMENTADAS
+- React
+- Vite
+- JavaScript
+- React Router DOM
+- Tailwind CSS
+- Supabase SDK instalado para integración futura
+
+4. ESTRUCTURA DEL PROYECTO FRONTEND
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── Footer.jsx
+│   │   └── VapeCard.jsx
+│   ├── context/
+│   │   └── CartContext.jsx
+│   ├── lib/
+│   │   └── whatsapp.js
+│   ├── routes/
+│   │   ├── ProtectedRoute.jsx
+│   │   ├── AdminRoute.jsx
+│   │   └── DeveloperRoute.jsx
+│   ├── services/
+│   │   └── products.js
+│   ├── views/
+│   │   ├── auth/
+│   │   │   └── Auth.jsx
+│   │   ├── admin/
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Inventory.jsx
+│   │   │   ├── Orders.jsx
+│   │   │   └── UserManager.jsx
+│   │   ├── cliente/
+│   │   │   ├── Home.jsx
+│   │   │   ├── Catalog.jsx
+│   │   │   ├── ProductDetail.jsx
+│   │   │   ├── Checkout.jsx
+│   │   │   └── MyOrders.jsx
+│   │   └── dev/
+│   │       ├── DevConsole.jsx
+│   │       └── ConfigSettings.jsx
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   └── main.jsx
+├── package.json
+├── vite.config.js
+├── index.html
+└── public/
+
+5. FUNCIONALIDADES IMPLEMENTADAS
+- Home con hero section y productos destacados
+- Catálogo con cards de productos
+- Detalle de producto individual
+- Carrito persistente con LocalStorage
+- Checkout con resumen del pedido y integración de WhatsApp
+- Historial de pedidos del cliente
+- Pantalla de autenticación con validación de edad mayor de 18
+- Panel administrativo mock con dashboard, inventario y usuarios
+- Panel dev con configuración y estado del sistema
+- Rutas protegidas para roles cliente/admin/dev
+
+6. LOGICA DE CARRO Y WHATSAPP
+- Se creó CartContext para manejar el estado del carrito.
+- Se almacenan los elementos en localStorage para persistencia.
+- Se integra la generación de mensajes para WhatsApp mediante buildOrderMessage y buildWhatsAppUrl.
+
+7. VALIDACIÓN REALIZADA
+Se ejecutó una compilación final con Vite para verificar que el proyecto genera build exitosamente.
+Resultado: compilación correcta sin errores.
+
+8. SERVIDOR DE DESARROLLO
+La aplicación queda disponible en el servidor local de desarrollo en:
+http://localhost:5173/
+
+9. SIGUIENTE PASO RECOMENDADO
+Conectar la aplicación con Supabase real para autenticación, productos, pedidos y permisos por roles; además, migrar los datos mock a base de datos real y activar políticas RLS.
+
+10. CONCLUSIÓN
+El proyecto ya cuenta con una base funcional y ordenada para continuar su crecimiento. Se dejó preparado el camino para implementar la versión real de la tienda con datos persistentes y un flujo completo de compra.
