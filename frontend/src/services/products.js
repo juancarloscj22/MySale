@@ -115,3 +115,11 @@ export async function setProductActive(id, active) {
     .single();
   if (error) throw error;
 }
+
+export async function deleteProduct(id) {
+  const { error } = await supabase.rpc('delete_product', {
+    p_product_id: id,
+  });
+
+  if (error) throw error;
+}

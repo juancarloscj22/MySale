@@ -8,6 +8,7 @@ import { createOrder, getCheckoutSettings, validateCoupon } from '../../services
 
 const initialDelivery = {
   address: '',
+  date: '',
   time: '',
   paymentMethod: '',
   adjacentZone: null,
@@ -15,6 +16,7 @@ const initialDelivery = {
 };
 const inputClass =
   'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500';
+const today = new Date().toLocaleDateString('en-CA');
 
 function getPendingRequestId() {
   const storageKey = 'pending-order-request-id';
@@ -104,6 +106,16 @@ export default function Checkout() {
       return;
     }
 
+    if (!delivery.date) {
+      setError('Selecciona la fecha preferida de entrega.');
+      return;
+    }
+
+    if (settings?.acceptingOrders === false) {
+      setError('La tienda no está aceptando pedidos por el momento. Inténtalo más tarde.');
+      return;
+    }
+
     if (!profile?.full_name?.trim() || !profile?.phone?.trim()) {
       setError('Completa tu nombre y teléfono en Mi cuenta antes de realizar el pedido.');
       return;
@@ -129,6 +141,7 @@ export default function Checkout() {
         deliveryName: profile.full_name,
         deliveryPhone: profile.phone,
         deliveryAddress: delivery.address,
+        deliveryDate: delivery.date,
         deliveryTime: delivery.time,
         paymentMethod: delivery.paymentMethod,
         cashChangeRequired: delivery.paymentMethod === 'cash' && delivery.cashChangeRequired,
@@ -195,9 +208,11 @@ export default function Checkout() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-black text-slate-900">Checkout</h1>
-      <p className="mt-3 text-slate-600">
-        El precio y el stock se vuelven a validar al guardar el pedido.
-      </p>
+      {settings?.acceptingOrders === false && (
+        <p role="status" className="mt-5 rounded-xl bg-amber-50 p-4 text-amber-800">
+          La tienda no está aceptando pedidos por el momento. Tu carrito se conserva para cuando vuelva el servicio.
+        </p>
+      )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_0.9fr]">
         <div className="space-y-8">
@@ -313,6 +328,19 @@ export default function Checkout() {
                     : 'No se agregará costo de envío.'}
               </span>
             </fieldset>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Fecha preferida de entrega *</span>
+              <input
+                name="date"
+                type="date"
+                min={today}
+                required
+                value={delivery.date}
+                onChange={updateDelivery}
+                className={inputClass}
+              />
+              <span className="mt-1 block text-xs text-slate-500">La tienda confirmará la disponibilidad de la fecha.</span>
+            </label>
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">Hora preferida de entrega</span>
               <input
@@ -439,7 +467,7 @@ export default function Checkout() {
               </span>
             </div>
             <p className="border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">
-              El envío configurado se cobra si indicas que tu domicilio está en zona aledaña. El servidor valida precios y stock, y calcula el total al confirmar.
+              El envío configurado se cobra si indicas que tu domicilio está en zona aledaña.
             </p>
           </div>
 
@@ -458,7 +486,7 @@ export default function Checkout() {
           <button
             type="submit"
             form="checkout-form"
-            disabled={submitting || loadingSettings || !settings?.whatsappNumber || delivery.adjacentZone === null}
+            disabled={submitting || loadingSettings || !settings?.whatsappNumber || delivery.adjacentZone === null || settings?.acceptingOrders === false}
             className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Validando y guardando...' : 'Crear pedido y continuar a WhatsApp'}

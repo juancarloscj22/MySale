@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { createCoupon, getCoupons, setCouponActive } from '../../services/coupons';
+import { useAuth } from '../../context/useAuth';
+import { createCoupon, deleteCoupon, getCoupons, setCouponActive } from '../../services/coupons';
 
-const emptyForm = { code: '', discountPercent: '', expiresAt: '' };
+const emptyForm = { code: '', discountPercent: '', maxUses: '', expiresAt: '' };
 const inputClass =
   'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500';
 const today = new Date().toLocaleDateString('en-CA');
@@ -12,6 +13,7 @@ const formatDate = (value) =>
     : 'Sin vencimiento';
 
 export default function Coupons() {
+  const { profile } = useAuth();
   const [coupons, setCoupons] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
@@ -83,16 +85,36 @@ export default function Coupons() {
     }
   };
 
+  const handleDelete = async (coupon) => {
+    if (!window.confirm(`¿Eliminar el cupón ${coupon.code}? Los pedidos anteriores conservarán su registro.`)) {
+      return;
+    }
+
+    setError('');
+    setMessage('');
+    setBusyCoupon(coupon.id);
+
+    try {
+      await deleteCoupon(coupon.id);
+      setMessage(`Cupón ${coupon.code} eliminado.`);
+      await loadCoupons();
+    } catch (deleteError) {
+      setError(deleteError.message);
+    } finally {
+      setBusyCoupon('');
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">Promociones</p>
       <h1 className="mt-2 text-4xl font-black text-slate-900">Cupones de descuento</h1>
-      <p className="mt-3 text-slate-600">Crea códigos con porcentaje de descuento y vencimiento opcional.</p>
+      <p className="mt-3 text-slate-600">Crea códigos con descuento, vencimiento y límite opcional de usos.</p>
 
       {error && <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
       {message && <p role="status" className="mt-6 rounded-xl bg-emerald-100 p-4 text-emerald-800">{message}</p>}
 
-      <form onSubmit={handleCreate} className="mt-8 grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-3">
+      <form onSubmit={handleCreate} className="mt-8 grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2">
         <label className="block">
           <span className="mb-2 block text-sm font-semibold text-slate-700">Código del cupón *</span>
           <input
@@ -121,6 +143,19 @@ export default function Coupons() {
           />
         </label>
         <label className="block">
+          <span className="mb-2 block text-sm font-semibold text-slate-700">Cantidad máxima de usos</span>
+          <input
+            type="number"
+            min="1"
+            step="1"
+            value={form.maxUses}
+            onChange={(event) => setForm((current) => ({ ...current, maxUses: event.target.value }))}
+            className={inputClass}
+            placeholder="Sin límite"
+          />
+          <span className="mt-1 block text-xs text-slate-500">Déjalo vacío para permitir usos ilimitados.</span>
+        </label>
+        <label className="block">
           <span className="mb-2 block text-sm font-semibold text-slate-700">Válido hasta (opcional)</span>
           <input
             type="date"
@@ -130,7 +165,7 @@ export default function Coupons() {
             className={inputClass}
           />
         </label>
-        <div className="md:col-span-3">
+        <div className="md:col-span-2">
           <button
             type="submit"
             disabled={saving}
@@ -165,9 +200,10 @@ export default function Coupons() {
               <tr>
                 <th scope="col" className="p-4">Código</th>
                 <th scope="col" className="p-4">Descuento</th>
+                <th scope="col" className="p-4">Usos</th>
                 <th scope="col" className="p-4">Vencimiento</th>
                 <th scope="col" className="p-4">Estado</th>
-                <th scope="col" className="p-4">Acción</th>
+                <th scope="col" className="p-4">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -175,9 +211,15 @@ export default function Coupons() {
                 <tr key={coupon.id} className="border-t border-slate-200">
                   <td className="p-4 font-mono font-bold text-slate-900">{coupon.code}</td>
                   <td className="p-4">{Number(coupon.discount_percent)}%</td>
+                  <td className="p-4">
+                    {coupon.max_uses === null
+                      ? `${coupon.used_count} / Sin límite`
+                      : `${coupon.used_count} / ${coupon.max_uses}`}
+                  </td>
                   <td className="p-4">{formatDate(coupon.expires_at)}</td>
                   <td className="p-4">{coupon.active ? 'Activo' : 'Inactivo'}</td>
                   <td className="p-4">
+                    <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => void handleToggle(coupon)}
@@ -186,6 +228,17 @@ export default function Coupons() {
                     >
                       {busyCoupon === coupon.id ? 'Guardando...' : coupon.active ? 'Desactivar' : 'Activar'}
                     </button>
+                    {profile?.role === 'developer' && (
+                      <button
+                        type="button"
+                        onClick={() => void handleDelete(coupon)}
+                        disabled={busyCoupon === coupon.id}
+                        className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 disabled:opacity-50"
+                      >
+                        {busyCoupon === coupon.id ? 'Procesando...' : 'Eliminar'}
+                      </button>
+                    )}
+                    </div>
                   </td>
                 </tr>
               ))}

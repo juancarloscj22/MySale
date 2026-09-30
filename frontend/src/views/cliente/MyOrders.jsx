@@ -71,6 +71,7 @@ export default function MyOrders() {
               </div>
               <p className="mt-2 text-sm text-slate-500">{formatDate(order.created_at)}</p>
               <div className="mt-3 grid gap-1 text-sm text-slate-600 sm:grid-cols-2">
+                <p>Fecha preferida: {order.delivery_date ?? 'Sin preferencia'}</p>
                 <p>Hora preferida: {order.delivery_time ? String(order.delivery_time).slice(0, 5) : 'Sin preferencia'}</p>
                 <p>Zona aledaña: {order.adjacent_zone ? 'Sí' : 'No'}</p>
                 <p>Medio de pago: {getPaymentMethodLabel(order.payment_method)}</p>

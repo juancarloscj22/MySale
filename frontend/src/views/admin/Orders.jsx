@@ -137,6 +137,9 @@ export default function Orders() {
                     Zona aledaña: {order.adjacent_zone ? 'Sí' : 'No'}
                   </p>
                   <p className="mt-2 text-sm text-slate-600">
+                    Fecha preferida: {order.delivery_date ?? 'Sin preferencia'}
+                  </p>
+                  <p className="text-sm text-slate-600">
                     Hora preferida: {order.delivery_time ? String(order.delivery_time).slice(0, 5) : 'Sin preferencia'}
                   </p>
                   <p className="text-sm text-slate-600">

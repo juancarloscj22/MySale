@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getProducts, saveProduct, setProductActive } from '../../services/products';
+import { useAuth } from '../../context/useAuth';
+import { deleteProduct, getProducts, saveProduct, setProductActive } from '../../services/products';
 
 const emptyForm = {
   id: '',
@@ -21,6 +22,7 @@ const inputClass =
   'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500';
 
 export default function Inventory() {
+  const { profile } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -150,6 +152,26 @@ export default function Inventory() {
       await refreshProducts();
     } catch (updateError) {
       setError(updateError.message);
+    } finally {
+      setBusyProductId('');
+    }
+  };
+
+  const handleDelete = async (product) => {
+    if (!window.confirm(`¿Eliminar permanentemente "${product.name}" del inventario? Los pedidos anteriores conservarán su información.`)) {
+      return;
+    }
+
+    setBusyProductId(product.id);
+    setError('');
+    setMessage('');
+
+    try {
+      await deleteProduct(product.id);
+      setMessage(`Producto "${product.name}" eliminado.`);
+      await refreshProducts();
+    } catch (deleteError) {
+      setError(deleteError.message);
     } finally {
       setBusyProductId('');
     }
@@ -305,6 +327,16 @@ export default function Inventory() {
                       >
                         {busyProductId === product.id ? 'Guardando...' : product.active ? 'Desactivar' : 'Activar'}
                       </button>
+                      {profile?.role === 'developer' && (
+                        <button
+                          type="button"
+                          disabled={busyProductId === product.id}
+                          onClick={() => void handleDelete(product)}
+                          className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          {busyProductId === product.id ? 'Procesando...' : 'Eliminar'}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

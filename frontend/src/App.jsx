@@ -28,9 +28,9 @@ function App() {
       <StoreSettingsProvider>
         <CartProvider>
           <BrowserRouter>
-            <div className="min-h-screen bg-slate-50 text-slate-900">
+            <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
               <Navbar />
-              <main>
+              <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/catalog" element={<Catalog />} />

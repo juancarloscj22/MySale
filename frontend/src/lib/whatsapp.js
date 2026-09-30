@@ -11,6 +11,7 @@ export const buildOrderMessage = (order) => {
     `Teléfono: ${order.delivery_phone}`,
     `Dirección: ${order.delivery_address}`,
     `Zona aledaña: ${order.adjacent_zone ? 'Sí' : 'No'}`,
+    ...(order.delivery_date ? [`Fecha preferida de entrega: ${order.delivery_date}`] : []),
     ...(order.delivery_time ? [`Hora preferida de entrega: ${String(order.delivery_time).slice(0, 5)}`] : []),
     `Medio de pago: ${getPaymentMethodLabel(order.payment_method)}`,
     ...(order.payment_method === 'cash'

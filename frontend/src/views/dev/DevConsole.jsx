@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import OrderAcceptanceControl from '../../components/OrderAcceptanceControl';
 import { useAuth } from '../../context/useAuth';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -117,6 +118,8 @@ export default function DevConsole() {
           Actualizar diagnóstico
         </button>
       </div>
+
+      <OrderAcceptanceControl />
 
       <section className="mt-8">
         <div className="mb-4">

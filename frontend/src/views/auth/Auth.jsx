@@ -34,9 +34,13 @@ export default function Auth() {
       if (isLogin) {
         await signIn(email, password);
       } else {
-        const { session: newSession } = await signUp({ email, password, fullName, phone });
+        const { session: newSession, user: newUser } = await signUp({ email, password, fullName, phone });
         if (!newSession) {
-          setNotice('Revisa tu correo para confirmar la cuenta y completar el registro.');
+          if (newUser?.identities?.length === 0) {
+            setError('Ya existe una cuenta con este correo. Inicia sesión en lugar de registrarte de nuevo.');
+          } else {
+            setNotice('Revisa tu correo para confirmar la cuenta y completar el registro.');
+          }
         }
       }
     } catch (submitError) {
