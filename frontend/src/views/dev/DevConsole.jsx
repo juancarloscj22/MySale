@@ -8,8 +8,8 @@ const tools = [
   {
     to: '/admin',
     title: 'Dashboard administrativo',
-    description: 'Indicadores y accesos a las áreas administrativas.',
-    status: 'Prototipo',
+    description: 'Métricas reales de la tienda, calendario de entregas y accesos administrativos.',
+    status: 'Disponible',
   },
   {
     to: '/admin/inventory',
