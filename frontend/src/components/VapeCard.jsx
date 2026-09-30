@@ -7,11 +7,18 @@ export default function VapeCard({ product }) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
       <Link to={`/product/${product.id}`} className="block overflow-hidden">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="h-56 w-full object-cover transition duration-300 group-hover:scale-105"
-        />
+        <div className="relative">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="h-56 w-full object-cover transition duration-300 group-hover:scale-105"
+          />
+          {product.discount_percent > 0 && (
+            <span className="absolute left-3 top-3 rounded-full bg-pink-100 px-3 py-1 text-sm font-black text-pink-700 shadow">
+              -{product.discount_percent}% OFF
+            </span>
+          )}
+        </div>
       </Link>
 
       <div className="space-y-4 p-5">
@@ -30,7 +37,14 @@ export default function VapeCard({ product }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-slate-500">{product.flavor}</p>
-            <p className="text-2xl font-black text-slate-900">${product.price.toFixed(2)}</p>
+            {product.discount_percent > 0 ? (
+              <>
+                <p className="text-xs text-slate-500 line-through">${product.originalPrice.toFixed(2)}</p>
+                <p className="text-2xl font-black text-slate-900">${product.price.toFixed(2)}</p>
+              </>
+            ) : (
+              <p className="text-2xl font-black text-slate-900">${product.price.toFixed(2)}</p>
+            )}
           </div>
           <button
             type="button"

@@ -134,6 +134,9 @@ export default function Orders() {
                   <p className="text-sm text-slate-600">{order.delivery_phone}</p>
                   <p className="mt-1 text-sm text-slate-600">{order.delivery_address}</p>
                   <p className="mt-2 text-sm text-slate-600">
+                    Zona aledaña: {order.adjacent_zone ? 'Sí' : 'No'}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-600">
                     Hora preferida: {order.delivery_time ? String(order.delivery_time).slice(0, 5) : 'Sin preferencia'}
                   </p>
                   <p className="text-sm text-slate-600">
@@ -157,6 +160,14 @@ export default function Orders() {
                   </ul>
                   <div className="mt-4 flex justify-between border-t border-slate-100 pt-3 text-sm">
                     <span className="text-slate-600">Envío {formatAmount(order.shipping_fee, order.currency_code)}</span>
+                  </div>
+                  {Number(order.coupon_discount) > 0 && (
+                    <p className="mt-2 text-right text-sm font-semibold text-purple-700">
+                      Cupón {order.coupon_code}: -{formatAmount(order.coupon_discount, order.currency_code)}
+                    </p>
+                  )}
+                  <div className="mt-2 flex justify-between text-sm">
+                    <span className="text-slate-600">Total</span>
                     <strong className="text-lg text-slate-900">{formatAmount(order.total, order.currency_code)}</strong>
                   </div>
                 </div>

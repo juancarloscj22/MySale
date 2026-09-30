@@ -43,7 +43,7 @@ export default function Dashboard() {
         {
           label: 'Usuarios registrados',
           value: formatNumber(metrics.users),
-          tone: 'bg-cyan-100 text-cyan-700',
+          tone: 'bg-cyan-500 text-slate-900',
         },
         {
           label: 'Ventas estimadas de hoy',
@@ -102,6 +102,12 @@ export default function Dashboard() {
               title: 'Usuarios',
               description: 'Consultar las cuentas registradas en la tienda.',
               action: 'Ver usuarios',
+            },
+            {
+              to: '/admin/coupons',
+              title: 'Cupones',
+              description: 'Crear códigos promocionales porcentuales y administrar su vigencia.',
+              action: 'Administrar cupones',
             },
           ].map((section) => (
             <Link

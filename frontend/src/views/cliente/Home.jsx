@@ -1,18 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import VapeCard from '../../components/VapeCard';
+import { useAuth } from '../../context/useAuth';
 import { getProducts } from '../../services/products';
 
 export default function Home() {
-  const [featured, setFeatured] = useState([]);
+  const { user, loading: authLoading } = useAuth();
+  const [saleProducts, setSaleProducts] = useState([]);
   const [productsError, setProductsError] = useState('');
+  const carouselRef = useRef(null);
 
   useEffect(() => {
     let active = true;
 
-    getProducts({ limit: 3 })
+    getProducts({ limit: 12, onSaleOnly: true })
       .then((products) => {
-        if (active) setFeatured(products);
+        if (active) setSaleProducts(products);
       })
       .catch((error) => {
         if (active) setProductsError(error.message);
@@ -24,69 +27,32 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-16 pb-20">
-      <section className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-slate-900 text-white">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
-          <div className="space-y-6">
-            <span className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-              Delivery en WhatsApp
-            </span>
-            <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
-              Descubre los mejores sabores del momento.
-            </h1>
-            <p className="max-w-xl text-base text-emerald-50">
-              Catálogo de vaporizadores premium, disposables y accesorios con una experiencia de compra rápida y segura.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                to="/catalog"
-                className="rounded-full bg-white px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-100"
-              >
-                Ver catálogo
-              </Link>
-              <Link
-                to="/auth"
-                className="rounded-full border border-white/40 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                Iniciar sesión
-              </Link>
-            </div>
-          </div>
-
-          <div className="rounded-[2rem] border border-white/20 bg-white/10 p-4 shadow-2xl backdrop-blur-sm">
-            <img
-              src="https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=1200&q=80"
-              alt="Productos de vape"
-              className="h-[440px] w-full rounded-[1.5rem] object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
+    <div className="space-y-12 pb-20">
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-6 md:grid-cols-3">
-          {[
-            { label: 'Pedidos del día', value: '128' },
-            { label: 'Usuarios activos', value: '2.4k' },
-            { label: 'Valor promedio', value: '$84.50' },
-          ].map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm text-slate-500">{stat.label}</p>
-              <p className="mt-3 text-3xl font-black text-slate-900">{stat.value}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4 rounded-3xl bg-gradient-to-r from-blue-200 via-violet-200 to-pink-100 p-8 sm:p-10">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">Trending</p>
-            <h2 className="mt-2 text-3xl font-black text-slate-900">Productos destacados</h2>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-purple-700">Ofertas especiales</p>
+            <h1 className="mt-2 text-3xl font-black text-slate-900 sm:text-5xl">Productos en descuento</h1>
+            <p className="mt-3 max-w-xl text-slate-700">
+              Aprovecha los precios especiales por tiempo limitado.
+            </p>
           </div>
-          <Link to="/catalog" className="text-sm font-semibold text-emerald-600 hover:text-emerald-700">
-            Ver todo
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/catalog"
+              className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600"
+            >
+              Ver catálogo
+            </Link>
+            {!authLoading && (
+              <Link
+                to={user ? '/mis-pedidos' : '/auth'}
+                className="rounded-full border border-slate-400 bg-white/60 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-white"
+              >
+                {user ? 'Ver mis pedidos' : 'Iniciar sesión'}
+              </Link>
+            )}
+          </div>
         </div>
 
         {productsError && (
@@ -94,18 +60,59 @@ export default function Home() {
             No se pudieron cargar los productos destacados: {productsError}
           </p>
         )}
-        {!productsError && featured.length === 0 && (
+        {!productsError && saleProducts.length === 0 && (
           <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600">
-            Aún no hay productos destacados.
+            Aún no hay productos en descuento. Vuelve pronto para descubrir nuestras ofertas.
           </p>
         )}
-        {featured.length > 0 && (
-          <div className="grid gap-6 md:grid-cols-3">
-            {featured.map((product) => (
-              <VapeCard key={product.id} product={product} />
-            ))}
+        {saleProducts.length > 0 && (
+          <div className="relative">
+            <div
+              ref={carouselRef}
+              className="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-5"
+            >
+              {saleProducts.map((product) => (
+                <div key={product.id} className="w-[min(82vw,20rem)] shrink-0 snap-start">
+                  <VapeCard product={product} />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                aria-label="Ver ofertas anteriores"
+                onClick={() => carouselRef.current?.scrollBy({ left: -340, behavior: 'smooth' })}
+                className="rounded-full border border-blue-300 bg-blue-100 px-4 py-2 font-bold text-blue-800 hover:bg-blue-200"
+              >
+                ←
+              </button>
+              <button
+                type="button"
+                aria-label="Ver más ofertas"
+                onClick={() => carouselRef.current?.scrollBy({ left: 340, behavior: 'smooth' })}
+                className="rounded-full border border-blue-300 bg-blue-100 px-4 py-2 font-bold text-blue-800 hover:bg-blue-200"
+              >
+                →
+              </button>
+            </div>
           </div>
         )}
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl border border-cyan-300 bg-cyan-100 p-8 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-800">MySale Shop</p>
+            <h2 className="mt-2 text-2xl font-black text-slate-900">¿Buscas algo más?</h2>
+            <p className="mt-2 text-slate-700">Explora todos los productos disponibles en la tienda.</p>
+          </div>
+          <Link
+            to="/catalog"
+            className="mt-5 inline-flex rounded-full bg-blue-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-600 sm:mt-0"
+          >
+            Explorar catálogo
+          </Link>
+        </div>
       </section>
     </div>
   );

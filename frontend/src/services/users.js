@@ -15,3 +15,21 @@ export async function getAdminUsers({ page = 0, pageSize = 25 } = {}) {
 
   return { users: data, total: count };
 }
+
+export async function manageUser({ userId, action, blocked }) {
+  const { data, error } = await supabase.functions.invoke('manage-user', {
+    body: { userId, action, blocked },
+  });
+
+  if (error) {
+    if (error.context instanceof Response) {
+      const responseBody = await error.context.clone().json().catch(() => null);
+      if (typeof responseBody?.error === 'string') {
+        throw new Error(responseBody.error);
+      }
+    }
+    throw error;
+  }
+  if (data?.error) throw new Error(data.error);
+  return data;
+}

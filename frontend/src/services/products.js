@@ -1,25 +1,33 @@
 import { supabase } from '../lib/supabaseClient';
 
 const productFields =
-  'id, name, description, price, stock, brand, category_id, flavor, nicotine, puffs, image_url, active, categories(id, name)';
+  'id, name, description, price, discount_percent, stock, brand, category_id, flavor, nicotine, puffs, image_url, active, categories(id, name)';
 
-const mapProduct = (row) => ({
-  ...row,
-  price: Number(row.price),
-  puffs: row.puffs ? String(row.puffs) : '',
-  image:
-    row.image_url ||
-    'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=900&q=80',
-  category: row.categories?.name ?? 'Vape',
-});
+const mapProduct = (row) => {
+  const originalPrice = Number(row.price);
+  const discountPercent = Number(row.discount_percent ?? 0);
 
-export async function getProducts({ limit, includeInactive = false } = {}) {
+  return {
+    ...row,
+    originalPrice,
+    discount_percent: discountPercent,
+    price: Number((originalPrice * (100 - discountPercent) / 100).toFixed(2)),
+    puffs: row.puffs ? String(row.puffs) : '',
+    image:
+      row.image_url ||
+      'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=900&q=80',
+    category: row.categories?.name ?? 'Vape',
+  };
+};
+
+export async function getProducts({ limit, includeInactive = false, onSaleOnly = false } = {}) {
   let query = supabase
     .from('products')
     .select(productFields)
     .order('name');
 
   if (!includeInactive) query = query.eq('active', true);
+  if (onSaleOnly) query = query.gt('discount_percent', 0);
   if (limit) query = query.limit(limit);
 
   const { data, error } = await query;
@@ -79,6 +87,7 @@ export async function saveProduct(product) {
     name: product.name.trim(),
     description: product.description.trim() || null,
     price: Number(product.price),
+    discount_percent: Number(product.discount_percent ?? 0),
     stock: Number(product.stock),
     brand: product.brand.trim() || null,
     category_id: categoryId,

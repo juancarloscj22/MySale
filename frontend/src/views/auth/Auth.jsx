@@ -161,7 +161,7 @@ export default function Auth() {
           <button
             type="submit"
             disabled={submitting || loading}
-            className="w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-600 disabled:cursor-wait disabled:opacity-60"
+            className="w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600 disabled:cursor-wait disabled:opacity-60"
           >
             {submitting ? 'Procesando...' : isLogin ? 'Entrar' : 'Crear cuenta'}
           </button>

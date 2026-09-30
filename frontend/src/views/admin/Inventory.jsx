@@ -6,6 +6,7 @@ const emptyForm = {
   name: '',
   description: '',
   price: '',
+  discount_percent: '0',
   stock: '',
   brand: '',
   category: '',
@@ -75,7 +76,8 @@ export default function Inventory() {
       id: product.id,
       name: product.name,
       description: product.description ?? '',
-      price: String(product.price),
+      price: String(product.originalPrice),
+      discount_percent: String(product.discount_percent ?? 0),
       stock: String(product.stock),
       brand: product.brand ?? '',
       category: product.category === 'Vape' ? '' : product.category,
@@ -97,6 +99,7 @@ export default function Inventory() {
     setMessage('');
 
     const price = Number(form.price);
+    const discountPercent = Number(form.discount_percent);
     const stock = Number(form.stock);
     const puffs = form.puffs === '' ? null : Number(form.puffs);
 
@@ -106,6 +109,10 @@ export default function Inventory() {
     }
     if (!Number.isFinite(price) || price < 0) {
       setFormError('El precio debe ser un número válido mayor o igual a cero.');
+      return;
+    }
+    if (!Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent > 100) {
+      setFormError('El descuento debe ser un porcentaje entre 0 y 100.');
       return;
     }
     if (!Number.isInteger(stock) || stock < 0) {
@@ -158,7 +165,7 @@ export default function Inventory() {
         <button
           type="button"
           onClick={openNewForm}
-          className="rounded-full bg-emerald-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-600"
+          className="rounded-full bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600"
         >
           Nuevo producto
         </button>
@@ -188,6 +195,10 @@ export default function Inventory() {
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">Precio *</span>
               <input name="price" type="number" min="0" step="0.01" required value={form.price} onChange={updateForm} className={inputClass} />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Descuento (%)</span>
+              <input name="discount_percent" type="number" min="0" max="100" step="0.01" value={form.discount_percent} onChange={updateForm} className={inputClass} />
             </label>
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">Stock *</span>
@@ -265,7 +276,17 @@ export default function Inventory() {
                   </td>
                   <td className="p-4">{product.category}</td>
                   <td className="p-4">{product.stock}</td>
-                  <td className="p-4">${product.price.toFixed(2)}</td>
+                  <td className="p-4">
+                    {product.discount_percent > 0 ? (
+                      <>
+                        <p className="font-bold text-slate-900">
+                          ${(product.originalPrice * (100 - product.discount_percent) / 100).toFixed(2)}
+                        </p>
+                        <p className="text-xs text-slate-500 line-through">${product.originalPrice.toFixed(2)}</p>
+                        <p className="text-xs font-semibold text-pink-700">-{product.discount_percent}%</p>
+                      </>
+                    ) : `$${product.originalPrice.toFixed(2)}`}
+                  </td>
                   <td className="p-4">
                     <span className={`rounded-full px-2 py-1 text-xs font-semibold ${!product.active ? 'bg-slate-100 text-slate-600' : product.stock > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                       {!product.active ? 'Inactivo' : product.stock > 0 ? 'Disponible' : 'Agotado'}

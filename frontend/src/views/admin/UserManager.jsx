@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getAdminUsers } from '../../services/users';
+import { useAuth } from '../../context/useAuth';
+import { getAdminUsers, manageUser } from '../../services/users';
 
 const pageSize = 25;
 const roles = {
@@ -12,12 +13,15 @@ const formatDate = (value) =>
   new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium' }).format(new Date(value));
 
 export default function UserManager() {
+  const { profile } = useAuth();
   const [users, setUsers] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
+  const [busyUserId, setBusyUserId] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -47,6 +51,51 @@ export default function UserManager() {
     setReloadKey((current) => current + 1);
   };
 
+  const handleBlockToggle = async (user) => {
+    const blocked = !user.blocked;
+    setError('');
+    setMessage('');
+    setBusyUserId(user.id);
+
+    try {
+      await manageUser({ userId: user.id, action: 'set_blocked', blocked });
+      setUsers((current) =>
+        current.map((item) => (item.id === user.id ? { ...item, blocked } : item)),
+      );
+      setMessage(blocked ? 'Usuario bloqueado.' : 'Usuario desbloqueado.');
+    } catch (actionError) {
+      setError(actionError.message);
+    } finally {
+      setBusyUserId('');
+    }
+  };
+
+  const handleDelete = async (user) => {
+    const identity = user.full_name || user.email || 'este usuario';
+    if (!window.confirm(`¿Eliminar permanentemente a ${identity}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    setError('');
+    setMessage('');
+    setBusyUserId(user.id);
+
+    try {
+      await manageUser({ userId: user.id, action: 'delete' });
+      const remainingUsers = total - 1;
+      const nextPage = users.length === 1 && page > 0 ? page - 1 : page;
+      setPage(nextPage);
+      setTotal(remainingUsers);
+      setMessage('Usuario eliminado permanentemente.');
+      setLoading(true);
+      setReloadKey((current) => current + 1);
+    } catch (actionError) {
+      setError(actionError.message);
+    } finally {
+      setBusyUserId('');
+    }
+  };
+
   const changePage = (nextPage) => {
     setLoading(true);
     setError('');
@@ -62,6 +111,11 @@ export default function UserManager() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">Administración</p>
           <h1 className="mt-2 text-4xl font-black text-slate-900">Gestión de usuarios</h1>
           <p className="mt-2 text-slate-600">Cuentas registradas: {total}</p>
+          {profile?.role === 'developer' && (
+            <p className="mt-2 text-sm text-slate-500">
+              Las acciones Dev bloquean o eliminan cuentas de cliente y administrador; las cuentas Dev y la tuya están protegidas.
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -75,7 +129,12 @@ export default function UserManager() {
 
       {error && (
         <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">
-          No se pudieron cargar los usuarios: {error}
+          {error}
+        </p>
+      )}
+      {message && (
+        <p role="status" className="mt-6 rounded-xl bg-emerald-100 p-4 text-emerald-800">
+          {message}
         </p>
       )}
       {loading && <p className="py-10 text-slate-600">Cargando usuarios...</p>}
@@ -96,6 +155,7 @@ export default function UserManager() {
                   <th scope="col" className="p-4">Rol</th>
                   <th scope="col" className="p-4">Estado</th>
                   <th scope="col" className="p-4">Registro</th>
+                  {profile?.role === 'developer' && <th scope="col" className="p-4">Acciones Dev</th>}
                 </tr>
               </thead>
               <tbody>
@@ -117,6 +177,32 @@ export default function UserManager() {
                       </span>
                     </td>
                     <td className="whitespace-nowrap p-4 text-slate-600">{formatDate(user.created_at)}</td>
+                    {profile?.role === 'developer' && (
+                      <td className="p-4">
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => void handleBlockToggle(user)}
+                            disabled={busyUserId === user.id || user.id === profile.id || user.role === 'developer'}
+                            title={user.role === 'developer' ? 'Las cuentas Dev están protegidas.' : undefined}
+                            className="rounded-full border border-blue-300 px-3 py-1.5 text-xs font-semibold text-blue-800 hover:bg-blue-50 disabled:opacity-50"
+                          >
+                            {busyUserId === user.id
+                              ? 'Procesando...'
+                              : user.blocked ? 'Desbloquear' : 'Bloquear'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleDelete(user)}
+                            disabled={busyUserId === user.id || user.id === profile.id || user.role === 'developer'}
+                            title={user.role === 'developer' ? 'Las cuentas Dev están protegidas.' : undefined}
+                            className="rounded-full border border-pink-300 px-3 py-1.5 text-xs font-semibold text-pink-800 hover:bg-pink-50 disabled:opacity-50"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

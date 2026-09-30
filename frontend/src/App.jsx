@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { CartProvider } from './context/CartContext.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { StoreSettingsProvider } from './context/StoreSettingsProvider.jsx';
 import ProtectedRoute from './routes/ProtectedRoute';
 import AdminRoute from './routes/AdminRoute';
 import DeveloperRoute from './routes/DeveloperRoute';
@@ -17,17 +18,19 @@ import Dashboard from './views/admin/Dashboard';
 import Inventory from './views/admin/Inventory';
 import Orders from './views/admin/Orders';
 import UserManager from './views/admin/UserManager';
+import Coupons from './views/admin/Coupons';
 import DevConsole from './views/dev/DevConsole';
 import ConfigSettings from './views/dev/ConfigSettings';
 
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <div className="min-h-screen bg-slate-50 text-slate-900">
-            <Navbar />
-            <main>
+      <StoreSettingsProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <div className="min-h-screen bg-slate-50 text-slate-900">
+              <Navbar />
+              <main>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/catalog" element={<Catalog />} />
@@ -98,6 +101,16 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/admin/coupons"
+                  element={
+                    <ProtectedRoute>
+                      <AdminRoute>
+                        <Coupons />
+                      </AdminRoute>
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route
                   path="/dev"
@@ -119,12 +132,23 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/dev/coupons"
+                  element={
+                    <ProtectedRoute>
+                      <DeveloperRoute>
+                        <Coupons />
+                      </DeveloperRoute>
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
-            </main>
-            <Footer />
-          </div>
-        </BrowserRouter>
-      </CartProvider>
+              </main>
+              <Footer />
+            </div>
+          </BrowserRouter>
+        </CartProvider>
+      </StoreSettingsProvider>
     </AuthProvider>
   );
 }

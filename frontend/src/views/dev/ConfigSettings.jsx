@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useStoreSettings } from '../../context/useStoreSettings';
 import { supabase } from '../../lib/supabaseClient';
 
 const initialSettings = {
@@ -14,11 +15,13 @@ const inputClass =
   'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500';
 
 export default function ConfigSettings() {
+  const { refreshStoreSettings } = useStoreSettings();
   const [settings, setSettings] = useState(initialSettings);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [logoPreviewError, setLogoPreviewError] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -58,6 +61,7 @@ export default function ConfigSettings() {
   const updateSetting = (event) => {
     const { name, value } = event.target;
     setSettings((current) => ({ ...current, [name]: value }));
+    if (name === 'logo_url') setLogoPreviewError(false);
   };
 
   const handleSave = async (event) => {
@@ -94,6 +98,12 @@ export default function ConfigSettings() {
     }
     if (!data) {
       setError('No se actualizó la configuración. Verifica que tu rol tenga permiso para modificarla.');
+      return;
+    }
+    try {
+      await refreshStoreSettings();
+    } catch (refreshError) {
+      setError(`La configuración se guardó, pero no se actualizó en la tienda: ${refreshError.message}`);
       return;
     }
     setMessage('Configuración guardada.');
@@ -152,6 +162,23 @@ export default function ConfigSettings() {
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-slate-700">URL del logotipo</span>
             <input name="logo_url" type="url" value={settings.logo_url} onChange={updateSetting} className={inputClass} placeholder="https://" />
+            {settings.logo_url && (
+              <div className="mt-3 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                {logoPreviewError ? (
+                  <p role="alert" className="text-sm text-red-700">
+                    No se pudo cargar la imagen. Usa una URL pública que apunte directamente a un archivo de imagen.
+                  </p>
+                ) : (
+                  <img
+                    src={settings.logo_url}
+                    alt="Vista previa del logotipo"
+                    onError={() => setLogoPreviewError(true)}
+                    className="h-14 w-14 rounded-lg bg-white object-contain p-1"
+                  />
+                )}
+                {!logoPreviewError && <span className="text-sm text-slate-600">Vista previa del logotipo</span>}
+              </div>
+            )}
           </label>
           <label className="block md:col-span-2">
             <span className="mb-2 block text-sm font-semibold text-slate-700">Mensaje inicial de WhatsApp</span>

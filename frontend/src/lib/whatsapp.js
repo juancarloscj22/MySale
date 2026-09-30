@@ -10,12 +10,16 @@ export const buildOrderMessage = (order) => {
     `Nombre: ${order.delivery_name}`,
     `Teléfono: ${order.delivery_phone}`,
     `Dirección: ${order.delivery_address}`,
+    `Zona aledaña: ${order.adjacent_zone ? 'Sí' : 'No'}`,
     ...(order.delivery_time ? [`Hora preferida de entrega: ${String(order.delivery_time).slice(0, 5)}`] : []),
     `Medio de pago: ${getPaymentMethodLabel(order.payment_method)}`,
     ...(order.payment_method === 'cash'
       ? [`¿Requiere cambio?: ${order.cash_change_required ? 'Sí' : 'No'}`]
       : []),
     `Subtotal: ${formatAmount(order.subtotal, order.currency_code)}`,
+    ...(Number(order.coupon_discount) > 0
+      ? [`Cupón ${order.coupon_code}: -${formatAmount(order.coupon_discount, order.currency_code)}`]
+      : []),
     `Envío: ${formatAmount(order.shipping_fee, order.currency_code)}`,
     `Total: ${formatAmount(order.total, order.currency_code)}`,
     'Productos:',

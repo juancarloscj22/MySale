@@ -71,7 +71,17 @@ export default function ProductDetail() {
             <span>{product.puffs} puffs</span>
           </div>
 
-          <p className="text-3xl font-black text-slate-900">${product.price.toFixed(2)}</p>
+          <div>
+            {product.discount_percent > 0 && (
+              <span className="inline-block rounded-full bg-pink-100 px-3 py-1 text-sm font-bold text-pink-700">
+                Oferta -{product.discount_percent}%
+              </span>
+            )}
+            {product.discount_percent > 0 && (
+              <p className="mt-2 text-lg text-slate-500 line-through">${product.originalPrice.toFixed(2)}</p>
+            )}
+            <p className="text-3xl font-black text-slate-900">${product.price.toFixed(2)}</p>
+          </div>
           <p className="text-base leading-7 text-slate-600">{product.description}</p>
 
           <div className="flex flex-wrap gap-4">

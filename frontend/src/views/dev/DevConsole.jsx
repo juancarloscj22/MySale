@@ -31,8 +31,14 @@ const tools = [
   {
     to: '/admin/users',
     title: 'Usuarios',
-    description: 'La gestión de usuarios todavía usa información de demostración.',
-    status: 'Prototipo',
+    description: 'Consultar cuentas y bloquear, desbloquear o eliminar usuarios no desarrolladores.',
+    status: 'Disponible',
+  },
+  {
+    to: '/dev/coupons',
+    title: 'Cupones',
+    description: 'Crear y activar cupones porcentuales con vencimiento opcional.',
+    status: 'Disponible',
   },
 ];
 

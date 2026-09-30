@@ -25,6 +25,8 @@ export async function createOrder({
   deliveryTime,
   paymentMethod,
   cashChangeRequired,
+  adjacentZone,
+  couponCode,
 }) {
   const { data, error } = await supabase.rpc('create_order', {
     p_request_id: requestId,
@@ -35,6 +37,8 @@ export async function createOrder({
     p_delivery_time: deliveryTime || null,
     p_payment_method: paymentMethod,
     p_cash_change_required: cashChangeRequired,
+    p_adjacent_zone: adjacentZone,
+    p_coupon_code: couponCode || null,
   });
 
   if (error) throw error;
@@ -46,7 +50,16 @@ export async function createOrder({
 }
 
 const orderFields =
-  'id, total, shipping_fee, currency_code, status, created_at, delivery_name, delivery_phone, delivery_address, delivery_time, payment_method, cash_change_required, order_items(product_name, quantity, unit_price, subtotal)';
+  'id, total, shipping_fee, coupon_code, coupon_discount, currency_code, status, created_at, delivery_name, delivery_phone, delivery_address, delivery_time, payment_method, cash_change_required, adjacent_zone, order_items(product_name, quantity, unit_price, subtotal)';
+
+export async function validateCoupon(code) {
+  const { data, error } = await supabase.rpc('validate_order_coupon', {
+    p_code: code,
+  });
+
+  if (error) throw error;
+  return Number(data);
+}
 
 export async function getMyOrders() {
   const { data, error } = await supabase

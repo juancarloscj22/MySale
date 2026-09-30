@@ -72,6 +72,7 @@ export default function MyOrders() {
               <p className="mt-2 text-sm text-slate-500">{formatDate(order.created_at)}</p>
               <div className="mt-3 grid gap-1 text-sm text-slate-600 sm:grid-cols-2">
                 <p>Hora preferida: {order.delivery_time ? String(order.delivery_time).slice(0, 5) : 'Sin preferencia'}</p>
+                <p>Zona aledaña: {order.adjacent_zone ? 'Sí' : 'No'}</p>
                 <p>Medio de pago: {getPaymentMethodLabel(order.payment_method)}</p>
                 {order.payment_method === 'cash' && (
                   <p>Requiere cambio: {order.cash_change_required ? 'Sí' : 'No'}</p>
@@ -85,6 +86,11 @@ export default function MyOrders() {
                   </li>
                 ))}
               </ul>
+              {Number(order.coupon_discount) > 0 && (
+                <p className="mt-3 text-right text-sm font-semibold text-purple-700">
+                  Cupón {order.coupon_code}: -{formatAmount(order.coupon_discount, order.currency_code)}
+                </p>
+              )}
               <div className="mt-4 flex justify-between border-t border-slate-100 pt-4 text-sm">
                 <span className="text-slate-600">Envío {formatAmount(order.shipping_fee, order.currency_code)}</span>
                 <strong className="text-lg text-slate-900">{formatAmount(order.total, order.currency_code)}</strong>

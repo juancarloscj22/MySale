@@ -4,12 +4,13 @@ import { useAuth } from '../../context/useAuth';
 import { useCart } from '../../context/useCart';
 import { buildOrderMessage, buildWhatsAppUrl } from '../../lib/whatsapp';
 import { paymentMethods } from '../../lib/orderOptions';
-import { createOrder, getCheckoutSettings } from '../../services/orders';
+import { createOrder, getCheckoutSettings, validateCoupon } from '../../services/orders';
 
 const initialDelivery = {
   address: '',
   time: '',
   paymentMethod: '',
+  adjacentZone: null,
   cashChangeRequired: false,
 };
 const inputClass =
@@ -36,6 +37,10 @@ export default function Checkout() {
   const [error, setError] = useState('');
   const [requestId, setRequestId] = useState(getPendingRequestId);
   const [completedOrder, setCompletedOrder] = useState(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -65,9 +70,39 @@ export default function Checkout() {
     }));
   };
 
+  const handleApplyCoupon = async () => {
+    setCouponError('');
+    setAppliedCoupon(null);
+    if (!couponCode.trim()) {
+      setCouponError('Escribe un código de cupón.');
+      return;
+    }
+
+    setValidatingCoupon(true);
+    try {
+      const discountPercent = await validateCoupon(couponCode);
+      setAppliedCoupon({ code: couponCode.trim().toUpperCase(), discountPercent });
+    } catch (validationError) {
+      setCouponError(validationError.message);
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const couponDiscount = appliedCoupon
+    ? Number((subtotal * appliedCoupon.discountPercent / 100).toFixed(2))
+    : 0;
+  const shippingFee = delivery.adjacentZone === true ? settings?.shippingFee ?? 0 : 0;
+  const estimatedTotal = subtotal - couponDiscount + shippingFee;
+
   const handleSubmitOrder = async (event) => {
     event.preventDefault();
     setError('');
+
+    if (delivery.adjacentZone === null) {
+      setError('Indica si tu domicilio está en zona aledaña para calcular el costo de envío.');
+      return;
+    }
 
     if (!profile?.full_name?.trim() || !profile?.phone?.trim()) {
       setError('Completa tu nombre y teléfono en Mi cuenta antes de realizar el pedido.');
@@ -97,6 +132,8 @@ export default function Checkout() {
         deliveryTime: delivery.time,
         paymentMethod: delivery.paymentMethod,
         cashChangeRequired: delivery.paymentMethod === 'cash' && delivery.cashChangeRequired,
+        adjacentZone: delivery.adjacentZone,
+        couponCode: appliedCoupon?.code ?? '',
       });
       const orderMessage = buildOrderMessage(order);
 
@@ -129,7 +166,7 @@ export default function Checkout() {
             href={completedOrder.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-flex rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-600"
+            className="mt-6 inline-flex rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600"
           >
             Continuar a WhatsApp
           </a>
@@ -171,8 +208,13 @@ export default function Checkout() {
                 <div className="min-w-32 flex-1">
                   <h2 className="text-lg font-bold text-slate-900">{item.name}</h2>
                   <p className="text-sm text-slate-500">{item.flavor}</p>
+                  {item.discount_percent > 0 && Number.isFinite(item.originalPrice) && (
+                    <p className="mt-1 text-sm text-slate-500 line-through">
+                      ${item.originalPrice.toFixed(2)}
+                    </p>
+                  )}
                   <p className="mt-2 text-lg font-black text-slate-900">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {settings?.currencyCode ?? '$'} {(item.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -236,6 +278,41 @@ export default function Checkout() {
                 className={inputClass}
               />
             </label>
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-semibold text-slate-700">¿Tu domicilio está en zona aledaña? *</legend>
+              <div className="flex gap-3">
+                {[
+                  { value: true, label: 'Sí' },
+                  { value: false, label: 'No' },
+                ].map((option) => (
+                  <button
+                    key={option.label}
+                    type="button"
+                    aria-pressed={delivery.adjacentZone === option.value}
+                    onClick={() =>
+                      setDelivery((current) => ({
+                        ...current,
+                        adjacentZone: option.value,
+                      }))
+                    }
+                    className={`rounded-full border px-5 py-2 text-sm font-semibold transition ${
+                      delivery.adjacentZone === option.value
+                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                        : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <span className="block text-xs text-slate-500">
+                {delivery.adjacentZone === null
+                  ? 'Selecciona una opción para calcular el envío.'
+                  : delivery.adjacentZone
+                    ? 'Se agregará el costo de envío configurado.'
+                    : 'No se agregará costo de envío.'}
+              </span>
+            </fieldset>
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">Hora preferida de entrega</span>
               <input
@@ -263,6 +340,40 @@ export default function Checkout() {
               </select>
               <span className="mt-1 block text-xs text-slate-500">El pago se coordina con la tienda; no se procesa en esta página.</span>
             </label>
+            <div className="rounded-2xl border border-purple-200 bg-purple-50 p-4">
+              <label htmlFor="coupon-code" className="mb-2 block text-sm font-semibold text-slate-700">
+                Cupón de descuento
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <input
+                  id="coupon-code"
+                  type="text"
+                  maxLength={32}
+                  value={couponCode}
+                  onChange={(event) => {
+                    setCouponCode(event.target.value.toUpperCase());
+                    setAppliedCoupon(null);
+                    setCouponError('');
+                  }}
+                  className={`${inputClass} min-w-0 flex-1`}
+                  placeholder="Ingresa tu código"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleApplyCoupon()}
+                  disabled={validatingCoupon || !couponCode.trim()}
+                  className="rounded-xl bg-purple-200 px-5 py-3 text-sm font-bold text-purple-900 hover:bg-purple-300 disabled:opacity-60"
+                >
+                  {validatingCoupon ? 'Validando...' : 'Aplicar'}
+                </button>
+              </div>
+              {appliedCoupon && (
+                <p role="status" className="mt-2 text-sm font-semibold text-emerald-700">
+                  Cupón {appliedCoupon.code} aplicado: {appliedCoupon.discountPercent}% de descuento.
+                </p>
+              )}
+              {couponError && <p role="alert" className="mt-2 text-sm text-pink-700">{couponError}</p>}
+            </div>
             {delivery.paymentMethod === 'cash' && (
               <fieldset className="space-y-2">
                 <legend className="text-sm font-semibold text-slate-700">¿Requieres cambio?</legend>
@@ -301,20 +412,34 @@ export default function Checkout() {
           <div className="mt-6 space-y-4 text-sm text-slate-600">
             <div className="flex justify-between">
               <span>Subtotal estimado</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{settings?.currencyCode ?? '$'} {subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span>Envío</span>
+              <span>Envío {delivery.adjacentZone === null ? '(selecciona zona)' : ''}</span>
               <span>
                 {loadingSettings
                   ? 'Cargando...'
                   : settings
-                    ? `${settings.currencyCode} ${settings.shippingFee.toFixed(2)}`
+                    ? `${settings.currencyCode} ${shippingFee.toFixed(2)}`
                     : 'No disponible'}
               </span>
             </div>
+            {appliedCoupon && (
+              <div className="flex justify-between text-purple-700">
+                <span>Cupón {appliedCoupon.code} (-{appliedCoupon.discountPercent}%)</span>
+                <span>-{settings ? `${settings.currencyCode} ${couponDiscount.toFixed(2)}` : `$${couponDiscount.toFixed(2)}`}</span>
+              </div>
+            )}
+            <div className="flex justify-between border-t border-slate-200 pt-4 font-bold text-slate-900">
+              <span>Total estimado</span>
+              <span>
+                {settings
+                  ? `${settings.currencyCode} ${estimatedTotal.toFixed(2)}`
+                  : `$${estimatedTotal.toFixed(2)}`}
+              </span>
+            </div>
             <p className="border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">
-              Envío y moneda configurados por la tienda. El servidor valida precios y stock, y calcula el total al confirmar.
+              El envío configurado se cobra si indicas que tu domicilio está en zona aledaña. El servidor valida precios y stock, y calcula el total al confirmar.
             </p>
           </div>
 
@@ -333,8 +458,8 @@ export default function Checkout() {
           <button
             type="submit"
             form="checkout-form"
-            disabled={submitting || loadingSettings || !settings?.whatsappNumber}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={submitting || loadingSettings || !settings?.whatsappNumber || delivery.adjacentZone === null}
+            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Validando y guardando...' : 'Crear pedido y continuar a WhatsApp'}
           </button>

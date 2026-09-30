@@ -1,11 +1,124 @@
 @import 'tailwindcss';
 
+@theme {
+  --color-slate-50: #f7faff;
+  --color-slate-100: #e8f5ff;
+  --color-slate-200: #cfe6ff;
+  --color-slate-300: #b5b8e8;
+  --color-slate-400: #7883a3;
+  --color-slate-500: #5c6886;
+  --color-slate-600: #45516e;
+  --color-slate-700: #35415d;
+  --color-slate-800: #26334c;
+  --color-slate-900: #19263d;
+  --color-slate-950: #111a2c;
+
+  --color-emerald-50: #f7faff;
+  --color-emerald-100: #e8f5ff;
+  --color-emerald-200: #cfe6ff;
+  --color-emerald-300: #b5b8e8;
+  --color-emerald-400: #39e639;
+  --color-emerald-500: #39e639;
+  --color-emerald-600: #268f26;
+  --color-emerald-700: #1f6f1f;
+  --color-emerald-800: #19551b;
+  --color-emerald-900: #143f17;
+
+  --color-blue-50: #f7faff;
+  --color-blue-100: #e8f5ff;
+  --color-blue-200: #cfe6ff;
+  --color-blue-300: #9ecaff;
+  --color-blue-400: #3b8dff;
+  --color-blue-500: #3b8dff;
+  --color-blue-600: #2c72ce;
+  --color-blue-700: #235ba3;
+  --color-blue-800: #1c477d;
+  --color-blue-900: #17385f;
+
+  --color-cyan-50: #f7faff;
+  --color-cyan-100: #e8f5ff;
+  --color-cyan-200: #cfe6ff;
+  --color-cyan-300: #a8edf0;
+  --color-cyan-400: #3fd2d9;
+  --color-cyan-500: #3fd2d9;
+  --color-cyan-600: #229da7;
+  --color-cyan-700: #1d737c;
+  --color-cyan-800: #195a63;
+  --color-cyan-900: #16464f;
+
+  --color-violet-50: #f7faff;
+  --color-violet-100: #e7c8ff;
+  --color-violet-200: #d3c6f6;
+  --color-violet-300: #d3c6f6;
+  --color-violet-400: #b9a5ed;
+  --color-violet-500: #a78be5;
+  --color-violet-600: #8066bd;
+  --color-violet-700: #634f91;
+  --color-violet-800: #4b3d6e;
+  --color-violet-900: #392f52;
+
+  --color-purple-50: #f7faff;
+  --color-purple-100: #e7c8ff;
+  --color-purple-200: #d3c6f6;
+  --color-purple-300: #d3c6f6;
+  --color-purple-400: #c4a4ed;
+  --color-purple-500: #ad83df;
+  --color-purple-600: #875fb5;
+  --color-purple-700: #68498d;
+  --color-purple-800: #50396c;
+  --color-purple-900: #3e2d53;
+
+  --color-pink-50: #f7faff;
+  --color-pink-100: #f7a6e6;
+  --color-pink-200: #f7a6e6;
+  --color-pink-300: #ed8bd8;
+  --color-pink-400: #df70c4;
+  --color-pink-500: #d05bb4;
+  --color-pink-600: #aa438f;
+  --color-pink-700: #85356f;
+  --color-pink-800: #672b57;
+  --color-pink-900: #4f2343;
+
+  --color-indigo-50: #f7faff;
+  --color-indigo-100: #e8f5ff;
+  --color-indigo-200: #b5b8e8;
+  --color-indigo-300: #b5b8e8;
+  --color-indigo-400: #959bd7;
+  --color-indigo-500: #7f86ca;
+  --color-indigo-600: #626aae;
+  --color-indigo-700: #4e568e;
+  --color-indigo-800: #3d456f;
+  --color-indigo-900: #303858;
+
+  --color-amber-50: #f7faff;
+  --color-amber-100: #e7c8ff;
+  --color-amber-200: #d3c6f6;
+  --color-amber-300: #d3c6f6;
+  --color-amber-400: #c1ace9;
+  --color-amber-500: #aa91d6;
+  --color-amber-600: #876eb0;
+  --color-amber-700: #68578b;
+  --color-amber-800: #51446e;
+  --color-amber-900: #403758;
+
+  --color-red-50: #f7faff;
+  --color-red-100: #f7a6e6;
+  --color-red-200: #f7a6e6;
+  --color-red-300: #ed8bd8;
+  --color-red-400: #df70c4;
+  --color-red-500: #d05bb4;
+  --color-red-600: #aa438f;
+  --color-red-700: #85356f;
+  --color-red-800: #672b57;
+  --color-red-900: #4f2343;
+}
+
 :root {
   font-family: Inter, 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #0f172a;
-  background: #f8fafc;
+  color: #19263d;
+  background: #f7faff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -20,7 +133,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f8fafc;
+  background: #f7faff;
 }
 
 * {
