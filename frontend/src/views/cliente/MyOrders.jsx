@@ -1,28 +1,98 @@
+import { useEffect, useState } from 'react';
+import { getPaymentMethodLabel } from '../../lib/orderOptions';
+import { getMyOrders } from '../../services/orders';
+
+const statusLabels = {
+  pending: 'Pendiente',
+  confirmed: 'Confirmado',
+  preparing: 'Preparando',
+  ready: 'Listo',
+  in_transit: 'En tránsito',
+  completed: 'Completado',
+  cancelled: 'Cancelado',
+};
+
+const formatDate = (value) =>
+  new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).format(
+    new Date(value),
+  );
+
+const formatAmount = (value, currency) => `${currency} ${Number(value).toFixed(2)}`;
+
 export default function MyOrders() {
-  const orders = [
-    { id: 'MS-1001', status: 'Confirmado', total: 89.9, date: '2026-09-28' },
-    { id: 'MS-1045', status: 'En tránsito', total: 62.4, date: '2026-09-24' },
-  ];
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    getMyOrders()
+      .then((result) => {
+        if (active) setOrders(result);
+      })
+      .catch((loadError) => {
+        if (active) setError(loadError.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="text-4xl font-black text-slate-900">Mis pedidos</h1>
-      <div className="mt-8 space-y-4">
-        {orders.map((order) => (
-          <div key={order.id} className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center">
-            <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{order.id}</p>
-              <p className="mt-2 text-xl font-bold text-slate-900">${order.total.toFixed(2)}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
-                {order.status}
-              </span>
-              <span className="text-sm text-slate-500">{order.date}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">Tu cuenta</p>
+      <h1 className="mt-2 text-4xl font-black text-slate-900">Mis pedidos</h1>
+
+      {loading && <p className="py-10 text-slate-600">Cargando pedidos...</p>}
+      {error && <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">No se pudieron cargar tus pedidos: {error}</p>}
+      {!loading && !error && orders.length === 0 && (
+        <p className="mt-8 rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600">
+          Aún no tienes pedidos.
+        </p>
+      )}
+
+      {!loading && !error && orders.length > 0 && (
+        <div className="mt-8 space-y-4">
+          {orders.map((order) => (
+            <article key={order.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Pedido</p>
+                  <p className="mt-1 break-all font-mono text-sm text-slate-700">{order.id}</p>
+                </div>
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
+                  {statusLabels[order.status] ?? order.status}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-slate-500">{formatDate(order.created_at)}</p>
+              <div className="mt-3 grid gap-1 text-sm text-slate-600 sm:grid-cols-2">
+                <p>Hora preferida: {order.delivery_time ? String(order.delivery_time).slice(0, 5) : 'Sin preferencia'}</p>
+                <p>Medio de pago: {getPaymentMethodLabel(order.payment_method)}</p>
+                {order.payment_method === 'cash' && (
+                  <p>Requiere cambio: {order.cash_change_required ? 'Sí' : 'No'}</p>
+                )}
+              </div>
+              <ul className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm text-slate-600">
+                {order.order_items.map((item, index) => (
+                  <li key={`${order.id}-${index}`} className="flex justify-between gap-4">
+                    <span>{item.product_name} × {item.quantity}</span>
+                    <span>{formatAmount(item.subtotal, order.currency_code)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 flex justify-between border-t border-slate-100 pt-4 text-sm">
+                <span className="text-slate-600">Envío {formatAmount(order.shipping_fee, order.currency_code)}</span>
+                <strong className="text-lg text-slate-900">{formatAmount(order.total, order.currency_code)}</strong>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

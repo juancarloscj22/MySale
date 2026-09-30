@@ -18,17 +18,23 @@ La aplicación se encuentra en `frontend/`. Las vistas están organizadas por á
 
 ## Estado actual
 
-El catálogo, registro e inicio de sesión ya usan Supabase. El inventario permite crear, editar y activar/desactivar productos. La consola de desarrollador muestra diagnósticos de conexión/RLS y accesos a las herramientas; la configuración de tienda también se guarda en Supabase. Las métricas y pedidos aún son prototipos. La seguridad de datos se aplica con RLS; los controles de rol de la interfaz complementan, pero no sustituyen, RLS.
+El catálogo, registro e inicio de sesión ya usan Supabase. El inventario permite crear, editar y activar/desactivar productos; el checkout valida y guarda pedidos; clientes consultan su historial y administración gestiona los estados. El dashboard muestra métricas reales de pedidos, inventario, usuarios y ventas estimadas; la gestión de usuarios consulta perfiles reales y muestra correo, contacto, rol, estado y fecha de registro con paginación. La consola de desarrollador muestra diagnósticos de conexión/RLS y accesos a las herramientas; la configuración de tienda también se guarda en Supabase. La seguridad de datos se aplica con RLS y funciones transaccionales; los controles de rol de la interfaz complementan, pero no sustituyen, RLS.
 
 Consulta `avance_proyecto_mysale.txt` para el resumen de los avances realizados.
 
 ## Esquema de Supabase
 
-Las migraciones `20260929162000_initial_schema.sql` y `20260929172000_catalog_and_auth_policies.sql` crean el esquema base y configuran RLS para catálogo, perfiles y administración. El catálogo activo y la configuración pública se pueden consultar; los usuarios solo pueden leer su propio perfil y pedidos. Los cambios administrativos requieren el rol `admin`. Clientes no pueden modificar perfiles ni insertar pedidos directamente desde el navegador; la creación segura de pedidos requiere una función transaccional que valide precios y stock. Ambas migraciones ya están aplicadas al proyecto enlazado.
+Las migraciones crean el esquema base, configuran RLS y habilitan el checkout. El público solo puede leer productos/categorías activos y la configuración pública; las cuentas solo pueden leer sus propios datos. Los cambios de catálogo/configuración y la administración de pedidos requieren un perfil `admin` o `developer`.
 
-La moneda del esquema es `MXN` provisional; confirmar que corresponde a la tienda antes de procesar pedidos.
+El registro solicita nombre, teléfono y correo; el checkout toma automáticamente nombre y teléfono del perfil y solo pide dirección, hora preferida de entrega y medio de pago. Si elige efectivo, puede indicar si requiere cambio. La sección **Mi cuenta** permite corregir sus datos. El RPC `create_order`, disponible únicamente para usuarios autenticados, valida el perfil y los datos de entrega, vuelve a consultar y bloquear productos, verifica stock/precio, descuenta existencias, guarda los precios como snapshot y registra el pedido en una transacción. También guarda la hora preferida de entrega (opcional), medio de pago (efectivo al recibir, transferencia bancaria o tarjeta al recibir) y preferencia de cambio para pagos en efectivo; el pago no se procesa en línea. Usa un identificador idempotente para que reintentos no dupliquen pedidos. No se aceptan precios ni envío proporcionados por el navegador. Después de guardar el pedido, se muestra una confirmación en la tienda y WhatsApp se abre solo al pulsar el enlace, en otra pestaña para mantener la página abierta.
 
-La CLI de Supabase está incluida como dependencia de desarrollo del frontend. Ambas migraciones ya están aplicadas en el proyecto enlazado. Para aplicar cambios futuros desde la raíz:
+Administración cambia el estado mediante `set_order_status`; no puede editar pedidos directamente. Cancelar un pedido antes de que entre en tránsito restaura el stock; los pedidos en tránsito o completados no se pueden cancelar y los cancelados no se pueden reabrir.
+
+La hora preferida y el medio de pago aparecen en el historial del cliente y en la administración de pedidos, además de incluirse en el mensaje de WhatsApp.
+
+El envío inicial es `5.00` y se puede ajustar en **Dev → Configuración de tienda** junto con la moneda y el número de WhatsApp. El checkout requiere un número de WhatsApp configurado. Confirma moneda y costo de envío antes de procesar pedidos reales.
+
+La CLI de Supabase está incluida como dependencia de desarrollo del frontend. Las migraciones del directorio `supabase/migrations` están aplicadas en el proyecto enlazado. Para aplicar cambios futuros desde la raíz:
 
 ```powershell
 npm --prefix frontend exec -- supabase login

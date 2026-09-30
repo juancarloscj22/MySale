@@ -1,22 +1,85 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getAdminDashboardMetrics } from '../../services/dashboard';
+
+const formatNumber = (value) => new Intl.NumberFormat('es-MX').format(value);
 
 export default function Dashboard() {
+  const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    getAdminDashboardMetrics()
+      .then((result) => {
+        if (active) setMetrics(result);
+      })
+      .catch((loadError) => {
+        if (active) setError(loadError.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const cards = metrics
+    ? [
+        {
+          label: 'Pedidos de hoy',
+          value: formatNumber(metrics.ordersToday),
+          tone: 'bg-emerald-100 text-emerald-700',
+        },
+        {
+          label: 'Productos con stock bajo',
+          value: formatNumber(metrics.lowStockProducts),
+          tone: 'bg-amber-100 text-amber-700',
+        },
+        {
+          label: 'Usuarios registrados',
+          value: formatNumber(metrics.users),
+          tone: 'bg-cyan-100 text-cyan-700',
+        },
+        {
+          label: 'Ventas estimadas de hoy',
+          value: new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: metrics.currencyCode,
+          }).format(metrics.salesToday),
+          tone: 'bg-violet-100 text-violet-700',
+        },
+      ]
+    : [];
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-black text-slate-900">Dashboard</h1>
-      <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: 'Pedidos del día', value: '128', tone: 'bg-emerald-100 text-emerald-700' },
-          { label: 'Stock bajo', value: '14', tone: 'bg-amber-100 text-amber-700' },
-          { label: 'Usuarios', value: '2,340', tone: 'bg-cyan-100 text-cyan-700' },
-          { label: 'Ventas', value: '$12.4k', tone: 'bg-violet-100 text-violet-700' },
-        ].map((item) => (
-          <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${item.tone}`}>{item.label}</div>
-            <p className="mt-4 text-3xl font-black text-slate-900">{item.value}</p>
+      {loading && <p className="mt-8 text-slate-600">Cargando métricas...</p>}
+      {error && (
+        <p role="alert" className="mt-8 rounded-xl bg-red-50 p-4 text-red-700">
+          No se pudieron cargar las métricas del dashboard: {error}
+        </p>
+      )}
+      {metrics && (
+        <>
+          <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {cards.map((item) => (
+              <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${item.tone}`}>{item.label}</div>
+                <p className="mt-4 text-3xl font-black text-slate-900">{item.value}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+          <p className="mt-3 text-xs text-slate-500">
+            Stock bajo: 5 unidades o menos. Ventas estimadas: pedidos de hoy excepto los cancelados.
+          </p>
+        </>
+      )}
 
       <section className="mt-10">
         <h2 className="text-2xl font-bold text-slate-900">Administración de la tienda</h2>

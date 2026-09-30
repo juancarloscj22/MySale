@@ -11,6 +11,7 @@ import Catalog from './views/cliente/Catalog';
 import ProductDetail from './views/cliente/ProductDetail';
 import Checkout from './views/cliente/Checkout';
 import MyOrders from './views/cliente/MyOrders';
+import MyAccount from './views/cliente/MyAccount';
 import Auth from './views/auth/Auth';
 import Dashboard from './views/admin/Dashboard';
 import Inventory from './views/admin/Inventory';
@@ -31,12 +32,27 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/catalog" element={<Catalog />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/checkout" element={<Checkout />} />
+                <Route
+                  path="/checkout"
+                  element={
+                    <ProtectedRoute>
+                      <Checkout />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/mis-pedidos"
                   element={
                     <ProtectedRoute>
                       <MyOrders />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/mi-cuenta"
+                  element={
+                    <ProtectedRoute>
+                      <MyAccount />
                     </ProtectedRoute>
                   }
                 />

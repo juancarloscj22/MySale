@@ -7,6 +7,7 @@ const initialSettings = {
   logo_url: '',
   whatsapp_message: '',
   currency_code: '',
+  shipping_fee: '',
 };
 
 const inputClass =
@@ -24,7 +25,7 @@ export default function ConfigSettings() {
 
     supabase
       .from('site_settings')
-      .select('whatsapp_number, store_name, logo_url, whatsapp_message, currency_code')
+      .select('whatsapp_number, store_name, logo_url, whatsapp_message, currency_code, shipping_fee')
       .eq('id', true)
       .single()
       .then(({ data, error: loadError }) => {
@@ -39,6 +40,7 @@ export default function ConfigSettings() {
           logo_url: data.logo_url ?? '',
           whatsapp_message: data.whatsapp_message ?? '',
           currency_code: data.currency_code ?? 'MXN',
+          shipping_fee: String(data.shipping_fee ?? 5),
         });
       })
       .catch((loadError) => {
@@ -64,6 +66,13 @@ export default function ConfigSettings() {
     setError('');
     setMessage('');
 
+    const shippingFee = Number(settings.shipping_fee);
+    if (!Number.isFinite(shippingFee) || shippingFee < 0) {
+      setSaving(false);
+      setError('El costo de envío debe ser un número válido mayor o igual a cero.');
+      return;
+    }
+
     const { data, error: saveError } = await supabase
       .from('site_settings')
       .update({
@@ -72,6 +81,7 @@ export default function ConfigSettings() {
         logo_url: settings.logo_url.trim() || null,
         whatsapp_message: settings.whatsapp_message.trim() || null,
         currency_code: settings.currency_code.trim().toUpperCase(),
+        shipping_fee: shippingFee,
       })
       .eq('id', true)
       .select('id')
@@ -125,6 +135,19 @@ export default function ConfigSettings() {
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-slate-700">WhatsApp de pedidos</span>
             <input name="whatsapp_number" type="tel" value={settings.whatsapp_number} onChange={updateSetting} className={inputClass} placeholder="+52..." />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">Costo de envío *</span>
+            <input
+              name="shipping_fee"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              value={settings.shipping_fee}
+              onChange={updateSetting}
+              className={inputClass}
+            />
           </label>
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-slate-700">URL del logotipo</span>

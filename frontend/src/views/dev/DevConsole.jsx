@@ -25,8 +25,8 @@ const tools = [
   {
     to: '/admin/orders',
     title: 'Pedidos',
-    description: 'La pantalla actual todavía usa información de demostración.',
-    status: 'Prototipo',
+    description: 'Consultar pedidos guardados y actualizar su estado desde el panel administrativo.',
+    status: 'Disponible',
   },
   {
     to: '/admin/users',

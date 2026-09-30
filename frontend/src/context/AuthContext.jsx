@@ -72,16 +72,31 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
-  const signUp = useCallback(async ({ email, password, fullName }) => {
+  const signUp = useCallback(async ({ email, password, fullName, phone }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: { full_name: fullName.trim(), phone: phone.trim() } },
     });
 
     if (error) throw error;
     return data;
   }, []);
+
+  const updateProfile = useCallback(async ({ fullName, phone }) => {
+    if (!session?.user) throw new Error('Debes iniciar sesión para actualizar tu perfil.');
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ full_name: fullName.trim(), phone: phone.trim() })
+      .eq('id', session.user.id)
+      .select('id, full_name, phone, role, blocked')
+      .single();
+
+    if (error) throw error;
+    setProfile(data);
+    return data;
+  }, [session]);
 
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
@@ -102,6 +117,7 @@ export function AuthProvider({ children }) {
         profileError,
         signIn,
         signUp,
+        updateProfile,
         signOut,
         refreshProfile,
       }}

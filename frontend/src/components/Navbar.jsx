@@ -7,6 +7,7 @@ const baseNavItems = [
   { to: '/', label: 'Inicio' },
   { to: '/catalog', label: 'Catálogo' },
   { to: '/mis-pedidos', label: 'Mis pedidos' },
+  { to: '/mi-cuenta', label: 'Mi cuenta' },
 ];
 
 export default function Navbar() {

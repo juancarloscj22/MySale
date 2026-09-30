@@ -9,6 +9,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [age, setAge] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -33,7 +34,7 @@ export default function Auth() {
       if (isLogin) {
         await signIn(email, password);
       } else {
-        const { session: newSession } = await signUp({ email, password, fullName });
+        const { session: newSession } = await signUp({ email, password, fullName, phone });
         if (!newSession) {
           setNotice('Revisa tu correo para confirmar la cuenta y completar el registro.');
         }
@@ -90,6 +91,23 @@ export default function Auth() {
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
                 className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500"
+              />
+            </label>
+          )}
+
+          {!isLogin && (
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Teléfono</span>
+              <input
+                type="tel"
+                autoComplete="tel"
+                required
+                minLength={7}
+                maxLength={32}
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500"
+                placeholder="Tu número de contacto"
               />
             </label>
           )}
