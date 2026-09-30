@@ -4,7 +4,7 @@ import { useAuth } from '../context/useAuth';
 export default function AdminRoute({ children }) {
   const { profile } = useAuth();
 
-  if (profile?.role !== 'admin') {
+  if (profile?.role !== 'admin' && profile?.role !== 'developer') {
     return <Navigate to="/" replace />;
   }
 

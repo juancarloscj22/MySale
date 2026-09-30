@@ -18,7 +18,7 @@ La aplicación se encuentra en `frontend/`. Las vistas están organizadas por á
 
 ## Estado actual
 
-El catálogo, registro e inicio de sesión ya usan Supabase. Las métricas, pedidos e interfaces de administración aún son prototipos. La seguridad de datos se aplica con RLS; los controles de rol de la interfaz son solo navegación. Configura el número real de WhatsApp antes de publicar.
+El catálogo, registro e inicio de sesión ya usan Supabase. El inventario permite crear, editar y activar/desactivar productos. La consola de desarrollador muestra diagnósticos de conexión/RLS y accesos a las herramientas; la configuración de tienda también se guarda en Supabase. Las métricas y pedidos aún son prototipos. La seguridad de datos se aplica con RLS; los controles de rol de la interfaz complementan, pero no sustituyen, RLS.
 
 Consulta `avance_proyecto_mysale.txt` para el resumen de los avances realizados.
 
@@ -28,7 +28,7 @@ Las migraciones `20260929162000_initial_schema.sql` y `20260929172000_catalog_an
 
 La moneda del esquema es `MXN` provisional; confirmar que corresponde a la tienda antes de procesar pedidos.
 
-La CLI de Supabase está incluida como dependencia de desarrollo del frontend. Para aplicar cambios futuros desde la raíz:
+La CLI de Supabase está incluida como dependencia de desarrollo del frontend. Ambas migraciones ya están aplicadas en el proyecto enlazado. Para aplicar cambios futuros desde la raíz:
 
 ```powershell
 npm --prefix frontend exec -- supabase login
@@ -38,11 +38,11 @@ npm --prefix frontend exec -- supabase db push
 
 El último comando aplica las migraciones pendientes al proyecto enlazado. Para ejecutar Supabase localmente en vez de usar un proyecto alojado, también se requiere Docker Desktop.
 
-Los registros nuevos reciben el rol `customer`. No se puede autoasignar un rol privilegiado: para promover la primera cuenta de administración, verifica primero el usuario en Supabase Auth y ejecuta en SQL Editor, con el UUID confirmado:
+Los registros nuevos reciben el rol `customer`. El rol `developer` incluye los permisos administrativos y acceso a las herramientas técnicas; `admin` no concede acceso a las rutas de desarrollador. La cuenta principal ya tiene el rol `developer`. Para promover cuentas adicionales, verifica primero al usuario en Supabase Auth y ejecuta en SQL Editor, con el UUID confirmado:
 
 ```sql
 update public.profiles
-set role = 'admin'
+set role = 'developer'
 where id = '<uuid-confirmado>';
 ```
 

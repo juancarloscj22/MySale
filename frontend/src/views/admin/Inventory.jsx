@@ -1,10 +1,34 @@
 import { useEffect, useState } from 'react';
-import { getProducts } from '../../services/products';
+import { getProducts, saveProduct, setProductActive } from '../../services/products';
+
+const emptyForm = {
+  id: '',
+  name: '',
+  description: '',
+  price: '',
+  stock: '',
+  brand: '',
+  category: '',
+  flavor: '',
+  nicotine: '',
+  puffs: '',
+  image_url: '',
+  active: true,
+};
+
+const inputClass =
+  'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500';
 
 export default function Inventory() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [formError, setFormError] = useState('');
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [busyProductId, setBusyProductId] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -25,37 +49,249 @@ export default function Inventory() {
     };
   }, []);
 
+  const refreshProducts = async () => {
+    try {
+      setProducts(await getProducts({ includeInactive: true }));
+      setError('');
+    } catch (loadError) {
+      setError(loadError.message);
+    }
+  };
+
+  const updateForm = (event) => {
+    const { name, value, type, checked } = event.target;
+    setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const openNewForm = () => {
+    setForm(emptyForm);
+    setFormError('');
+    setMessage('');
+    setFormOpen(true);
+  };
+
+  const openEditForm = (product) => {
+    setForm({
+      id: product.id,
+      name: product.name,
+      description: product.description ?? '',
+      price: String(product.price),
+      stock: String(product.stock),
+      brand: product.brand ?? '',
+      category: product.category === 'Vape' ? '' : product.category,
+      flavor: product.flavor ?? '',
+      nicotine: product.nicotine ?? '',
+      puffs: product.puffs ?? '',
+      image_url: product.image_url ?? '',
+      active: product.active,
+    });
+    setFormError('');
+    setMessage('');
+    setFormOpen(true);
+  };
+
+  const handleSave = async (event) => {
+    event.preventDefault();
+    setError('');
+    setFormError('');
+    setMessage('');
+
+    const price = Number(form.price);
+    const stock = Number(form.stock);
+    const puffs = form.puffs === '' ? null : Number(form.puffs);
+
+    if (!form.name.trim()) {
+      setFormError('El nombre del producto es obligatorio.');
+      return;
+    }
+    if (!Number.isFinite(price) || price < 0) {
+      setFormError('El precio debe ser un número válido mayor o igual a cero.');
+      return;
+    }
+    if (!Number.isInteger(stock) || stock < 0) {
+      setFormError('El stock debe ser un número entero mayor o igual a cero.');
+      return;
+    }
+    if (puffs !== null && (!Number.isInteger(puffs) || puffs <= 0)) {
+      setFormError('Las caladas deben ser un entero mayor que cero.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await saveProduct(form);
+      setFormOpen(false);
+      setForm(emptyForm);
+      setMessage(form.id ? 'Producto actualizado.' : 'Producto creado.');
+      await refreshProducts();
+    } catch (saveError) {
+      setFormError(saveError.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggleActive = async (product) => {
+    const nextActive = !product.active;
+    setBusyProductId(product.id);
+    setError('');
+    setMessage('');
+
+    try {
+      await setProductActive(product.id, nextActive);
+      setMessage(nextActive ? 'Producto activado.' : 'Producto desactivado.');
+      await refreshProducts();
+    } catch (updateError) {
+      setError(updateError.message);
+    } finally {
+      setBusyProductId('');
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="text-4xl font-black text-slate-900">Inventario</h1>
-      {loading && <p className="py-8 text-slate-600">Cargando inventario...</p>}
-      {error && <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">No se pudo cargar el inventario: {error}</p>}
-      <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full text-left text-sm">
-          <thead className="bg-slate-100 text-slate-700">
-            <tr>
-              <th className="p-4">Producto</th>
-              <th className="p-4">Stock</th>
-              <th className="p-4">Precio</th>
-              <th className="p-4">Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.id} className="border-t border-slate-200">
-                <td className="p-4 font-semibold text-slate-900">{product.name}</td>
-                <td className="p-4">{product.stock}</td>
-                <td className="p-4">${product.price.toFixed(2)}</td>
-                <td className="p-4">
-                  <span className={`rounded-full px-2 py-1 text-xs font-semibold ${product.stock > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                    {product.stock > 0 ? 'Disponible' : 'Agotado'}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">Administración</p>
+          <h1 className="mt-2 text-4xl font-black text-slate-900">Inventario</h1>
+        </div>
+        <button
+          type="button"
+          onClick={openNewForm}
+          className="rounded-full bg-emerald-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-600"
+        >
+          Nuevo producto
+        </button>
       </div>
+
+      {message && <p role="status" className="mt-6 rounded-xl bg-emerald-50 p-4 text-emerald-800">{message}</p>}
+      {error && <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">No se pudo completar la operación: {error}</p>}
+
+      {formOpen && (
+        <form onSubmit={handleSave} className="mt-8 space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-2xl font-bold text-slate-900">{form.id ? 'Editar producto' : 'Crear producto'}</h2>
+            <button type="button" onClick={() => setFormOpen(false)} className="text-sm font-semibold text-slate-500 hover:text-slate-900">
+              Cerrar
+            </button>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Nombre *</span>
+              <input name="name" required value={form.name} onChange={updateForm} className={inputClass} />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Marca</span>
+              <input name="brand" value={form.brand} onChange={updateForm} className={inputClass} />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Precio *</span>
+              <input name="price" type="number" min="0" step="0.01" required value={form.price} onChange={updateForm} className={inputClass} />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Stock *</span>
+              <input name="stock" type="number" min="0" step="1" required value={form.stock} onChange={updateForm} className={inputClass} />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Categoría</span>
+              <input name="category" value={form.category} onChange={updateForm} className={inputClass} placeholder="Ej. Disposables" />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Sabor</span>
+              <input name="flavor" value={form.flavor} onChange={updateForm} className={inputClass} />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Nicotina</span>
+              <input name="nicotine" value={form.nicotine} onChange={updateForm} className={inputClass} placeholder="Ej. 3%" />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Caladas</span>
+              <input name="puffs" type="number" min="1" step="1" value={form.puffs} onChange={updateForm} className={inputClass} />
+            </label>
+            <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">URL de imagen</span>
+              <input name="image_url" type="url" value={form.image_url} onChange={updateForm} className={inputClass} placeholder="https://" />
+            </label>
+            <label className="block md:col-span-2">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Descripción</span>
+              <textarea name="description" rows="3" value={form.description} onChange={updateForm} className={inputClass} />
+            </label>
+            <label className="flex items-center gap-3 text-sm font-semibold text-slate-700 md:col-span-2">
+              <input name="active" type="checkbox" checked={form.active} onChange={updateForm} className="h-4 w-4 accent-emerald-500" />
+              Disponible en el catálogo
+            </label>
+          </div>
+
+          {formError && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{formError}</p>}
+
+          <div className="flex flex-wrap gap-3">
+            <button type="submit" disabled={saving} className="rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white disabled:opacity-60">
+              {saving ? 'Guardando...' : 'Guardar producto'}
+            </button>
+            <button type="button" onClick={() => setFormOpen(false)} className="rounded-full border border-slate-300 px-6 py-3 text-sm font-bold text-slate-700">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+
+      {loading && <p className="py-8 text-slate-600">Cargando inventario...</p>}
+      {!loading && !error && products.length === 0 && (
+        <p className="mt-8 rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600">
+          El inventario está vacío. Crea el primer producto para publicarlo en el catálogo.
+        </p>
+      )}
+
+      {!loading && products.length > 0 && (
+        <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-slate-100 text-slate-700">
+              <tr>
+                <th className="p-4">Producto</th>
+                <th className="p-4">Categoría</th>
+                <th className="p-4">Stock</th>
+                <th className="p-4">Precio</th>
+                <th className="p-4">Estado</th>
+                <th className="p-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id} className="border-t border-slate-200">
+                  <td className="p-4">
+                    <p className="font-semibold text-slate-900">{product.name}</p>
+                    <p className="text-xs text-slate-500">{product.brand || 'Sin marca'}</p>
+                  </td>
+                  <td className="p-4">{product.category}</td>
+                  <td className="p-4">{product.stock}</td>
+                  <td className="p-4">${product.price.toFixed(2)}</td>
+                  <td className="p-4">
+                    <span className={`rounded-full px-2 py-1 text-xs font-semibold ${!product.active ? 'bg-slate-100 text-slate-600' : product.stock > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {!product.active ? 'Inactivo' : product.stock > 0 ? 'Disponible' : 'Agotado'}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" onClick={() => openEditForm(product)} className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busyProductId === product.id}
+                        onClick={() => handleToggleActive(product)}
+                        className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                      >
+                        {busyProductId === product.id ? 'Guardando...' : product.active ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

@@ -16,7 +16,9 @@ export default function Navbar() {
   const [signOutError, setSignOutError] = useState('');
   const navItems = [
     ...baseNavItems,
-    ...(profile?.role === 'admin' ? [{ to: '/admin', label: 'Admin' }] : []),
+    ...(profile?.role === 'admin' || profile?.role === 'developer'
+      ? [{ to: '/admin', label: 'Admin' }]
+      : []),
     ...(profile?.role === 'developer' ? [{ to: '/dev', label: 'Dev' }] : []),
   ];
 

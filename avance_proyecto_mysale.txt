@@ -121,3 +121,18 @@ Quedaron conectados Auth (registro/inicio/cierre de sesión), las protecciones d
 Se volvió a consultar la lista de migraciones remota y aparecen 20260929162000 y 20260929172000. REST devuelve HTTP 200 para products, categories y site_settings; las dos primeras están vacías, y site_settings contiene su registro inicial.
 Se corrigieron imports y estados de carga/error en inventario y detalle de producto, y se mejoró ProtectedRoute para manejar sesión sin usuario, perfil bloqueado, perfil ausente y error de lectura. Se añadió supabase/.gitignore para impedir que archivos de vinculación temporales se suban al repositorio.
 Validación: npm run lint pasó sin advertencias; npm run build pasó, con una advertencia de Vite por bundle minificado mayor de 500 kB. No se registró un usuario de prueba ni se cargaron productos.
+
+18. ADMINISTRACIÓN FUNCIONAL DEL CATÁLOGO
+Se amplió el inventario para que un usuario con rol admin pueda crear productos, editar sus datos y activar/desactivar productos. Incluye nombre, descripción, precio, stock, marca, categoría, sabor, nicotina, caladas e URL de imagen; las categorías se crean al guardar un producto cuando no existen. Se valida la entrada en el formulario y se muestran errores/estados vacíos.
+Las operaciones se envían con el cliente Supabase y dependen de las políticas RLS administrativas. La primera cuenta admin ya fue verificada y asignada; no se guardó su identificador en este documento. El proyecto aún no tiene productos semilla.
+
+19. NAVEGACIÓN DEL DASHBOARD ADMIN
+Se añadieron accesos desde el dashboard hacia Inventario, Pedidos y Usuarios. La tarjeta de Inventario abre la pantalla para agregar, editar y activar/desactivar productos.
+
+20. ROL DE DESARROLLADOR CON PRIVILEGIOS ADMINISTRATIVOS
+Se añadió la migración 20260929193900_developer_admin_privileges.sql para que la función RLS is_admin también autorice perfiles developer. Así, el rol developer conserva acceso a herramientas técnicas y obtiene las capacidades administrativas ya sujetas a RLS. Se actualizaron la ruta AdminRoute y la navegación para permitir que developer acceda tanto a Admin como a Dev.
+La migración quedó aplicada y registrada en el proyecto remoto. La cuenta principal confirmada se promovió de admin a developer; no se registra su UUID aquí. Es necesario cerrar sesión y volver a entrar para que el frontend recargue el rol actualizado.
+
+21. CONSOLA DE DESARROLLADOR Y CONFIGURACIÓN
+La consola Dev ahora muestra el correo/rol de la sesión, el proyecto Supabase, comprobaciones reales de acceso a la base y catálogo bajo RLS, y accesos a dashboard, inventario, pedidos, usuarios y configuración. Marca explícitamente pedidos, usuarios y métricas como prototipos donde aún corresponde.
+La configuración de tienda dejó de ser un formulario de muestra: lee y guarda nombre, moneda, número de WhatsApp, logotipo y mensaje inicial en site_settings, con mensajes de carga, éxito y error. Está protegida por el rol developer y las políticas RLS administrativas existentes.
