@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -7,20 +8,21 @@ import { StoreSettingsProvider } from './context/StoreSettingsProvider.jsx';
 import ProtectedRoute from './routes/ProtectedRoute';
 import AdminRoute from './routes/AdminRoute';
 import DeveloperRoute from './routes/DeveloperRoute';
-import Home from './views/cliente/Home';
-import Catalog from './views/cliente/Catalog';
-import ProductDetail from './views/cliente/ProductDetail';
-import Checkout from './views/cliente/Checkout';
-import MyOrders from './views/cliente/MyOrders';
-import MyAccount from './views/cliente/MyAccount';
-import Auth from './views/auth/Auth';
-import Dashboard from './views/admin/Dashboard';
-import Inventory from './views/admin/Inventory';
-import Orders from './views/admin/Orders';
-import UserManager from './views/admin/UserManager';
-import Coupons from './views/admin/Coupons';
-import DevConsole from './views/dev/DevConsole';
-import ConfigSettings from './views/dev/ConfigSettings';
+
+const Home = lazy(() => import('./views/cliente/Home'));
+const Catalog = lazy(() => import('./views/cliente/Catalog'));
+const ProductDetail = lazy(() => import('./views/cliente/ProductDetail'));
+const Checkout = lazy(() => import('./views/cliente/Checkout'));
+const MyOrders = lazy(() => import('./views/cliente/MyOrders'));
+const MyAccount = lazy(() => import('./views/cliente/MyAccount'));
+const Auth = lazy(() => import('./views/auth/Auth'));
+const Dashboard = lazy(() => import('./views/admin/Dashboard'));
+const Inventory = lazy(() => import('./views/admin/Inventory'));
+const Orders = lazy(() => import('./views/admin/Orders'));
+const UserManager = lazy(() => import('./views/admin/UserManager'));
+const Coupons = lazy(() => import('./views/admin/Coupons'));
+const DevConsole = lazy(() => import('./views/dev/DevConsole'));
+const ConfigSettings = lazy(() => import('./views/dev/ConfigSettings'));
 
 function App() {
   return (
@@ -31,118 +33,126 @@ function App() {
             <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
               <Navbar />
               <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/catalog" element={<Catalog />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route
-                  path="/checkout"
-                  element={
-                    <ProtectedRoute>
-                      <Checkout />
-                    </ProtectedRoute>
+                <Suspense
+                  fallback={
+                    <p role="status" className="px-4 py-16 text-center text-slate-600">
+                      Cargando página...
+                    </p>
                   }
-                />
-                <Route
-                  path="/mis-pedidos"
-                  element={
-                    <ProtectedRoute>
-                      <MyOrders />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/mi-cuenta"
-                  element={
-                    <ProtectedRoute>
-                      <MyAccount />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/auth" element={<Auth />} />
+                >
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/catalog" element={<Catalog />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route
+                      path="/checkout"
+                      element={
+                        <ProtectedRoute>
+                          <Checkout />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/mis-pedidos"
+                      element={
+                        <ProtectedRoute>
+                          <MyOrders />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/mi-cuenta"
+                      element={
+                        <ProtectedRoute>
+                          <MyAccount />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/auth" element={<Auth />} />
 
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute>
-                      <AdminRoute>
-                        <Dashboard />
-                      </AdminRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/inventory"
-                  element={
-                    <ProtectedRoute>
-                      <AdminRoute>
-                        <Inventory />
-                      </AdminRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/orders"
-                  element={
-                    <ProtectedRoute>
-                      <AdminRoute>
-                        <Orders />
-                      </AdminRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/users"
-                  element={
-                    <ProtectedRoute>
-                      <AdminRoute>
-                        <UserManager />
-                      </AdminRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/coupons"
-                  element={
-                    <ProtectedRoute>
-                      <AdminRoute>
-                        <Coupons />
-                      </AdminRoute>
-                    </ProtectedRoute>
-                  }
-                />
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedRoute>
+                          <AdminRoute>
+                            <Dashboard />
+                          </AdminRoute>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/inventory"
+                      element={
+                        <ProtectedRoute>
+                          <AdminRoute>
+                            <Inventory />
+                          </AdminRoute>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/orders"
+                      element={
+                        <ProtectedRoute>
+                          <AdminRoute>
+                            <Orders />
+                          </AdminRoute>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/users"
+                      element={
+                        <ProtectedRoute>
+                          <AdminRoute>
+                            <UserManager />
+                          </AdminRoute>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/coupons"
+                      element={
+                        <ProtectedRoute>
+                          <AdminRoute>
+                            <Coupons />
+                          </AdminRoute>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                <Route
-                  path="/dev"
-                  element={
-                    <ProtectedRoute>
-                      <DeveloperRoute>
-                        <DevConsole />
-                      </DeveloperRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dev/settings"
-                  element={
-                    <ProtectedRoute>
-                      <DeveloperRoute>
-                        <ConfigSettings />
-                      </DeveloperRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dev/coupons"
-                  element={
-                    <ProtectedRoute>
-                      <DeveloperRoute>
-                        <Coupons />
-                      </DeveloperRoute>
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
+                    <Route
+                      path="/dev"
+                      element={
+                        <ProtectedRoute>
+                          <DeveloperRoute>
+                            <DevConsole />
+                          </DeveloperRoute>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/dev/settings"
+                      element={
+                        <ProtectedRoute>
+                          <DeveloperRoute>
+                            <ConfigSettings />
+                          </DeveloperRoute>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/dev/coupons"
+                      element={
+                        <ProtectedRoute>
+                          <DeveloperRoute>
+                            <Coupons />
+                          </DeveloperRoute>
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Routes>
+                </Suspense>
               </main>
               <Footer />
             </div>
