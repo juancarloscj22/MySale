@@ -1,9 +1,27 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import VapeCard from '../../components/VapeCard';
-import { products } from '../../services/products';
+import { getProducts } from '../../services/products';
 
 export default function Home() {
-  const featured = products.slice(0, 3);
+  const [featured, setFeatured] = useState([]);
+  const [productsError, setProductsError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    getProducts({ limit: 3 })
+      .then((products) => {
+        if (active) setFeatured(products);
+      })
+      .catch((error) => {
+        if (active) setProductsError(error.message);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div className="space-y-16 pb-20">
@@ -71,11 +89,23 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {featured.map((product) => (
-            <VapeCard key={product.id} product={product} />
-          ))}
-        </div>
+        {productsError && (
+          <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">
+            No se pudieron cargar los productos destacados: {productsError}
+          </p>
+        )}
+        {!productsError && featured.length === 0 && (
+          <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600">
+            Aún no hay productos destacados.
+          </p>
+        )}
+        {featured.length > 0 && (
+          <div className="grid gap-6 md:grid-cols-3">
+            {featured.map((product) => (
+              <VapeCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

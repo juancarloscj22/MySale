@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { CartProvider } from './context/CartContext';
+import { CartProvider } from './context/CartContext.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute from './routes/ProtectedRoute';
 import AdminRoute from './routes/AdminRoute';
 import DeveloperRoute from './routes/DeveloperRoute';
@@ -20,50 +21,95 @@ import ConfigSettings from './views/dev/ConfigSettings';
 
 function App() {
   return (
-    <CartProvider>
-      <BrowserRouter>
-        <div className="min-h-screen bg-slate-50 text-slate-900">
-          <Navbar />
-          <main>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/catalog" element={<Catalog />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/mis-pedidos" element={<MyOrders />} />
-              <Route path="/auth" element={<Auth />} />
+    <AuthProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-slate-50 text-slate-900">
+            <Navbar />
+            <main>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/catalog" element={<Catalog />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route
+                  path="/mis-pedidos"
+                  element={
+                    <ProtectedRoute>
+                      <MyOrders />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/auth" element={<Auth />} />
 
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute isAuthenticated={true}>
-                    <AdminRoute isAdmin={true}>
-                      <Dashboard />
-                    </AdminRoute>
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/admin/inventory" element={<ProtectedRoute isAuthenticated={true}><AdminRoute isAdmin={true}><Inventory /></AdminRoute></ProtectedRoute>} />
-              <Route path="/admin/orders" element={<ProtectedRoute isAuthenticated={true}><AdminRoute isAdmin={true}><Orders /></AdminRoute></ProtectedRoute>} />
-              <Route path="/admin/users" element={<ProtectedRoute isAuthenticated={true}><AdminRoute isAdmin={true}><UserManager /></AdminRoute></ProtectedRoute>} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminRoute>
+                        <Dashboard />
+                      </AdminRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/inventory"
+                  element={
+                    <ProtectedRoute>
+                      <AdminRoute>
+                        <Inventory />
+                      </AdminRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/orders"
+                  element={
+                    <ProtectedRoute>
+                      <AdminRoute>
+                        <Orders />
+                      </AdminRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <ProtectedRoute>
+                      <AdminRoute>
+                        <UserManager />
+                      </AdminRoute>
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/dev"
-                element={
-                  <ProtectedRoute isAuthenticated={true}>
-                    <DeveloperRoute isDeveloper={true}>
-                      <DevConsole />
-                    </DeveloperRoute>
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/dev/settings" element={<ProtectedRoute isAuthenticated={true}><DeveloperRoute isDeveloper={true}><ConfigSettings /></DeveloperRoute></ProtectedRoute>} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </BrowserRouter>
-    </CartProvider>
+                <Route
+                  path="/dev"
+                  element={
+                    <ProtectedRoute>
+                      <DeveloperRoute>
+                        <DevConsole />
+                      </DeveloperRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dev/settings"
+                  element={
+                    <ProtectedRoute>
+                      <DeveloperRoute>
+                        <ConfigSettings />
+                      </DeveloperRoute>
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </BrowserRouter>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

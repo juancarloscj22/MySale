@@ -18,6 +18,32 @@ La aplicación se encuentra en `frontend/`. Las vistas están organizadas por á
 
 ## Estado actual
 
-Esta es una base de interfaz/prototipo: los productos, pedidos, métricas y usuarios son datos de muestra. Supabase está agregado como dependencia, pero todavía no está configurado ni conectado. La autenticación y los controles de rol no son seguridad real y deben integrarse con Supabase Auth y políticas RLS antes de usar datos o habilitar operaciones comerciales. Configura el número real de WhatsApp antes de publicar.
+El catálogo, registro e inicio de sesión ya usan Supabase. Las métricas, pedidos e interfaces de administración aún son prototipos. La seguridad de datos se aplica con RLS; los controles de rol de la interfaz son solo navegación. Configura el número real de WhatsApp antes de publicar.
 
 Consulta `avance_proyecto_mysale.txt` para el resumen de los avances realizados.
+
+## Esquema de Supabase
+
+Las migraciones `20260929162000_initial_schema.sql` y `20260929172000_catalog_and_auth_policies.sql` crean el esquema base y configuran RLS para catálogo, perfiles y administración. El catálogo activo y la configuración pública se pueden consultar; los usuarios solo pueden leer su propio perfil y pedidos. Los cambios administrativos requieren el rol `admin`. Clientes no pueden modificar perfiles ni insertar pedidos directamente desde el navegador; la creación segura de pedidos requiere una función transaccional que valide precios y stock. Ambas migraciones ya están aplicadas al proyecto enlazado.
+
+La moneda del esquema es `MXN` provisional; confirmar que corresponde a la tienda antes de procesar pedidos.
+
+La CLI de Supabase está incluida como dependencia de desarrollo del frontend. Para aplicar cambios futuros desde la raíz:
+
+```powershell
+npm --prefix frontend exec -- supabase login
+npm --prefix frontend exec -- supabase link --project-ref hyfucataajcqzdxoiusy
+npm --prefix frontend exec -- supabase db push
+```
+
+El último comando aplica las migraciones pendientes al proyecto enlazado. Para ejecutar Supabase localmente en vez de usar un proyecto alojado, también se requiere Docker Desktop.
+
+Los registros nuevos reciben el rol `customer`. No se puede autoasignar un rol privilegiado: para promover la primera cuenta de administración, verifica primero el usuario en Supabase Auth y ejecuta en SQL Editor, con el UUID confirmado:
+
+```sql
+update public.profiles
+set role = 'admin'
+where id = '<uuid-confirmado>';
+```
+
+Para configurar el frontend, copia `frontend/.env.example` a `frontend/.env.local` y añade la URL y la clave pública del proyecto. `.env.local` está ignorado por Git; nunca pongas una clave `service_role` o secret en variables `VITE_*`.

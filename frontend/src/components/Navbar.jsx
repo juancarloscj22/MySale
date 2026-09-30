@@ -1,17 +1,34 @@
-import { NavLink } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
+import { useCart } from '../context/useCart';
 
-const navItems = [
+const baseNavItems = [
   { to: '/', label: 'Inicio' },
   { to: '/catalog', label: 'Catálogo' },
   { to: '/mis-pedidos', label: 'Mis pedidos' },
-  { to: '/admin', label: 'Admin' },
-  { to: '/dev', label: 'Dev' },
-  { to: '/auth', label: 'Acceso' },
 ];
 
 export default function Navbar() {
   const { totalItems } = useCart();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [signOutError, setSignOutError] = useState('');
+  const navItems = [
+    ...baseNavItems,
+    ...(profile?.role === 'admin' ? [{ to: '/admin', label: 'Admin' }] : []),
+    ...(profile?.role === 'developer' ? [{ to: '/dev', label: 'Dev' }] : []),
+  ];
+
+  const handleSignOut = async () => {
+    setSignOutError('');
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      setSignOutError(error.message);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -37,6 +54,15 @@ export default function Navbar() {
               {item.label}
             </NavLink>
           ))}
+          {user ? (
+            <button type="button" onClick={handleSignOut} className="text-sm font-medium text-slate-600 hover:text-slate-900">
+              Cerrar sesión
+            </button>
+          ) : (
+            <NavLink to="/auth" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+              Acceso
+            </NavLink>
+          )}
         </nav>
 
         <NavLink
@@ -49,6 +75,7 @@ export default function Navbar() {
           </span>
         </NavLink>
       </div>
+      {signOutError && <p role="alert" className="px-4 pb-2 text-center text-sm text-red-700">{signOutError}</p>}
     </header>
   );
 }

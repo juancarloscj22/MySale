@@ -1,16 +1,54 @@
 import { useState } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/useAuth';
 
 export default function Auth() {
+  const { user, loading, signIn, signUp } = useAuth();
+  const location = useLocation();
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [age, setAge] = useState('');
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  if (!loading && user) {
+    return <Navigate to={location.state?.from ?? '/'} replace />;
+  }
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (Number(age) < 18) {
-      alert('Debes ser mayor de 18 años para continuar.');
+    setError('');
+    setNotice('');
+
+    if (!isLogin && Number(age) < 18) {
+      setError('Debes confirmar que tienes al menos 18 años para registrarte.');
       return;
     }
-    alert(isLogin ? 'Inicio de sesión exitoso' : 'Registro exitoso');
+
+    setSubmitting(true);
+    try {
+      if (isLogin) {
+        await signIn(email, password);
+      } else {
+        const { session: newSession } = await signUp({ email, password, fullName });
+        if (!newSession) {
+          setNotice('Revisa tu correo para confirmar la cuenta y completar el registro.');
+        }
+      }
+    } catch (submitError) {
+      setError(submitError.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const changeMode = (loginMode) => {
+    setIsLogin(loginMode);
+    setError('');
+    setNotice('');
   };
 
   return (
@@ -26,33 +64,88 @@ export default function Auth() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex rounded-full bg-slate-100 p-1">
-            <button type="button" onClick={() => setIsLogin(true)} className={`flex-1 rounded-full px-4 py-2 text-sm font-bold ${isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>
+            <button
+              type="button"
+              onClick={() => changeMode(true)}
+              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold ${isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+            >
               Iniciar sesión
             </button>
-            <button type="button" onClick={() => setIsLogin(false)} className={`flex-1 rounded-full px-4 py-2 text-sm font-bold ${!isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>
+            <button
+              type="button"
+              onClick={() => changeMode(false)}
+              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold ${!isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+            >
               Registrarse
             </button>
           </div>
 
+          {!isLogin && (
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Nombre completo</span>
+              <input
+                type="text"
+                autoComplete="name"
+                required
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500"
+              />
+            </label>
+          )}
+
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-slate-700">Correo electrónico</span>
-            <input type="email" className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500" placeholder="usuario@email.com" />
+            <input
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500"
+              placeholder="usuario@email.com"
+            />
           </label>
 
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-slate-700">Contraseña</span>
-            <input type="password" className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500" placeholder="••••••••" />
+            <input
+              type="password"
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
+              required
+              minLength={6}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500"
+              placeholder="Mínimo 6 caracteres"
+            />
           </label>
 
           {!isLogin && (
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">Edad</span>
-              <input type="number" min="18" value={age} onChange={(e) => setAge(e.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500" placeholder="18" />
+              <input
+                type="number"
+                min="18"
+                max="120"
+                required
+                value={age}
+                onChange={(event) => setAge(event.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500"
+                placeholder="18"
+              />
             </label>
           )}
 
-          <button type="submit" className="w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-600">
-            {isLogin ? 'Entrar' : 'Crear cuenta'}
+          {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+          {notice && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">{notice}</p>}
+
+          <button
+            type="submit"
+            disabled={submitting || loading}
+            className="w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-600 disabled:cursor-wait disabled:opacity-60"
+          >
+            {submitting ? 'Procesando...' : isLogin ? 'Entrar' : 'Crear cuenta'}
           </button>
         </form>
       </div>

@@ -1,9 +1,35 @@
-import { products } from '../../services/products';
+import { useEffect, useState } from 'react';
+import { getProducts } from '../../services/products';
 
 export default function Inventory() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    getProducts({ includeInactive: true })
+      .then((result) => {
+        if (active) setProducts(result);
+      })
+      .catch((loadError) => {
+        if (active) setError(loadError.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-black text-slate-900">Inventario</h1>
+      {loading && <p className="py-8 text-slate-600">Cargando inventario...</p>}
+      {error && <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">No se pudo cargar el inventario: {error}</p>}
       <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <table className="min-w-full text-left text-sm">
           <thead className="bg-slate-100 text-slate-700">

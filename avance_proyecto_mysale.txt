@@ -87,7 +87,37 @@ La aplicación queda disponible en el servidor local de desarrollo en:
 http://localhost:5173/
 
 9. SIGUIENTE PASO RECOMENDADO
-Conectar la aplicación con Supabase real para autenticación, productos, pedidos y permisos por roles; además, migrar los datos mock a base de datos real y activar políticas RLS.
+Conectar catálogo y autenticación a Supabase; verificar políticas RLS y seguridad antes de habilitar escrituras de pedidos.
 
 10. CONCLUSIÓN
 El proyecto ya cuenta con una base funcional y ordenada para continuar su crecimiento. Se dejó preparado el camino para implementar la versión real de la tienda con datos persistentes y un flujo completo de compra.
+
+11. AVANCE POSTERIOR: ESQUEMA INICIAL DE SUPABASE
+Se añadió supabase/migrations/20260929162000_initial_schema.sql con las tablas profiles, categories, products, orders, order_items, site_settings y activity_logs. Incluye relaciones con Supabase Auth, campos de auditoría, estados de pedido, validaciones de valores, índices de consulta, actualización automática de updated_at y creación de perfil al registrarse un usuario.
+En el momento de crearla, RLS quedó activado sin políticas. Las políticas se añadieron posteriormente en la migración 20260929172000_catalog_and_auth_policies.sql. MXN se usa como moneda provisional y debe confirmarse antes de procesar pedidos.
+
+12. HERRAMIENTAS DE SUPABASE
+Se instaló la CLI de Supabase como dependencia de desarrollo del frontend (supabase 2.118.0) y se verificó que se ejecuta correctamente. También se comprobó que el build frontend continúa funcionando.
+La CLI se autenticó localmente, enlazó el proyecto hyfucataajcqzdxoiusy y verificó que la migración 20260929162000 quedó registrada en local y en remoto. Docker Desktop no es necesario para publicar la migración a un proyecto alojado, pero sí para correr el stack local de Supabase.
+
+13. CONEXIÓN DEL FRONTEND A SUPABASE
+Se configuró el proyecto hyfucataajcqzdxoiusy en frontend/.env.local con la URL y clave pública entregadas, archivo ignorado por Git. Se creó frontend/.env.example y frontend/src/lib/supabaseClient.js, y se inicializa el cliente Supabase desde el arranque de la aplicación. El endpoint de salud de Auth respondió HTTP 200 con la clave pública.
+En el momento de configurar el cliente, el endpoint REST de products respondió HTTP 200 y una lista vacía bajo RLS. Las pantallas se conectaron en el avance 15. Nunca se debe usar una service_role key en frontend.
+
+14. MIGRACIÓN APLICADA
+Tras iniciar sesión, se enlazó el CLI con el proyecto y se ejecutó supabase db push. La CLI indicó que la base remota estaba al día; supabase migration list confirmó 20260929162000 en local y remoto. La consulta REST de products devolvió HTTP 200 con [].
+El esquema base quedó en el proyecto Supabase. Las políticas RLS y la conexión de Auth/catálogo se agregaron y aplicaron en avances posteriores.
+
+15. POLÍTICAS RLS, AUTENTICACIÓN Y CATÁLOGO
+Se agregó la migración 20260929172000_catalog_and_auth_policies.sql: el público puede leer categorías/productos activos y configuración pública; un usuario autenticado solo puede leer su perfil y pedidos; administradores pueden gestionar catálogo y pedidos. Los registros de actividad son solo lectura para administradores. No se permite cambiar roles desde el navegador ni insertar pedidos directamente; un RPC transaccional deberá validar precios y stock antes de habilitar pedidos.
+El frontend ahora obtiene y cambia sesión con Supabase Auth, muestra errores/confirmación de registro, y protege las rutas de cuenta/admin/dev según perfil real. Inicio, catálogo y detalle consultan productos activos de Supabase y presentan estados vacío/carga/error. Las estadísticas, pedidos y vistas administrativas aún son de muestra.
+Los usuarios recién registrados son customer. La primera cuenta admin se asigna manualmente desde SQL Editor después de confirmar el UUID del usuario.
+
+16. APLICACIÓN DE POLÍTICAS Y CONEXIÓN FUNCIONAL
+Se aplicó la migración 20260929172000_catalog_and_auth_policies.sql al proyecto Supabase. migration list confirma ambas migraciones registradas en remoto. Las consultas públicas a products y categories responden HTTP 200 con listas vacías; site_settings responde HTTP 200 con la configuración inicial.
+Quedaron conectados Auth (registro/inicio/cierre de sesión), las protecciones de ruta por perfil y las consultas de catálogo, detalle e inventario. No se cargaron productos ni se probó una sesión real; las vistas de pedidos, métricas y administración (salvo consulta de inventario) siguen siendo prototipos. Falta crear la primera cuenta y asignar admin manualmente, agregar productos, y diseñar un RPC transaccional de pedidos.
+
+17. VERIFICACIÓN TRAS APLICAR RLS
+Se volvió a consultar la lista de migraciones remota y aparecen 20260929162000 y 20260929172000. REST devuelve HTTP 200 para products, categories y site_settings; las dos primeras están vacías, y site_settings contiene su registro inicial.
+Se corrigieron imports y estados de carga/error en inventario y detalle de producto, y se mejoró ProtectedRoute para manejar sesión sin usuario, perfil bloqueado, perfil ausente y error de lectura. Se añadió supabase/.gitignore para impedir que archivos de vinculación temporales se suban al repositorio.
+Validación: npm run lint pasó sin advertencias; npm run build pasó, con una advertencia de Vite por bundle minificado mayor de 500 kB. No se registró un usuario de prueba ni se cargaron productos.

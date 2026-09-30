@@ -1,7 +1,10 @@
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
 
-export default function DeveloperRoute({ children, isDeveloper = false }) {
-  if (!isDeveloper) {
+export default function DeveloperRoute({ children }) {
+  const { profile } = useAuth();
+
+  if (profile?.role !== 'developer') {
     return <Navigate to="/" replace />;
   }
 

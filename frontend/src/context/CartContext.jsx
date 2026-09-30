@@ -1,6 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-
-const CartContext = createContext(null);
+import { useEffect, useMemo, useState } from 'react';
+import { CartContext } from './cartContext.js';
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState(() => {
@@ -68,14 +67,4 @@ export function CartProvider({ children }) {
       {children}
     </CartContext.Provider>
   );
-}
-
-export function useCart() {
-  const context = useContext(CartContext);
-
-  if (!context) {
-    throw new Error('useCart must be used inside CartProvider');
-  }
-
-  return context;
 }

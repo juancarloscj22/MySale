@@ -1,12 +1,43 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
+import { useCart } from '../../context/useCart';
 import { getProductById } from '../../services/products';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { addItem } = useCart();
-  const product = useMemo(() => getProductById(id), [id]);
+  const [result, setResult] = useState({ id: null, product: null, error: '' });
+
+  useEffect(() => {
+    let active = true;
+
+    getProductById(id)
+      .then((result) => {
+        if (active) setResult({ id, product: result, error: '' });
+      })
+      .catch((loadError) => {
+        if (active) setResult({ id, product: null, error: loadError.message });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  const loading = result.id !== id;
+  const { product, error } = result;
+
+  if (loading) {
+    return <p className="p-12 text-center text-slate-600">Cargando producto...</p>;
+  }
+
+  if (error) {
+    return (
+      <div role="alert" className="mx-auto max-w-4xl px-4 py-20 text-center text-red-700">
+        No se pudo cargar el producto: {error}
+      </div>
+    );
+  }
 
   if (!product) {
     return (
