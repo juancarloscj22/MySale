@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { pendingDeliveryLocation } from '../lib/orderOptions';
 
 export async function getCheckoutSettings() {
   const { data, error } = await supabase
@@ -22,7 +23,6 @@ export async function createOrder({
   items,
   deliveryName,
   deliveryPhone,
-  deliveryAddress,
   deliveryDate,
   deliveryTime,
   paymentMethod,
@@ -39,7 +39,7 @@ export async function createOrder({
     })),
     p_delivery_name: deliveryName,
     p_delivery_phone: deliveryPhone,
-    p_delivery_address: deliveryAddress,
+    p_delivery_address: pendingDeliveryLocation,
     p_delivery_time: deliveryTime || null,
     p_payment_method: paymentMethod,
     p_cash_change_required: cashChangeRequired,

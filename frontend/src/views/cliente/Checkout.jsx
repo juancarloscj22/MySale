@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import { useCart } from '../../context/useCart';
 import { buildOrderMessage, buildWhatsAppUrl } from '../../lib/whatsapp';
-import { paymentMethods } from '../../lib/orderOptions';
+import { deliveryLocationRequest, paymentMethods } from '../../lib/orderOptions';
 import { createOrder, getCheckoutSettings, validateCoupon } from '../../services/orders';
 
 const initialDelivery = {
-  address: '',
   date: '',
   time: '',
   paymentMethod: '',
@@ -145,7 +144,6 @@ export default function Checkout() {
         items,
         deliveryName: profile.full_name,
         deliveryPhone: profile.phone,
-        deliveryAddress: delivery.address,
         deliveryDate: delivery.date,
         deliveryTime: delivery.time,
         paymentMethod: delivery.paymentMethod,
@@ -284,20 +282,9 @@ export default function Checkout() {
               </Link>
             </div>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-700">Dirección de entrega *</span>
-              <textarea
-                name="address"
-                autoComplete="street-address"
-                required
-                minLength={5}
-                maxLength={500}
-                rows={3}
-                value={delivery.address}
-                onChange={updateDelivery}
-                className={inputClass}
-              />
-            </label>
+            <p role="note" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
+              {deliveryLocationRequest}
+            </p>
             <fieldset className="space-y-2">
               <legend className="text-sm font-semibold text-slate-700">¿Tu domicilio está en zona aledaña? *</legend>
               <div className="flex gap-3">

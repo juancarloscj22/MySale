@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getPaymentMethodLabel } from '../../lib/orderOptions';
+import { getPaymentMethodLabel, pendingDeliveryLocation } from '../../lib/orderOptions';
 import { getAllOrders, updateOrderStatus } from '../../services/orders';
 
 const statuses = [
@@ -132,7 +132,11 @@ export default function Orders() {
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Entrega</p>
                   <p className="mt-1 font-semibold text-slate-900">{order.delivery_name}</p>
                   <p className="text-sm text-slate-600">{order.delivery_phone}</p>
-                  <p className="mt-1 text-sm text-slate-600">{order.delivery_address}</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Ubicación: {order.delivery_address === pendingDeliveryLocation
+                      ? pendingDeliveryLocation
+                      : order.delivery_address}
+                  </p>
                   <p className="mt-2 text-sm text-slate-600">
                     Zona aledaña: {order.adjacent_zone ? 'Sí' : 'No'}
                   </p>

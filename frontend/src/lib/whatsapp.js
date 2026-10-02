@@ -1,4 +1,4 @@
-import { getPaymentMethodLabel } from './orderOptions';
+import { deliveryLocationRequest, getPaymentMethodLabel, pendingDeliveryLocation } from './orderOptions';
 
 const formatAmount = (amount, currencyCode) =>
   `${currencyCode} ${Number(amount).toFixed(2)}`;
@@ -9,7 +9,9 @@ export const buildOrderMessage = (order) => {
     `Pedido: ${order.id}`,
     `Nombre: ${order.delivery_name}`,
     `Teléfono: ${order.delivery_phone}`,
-    `Dirección: ${order.delivery_address}`,
+    ...(order.delivery_address === pendingDeliveryLocation
+      ? [`Ubicación: ${pendingDeliveryLocation}`, deliveryLocationRequest]
+      : [`Dirección: ${order.delivery_address}`]),
     `Zona aledaña: ${order.adjacent_zone ? 'Sí' : 'No'}`,
     ...(order.delivery_date ? [`Fecha preferida de entrega: ${order.delivery_date}`] : []),
     ...(order.delivery_time ? [`Hora preferida de entrega: ${String(order.delivery_time).slice(0, 5)}`] : []),
