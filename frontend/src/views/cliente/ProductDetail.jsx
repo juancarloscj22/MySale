@@ -58,7 +58,11 @@ export default function ProductDetail() {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="grid gap-10 lg:grid-cols-2">
         <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
-          <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+          <img
+            src={selectedFlavor?.image_url || product.image}
+            alt={selectedFlavor ? `${product.name} - ${selectedFlavor.flavor}` : product.name}
+            className="h-full w-full object-cover"
+          />
         </div>
 
         <div className="space-y-6">

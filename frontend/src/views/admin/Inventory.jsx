@@ -10,7 +10,7 @@ const emptyForm = {
   discount_percent: '0',
   brand: '',
   category: '',
-  flavors: [{ id: null, flavor: '', stock: '0', active: true }],
+  flavors: [{ id: null, flavor: '', image_url: '', stock: '0', active: true }],
   nicotine: '',
   puffs: '',
   image_url: '',
@@ -68,7 +68,7 @@ export default function Inventory() {
   const addFlavor = () => {
     setForm((current) => ({
       ...current,
-      flavors: [...current.flavors, { id: null, flavor: '', stock: '0', active: true }],
+      flavors: [...current.flavors, { id: null, flavor: '', image_url: '', stock: '0', active: true }],
     }));
   };
 
@@ -310,12 +310,24 @@ export default function Inventory() {
                       className={inputClass}
                     />
                   </label>
+                  <label className="block sm:col-span-2">
+                    <span className="mb-1 block text-xs font-semibold text-slate-500">URL de imagen del sabor</span>
+                    <input
+                      type="url"
+                      value={flavor.image_url ?? ''}
+                      onChange={(event) => updateFlavor(index, 'image_url', event.target.value)}
+                      disabled={!flavor.active}
+                      maxLength={2048}
+                      className={inputClass}
+                      placeholder="https://"
+                    />
+                  </label>
                   {flavor.active ? (
-                    <button type="button" onClick={() => removeFlavor(index)} className="self-end rounded-full border border-red-200 px-3 py-2 text-xs font-semibold text-red-700">
+                    <button type="button" onClick={() => removeFlavor(index)} className="self-end rounded-full border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 sm:col-start-3 sm:row-start-1">
                       Quitar
                     </button>
                   ) : (
-                    <button type="button" onClick={() => updateFlavor(index, 'active', true)} className="self-end rounded-full border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700">
+                    <button type="button" onClick={() => updateFlavor(index, 'active', true)} className="self-end rounded-full border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700 sm:col-start-3 sm:row-start-1">
                       Reactivar
                     </button>
                   )}

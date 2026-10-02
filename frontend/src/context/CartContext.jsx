@@ -38,6 +38,7 @@ export function CartProvider({ children }) {
         cartKey,
         flavor_id: flavor.id,
         flavor: flavor.flavor,
+        flavor_image_url: flavor.image_url ?? '',
         flavor_stock: flavor.stock,
         quantity: 1,
       }];

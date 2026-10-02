@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 
 const productFields =
-  'id, name, description, price, discount_percent, stock, brand, category_id, flavor, nicotine, puffs, image_url, active, categories(id, name), product_flavors(id, flavor, stock, active)';
+  'id, name, description, price, discount_percent, stock, brand, category_id, flavor, nicotine, puffs, image_url, active, categories(id, name), product_flavors(id, flavor, image_url, stock, active)';
 
 const mapProduct = (row) => {
   const originalPrice = Number(row.price);
@@ -87,7 +87,7 @@ async function getOrCreateCategory(categoryName) {
 
 export async function saveProduct(product) {
   const categoryId = await getOrCreateCategory(product.category ?? '');
-  const { error } = await supabase.rpc('save_product', {
+  const { data: productId, error } = await supabase.rpc('save_product', {
     p_product_id: product.id || null,
     p_name: product.name.trim(),
     p_description: product.description.trim() || null,
@@ -107,6 +107,15 @@ export async function saveProduct(product) {
     })),
   });
   if (error) throw error;
+
+  const { error: flavorImagesError } = await supabase.rpc('save_product_flavor_images', {
+    p_product_id: productId,
+    p_flavors: product.flavors.map((flavor) => ({
+      flavor: flavor.flavor.trim(),
+      image_url: flavor.image_url?.trim() || null,
+    })),
+  });
+  if (flavorImagesError) throw flavorImagesError;
 }
 
 export async function setProductActive(id, active) {

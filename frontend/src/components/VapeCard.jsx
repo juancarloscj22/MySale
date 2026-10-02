@@ -16,8 +16,8 @@ export default function VapeCard({ product }) {
       <Link to={`/product/${product.id}`} className="block overflow-hidden">
         <div className="relative">
           <img
-            src={product.image}
-            alt={product.name}
+            src={selectedFlavor?.image_url || product.image}
+            alt={selectedFlavor ? `${product.name} - ${selectedFlavor.flavor}` : product.name}
             className="h-56 w-full object-cover transition duration-300 group-hover:scale-105"
           />
           {product.discount_percent > 0 && (

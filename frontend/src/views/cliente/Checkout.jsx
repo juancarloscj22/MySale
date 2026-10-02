@@ -224,7 +224,7 @@ export default function Checkout() {
           <div className="space-y-4">
             {items.map((item) => (
               <div key={item.cartKey ?? item.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <img src={item.image} alt={item.name} className="h-24 w-24 rounded-xl object-cover" />
+                <img src={item.flavor_image_url || item.image} alt={`${item.name}${item.flavor ? ` - ${item.flavor}` : ''}`} className="h-24 w-24 rounded-xl object-cover" />
                 <div className="min-w-32 flex-1">
                   <h2 className="text-lg font-bold text-slate-900">{item.name}</h2>
                   <p className="text-sm text-slate-500">Sabor: {item.flavor || 'Pendiente de seleccionar'}</p>
