@@ -20,29 +20,39 @@ export function CartProvider({ children }) {
     localStorage.setItem('vape-cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product) => {
+  const addItem = (product, flavor) => {
+    if (!flavor?.id) return;
+    const cartKey = `${product.id}:${flavor.id}`;
+
     setItems((current) => {
-      const existing = current.find((item) => item.id === product.id);
+      const existing = current.find((item) => item.cartKey === cartKey);
 
       if (existing) {
         return current.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+          item.cartKey === cartKey ? { ...item, quantity: item.quantity + 1 } : item,
         );
       }
 
-      return [...current, { ...product, quantity: 1 }];
+      return [...current, {
+        ...product,
+        cartKey,
+        flavor_id: flavor.id,
+        flavor: flavor.flavor,
+        flavor_stock: flavor.stock,
+        quantity: 1,
+      }];
     });
   };
 
-  const removeItem = (productId) => {
-    setItems((current) => current.filter((item) => item.id !== productId));
+  const removeItem = (cartKey) => {
+    setItems((current) => current.filter((item) => (item.cartKey ?? item.id) !== cartKey));
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (cartKey, quantity) => {
     setItems((current) =>
       current
         .map((item) =>
-          item.id === productId ? { ...item, quantity: Math.max(0, quantity) } : item,
+          (item.cartKey ?? item.id) === cartKey ? { ...item, quantity: Math.max(0, quantity) } : item,
         )
         .filter((item) => item.quantity > 0),
     );

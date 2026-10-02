@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 
 const productFields =
-  'id, name, description, price, discount_percent, stock, brand, category_id, flavor, nicotine, puffs, image_url, active, categories(id, name)';
+  'id, name, description, price, discount_percent, stock, brand, category_id, flavor, nicotine, puffs, image_url, active, categories(id, name), product_flavors(id, flavor, stock, active)';
 
 const mapProduct = (row) => {
   const originalPrice = Number(row.price);
@@ -9,6 +9,10 @@ const mapProduct = (row) => {
 
   return {
     ...row,
+    flavors: (row.product_flavors ?? []).map((flavor) => ({
+      ...flavor,
+      stock: Number(flavor.stock),
+    })),
     originalPrice,
     discount_percent: discountPercent,
     price: Number((originalPrice * (100 - discountPercent) / 100).toFixed(2)),
@@ -83,26 +87,25 @@ async function getOrCreateCategory(categoryName) {
 
 export async function saveProduct(product) {
   const categoryId = await getOrCreateCategory(product.category ?? '');
-  const payload = {
-    name: product.name.trim(),
-    description: product.description.trim() || null,
-    price: Number(product.price),
-    discount_percent: Number(product.discount_percent ?? 0),
-    stock: Number(product.stock),
-    brand: product.brand.trim() || null,
-    category_id: categoryId,
-    flavor: product.flavor.trim() || null,
-    nicotine: product.nicotine.trim() || null,
-    puffs: product.puffs === '' ? null : Number(product.puffs),
-    image_url: product.image_url.trim() || null,
-    active: product.active,
-  };
-
-  const query = product.id
-    ? supabase.from('products').update(payload).eq('id', product.id)
-    : supabase.from('products').insert(payload);
-
-  const { error } = await query.select('id').single();
+  const { error } = await supabase.rpc('save_product', {
+    p_product_id: product.id || null,
+    p_name: product.name.trim(),
+    p_description: product.description.trim() || null,
+    p_price: Number(product.price),
+    p_discount_percent: Number(product.discount_percent ?? 0),
+    p_brand: product.brand.trim() || null,
+    p_category_id: categoryId,
+    p_nicotine: product.nicotine.trim() || null,
+    p_puffs: product.puffs === '' ? null : Number(product.puffs),
+    p_image_url: product.image_url.trim() || null,
+    p_active: product.active,
+    p_flavors: product.flavors.map((flavor) => ({
+      id: flavor.id || null,
+      flavor: flavor.flavor.trim(),
+      stock: Number(flavor.stock),
+      active: flavor.active,
+    })),
+  });
   if (error) throw error;
 }
 

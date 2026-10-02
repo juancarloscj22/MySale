@@ -26,7 +26,7 @@ export const buildOrderMessage = (order) => {
     'Productos:',
     ...order.items.map(
       (item) =>
-        `- ${item.name} x${item.quantity} (${formatAmount(item.subtotal, order.currency_code)})`,
+        `- ${item.name}${item.flavor ? ` · ${item.flavor}` : ''} x${item.quantity} (${formatAmount(item.subtotal, order.currency_code)})`,
     ),
   ];
 

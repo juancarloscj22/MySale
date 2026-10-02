@@ -156,7 +156,7 @@ export default function Orders() {
                   <ul className="mt-2 space-y-2 text-sm text-slate-600">
                     {order.order_items.map((item, index) => (
                       <li key={`${order.id}-${index}`} className="flex justify-between gap-4">
-                        <span>{item.product_name} × {item.quantity}</span>
+                        <span>{item.product_name}{item.flavor_name ? ` · ${item.flavor_name}` : ''} × {item.quantity}</span>
                         <span>{formatAmount(item.subtotal, order.currency_code)}</span>
                       </li>
                     ))}

@@ -6,6 +6,7 @@ import { getProductById } from '../../services/products';
 export default function ProductDetail() {
   const { id } = useParams();
   const { addItem } = useCart();
+  const [selectedFlavorId, setSelectedFlavorId] = useState('');
   const [result, setResult] = useState({ id: null, product: null, error: '' });
 
   useEffect(() => {
@@ -26,6 +27,9 @@ export default function ProductDetail() {
 
   const loading = result.id !== id;
   const { product, error } = result;
+  const availableFlavors = product?.flavors.filter((flavor) => flavor.active) ?? [];
+  const selectedFlavor = availableFlavors.find((flavor) => flavor.id === selectedFlavorId)
+    ?? availableFlavors.find((flavor) => flavor.stock > 0);
 
   if (loading) {
     return <p className="p-12 text-center text-slate-600">Cargando producto...</p>;
@@ -64,11 +68,9 @@ export default function ProductDetail() {
           </div>
 
           <div className="flex items-center gap-3 text-sm text-slate-500">
-            <span>{product.flavor}</span>
+            <span>{product.nicotine || 'Nicotina no especificada'}</span>
             <span>•</span>
-            <span>{product.nicotine}</span>
-            <span>•</span>
-            <span>{product.puffs} puffs</span>
+            <span>{product.puffs ? `${product.puffs} puffs` : 'Caladas no especificadas'}</span>
           </div>
 
           <div>
@@ -84,14 +86,36 @@ export default function ProductDetail() {
           </div>
           <p className="text-base leading-7 text-slate-600">{product.description}</p>
 
+          <fieldset className="space-y-3">
+            <legend className="text-sm font-semibold text-slate-700">Selecciona un sabor *</legend>
+            <div className="flex flex-wrap gap-2">
+              {availableFlavors.map((flavor) => (
+                <button
+                  key={flavor.id}
+                  type="button"
+                  disabled={flavor.stock === 0}
+                  aria-pressed={selectedFlavor?.id === flavor.id}
+                  onClick={() => setSelectedFlavorId(flavor.id)}
+                  className={`rounded-full border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                    selectedFlavor?.id === flavor.id
+                      ? 'border-emerald-600 bg-emerald-600 text-white'
+                      : 'border-slate-300 bg-white text-slate-700 hover:border-emerald-400'
+                  }`}
+                >
+                  {flavor.flavor} · {flavor.stock} disponibles
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
           <div className="flex flex-wrap gap-4">
             <button
               type="button"
-              onClick={() => addItem(product)}
-              disabled={product.stock === 0}
+              onClick={() => addItem(product, selectedFlavor)}
+              disabled={!selectedFlavor}
               className="rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
-              {product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+              {selectedFlavor ? 'Agregar al carrito' : 'Sin sabores disponibles'}
             </button>
             <Link to="/catalog" className="rounded-full border border-slate-300 px-6 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
               Volver
@@ -100,7 +124,7 @@ export default function ProductDetail() {
 
           <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
             <div className="flex justify-between"><span>Marca</span><strong>{product.brand}</strong></div>
-            <div className="flex justify-between"><span>Stock</span><strong>{product.stock > 0 ? `${product.stock} unidades` : 'Agotado'}</strong></div>
+            <div className="flex justify-between"><span>Stock total</span><strong>{product.stock > 0 ? `${product.stock} unidades` : 'Agotado'}</strong></div>
             <div className="flex justify-between"><span>Disponibilidad</span><strong>{product.active ? 'Activo' : 'Inactivo'}</strong></div>
           </div>
         </div>

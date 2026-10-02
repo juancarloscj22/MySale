@@ -111,6 +111,11 @@ export default function Checkout() {
       return;
     }
 
+    if (items.some((item) => !item.flavor_id)) {
+      setError('El carrito tiene productos sin sabor seleccionado. Elimínalos y vuelve a agregarlos eligiendo un sabor.');
+      return;
+    }
+
     if (settings?.acceptingOrders === false) {
       setError('La tienda no está aceptando pedidos por el momento. Inténtalo más tarde.');
       return;
@@ -218,11 +223,11 @@ export default function Checkout() {
         <div className="space-y-8">
           <div className="space-y-4">
             {items.map((item) => (
-              <div key={item.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div key={item.cartKey ?? item.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <img src={item.image} alt={item.name} className="h-24 w-24 rounded-xl object-cover" />
                 <div className="min-w-32 flex-1">
                   <h2 className="text-lg font-bold text-slate-900">{item.name}</h2>
-                  <p className="text-sm text-slate-500">{item.flavor}</p>
+                  <p className="text-sm text-slate-500">Sabor: {item.flavor || 'Pendiente de seleccionar'}</p>
                   {item.discount_percent > 0 && Number.isFinite(item.originalPrice) && (
                     <p className="mt-1 text-sm text-slate-500 line-through">
                       ${item.originalPrice.toFixed(2)}
@@ -236,7 +241,7 @@ export default function Checkout() {
                   <button
                     type="button"
                     aria-label={`Quitar una unidad de ${item.name}`}
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    onClick={() => updateQuantity(item.cartKey ?? item.id, item.quantity - 1)}
                     disabled={submitting}
                     className="h-8 w-8 rounded-full border border-slate-300 text-lg"
                   >
@@ -246,7 +251,7 @@ export default function Checkout() {
                   <button
                     type="button"
                     aria-label={`Agregar una unidad de ${item.name}`}
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    onClick={() => updateQuantity(item.cartKey ?? item.id, item.quantity + 1)}
                     disabled={submitting}
                     className="h-8 w-8 rounded-full border border-slate-300 text-lg"
                   >
@@ -255,7 +260,7 @@ export default function Checkout() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => removeItem(item.id)}
+                  onClick={() => removeItem(item.cartKey ?? item.id)}
                   disabled={submitting}
                   className="text-sm font-semibold text-red-500"
                 >
