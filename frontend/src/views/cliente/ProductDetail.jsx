@@ -90,27 +90,25 @@ export default function ProductDetail() {
           </div>
           <p className="text-base leading-7 text-slate-600">{product.description}</p>
 
-          <fieldset className="space-y-3">
-            <legend className="text-sm font-semibold text-slate-700">Selecciona un sabor *</legend>
-            <div className="flex flex-wrap gap-2">
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Selecciona un sabor *</span>
+            <select
+              value={selectedFlavor?.id ?? ''}
+              onChange={(event) => setSelectedFlavorId(event.target.value)}
+              disabled={availableFlavors.length === 0}
+              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+            >
+              {availableFlavors.length === 0 && <option value="">Sin sabores disponibles</option>}
+              {availableFlavors.length > 0 && !selectedFlavor && (
+                <option value="" disabled>Sin sabores disponibles</option>
+              )}
               {availableFlavors.map((flavor) => (
-                <button
-                  key={flavor.id}
-                  type="button"
-                  disabled={flavor.stock === 0}
-                  aria-pressed={selectedFlavor?.id === flavor.id}
-                  onClick={() => setSelectedFlavorId(flavor.id)}
-                  className={`rounded-full border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
-                    selectedFlavor?.id === flavor.id
-                      ? 'border-emerald-600 bg-emerald-600 text-white'
-                      : 'border-slate-300 bg-white text-slate-700 hover:border-emerald-400'
-                  }`}
-                >
-                  {flavor.flavor} · {flavor.stock} disponibles
-                </button>
+                <option key={flavor.id} value={flavor.id} disabled={flavor.stock === 0}>
+                  {flavor.flavor} · {flavor.stock > 0 ? `${flavor.stock} disponibles` : 'Agotado'}
+                </option>
               ))}
-            </div>
-          </fieldset>
+            </select>
+          </label>
 
           <div className="flex flex-wrap gap-4">
             <button

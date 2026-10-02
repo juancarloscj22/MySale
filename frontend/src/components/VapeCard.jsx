@@ -55,27 +55,25 @@ export default function VapeCard({ product }) {
           </div>
         </div>
         {availableFlavors.length > 0 && (
-          <fieldset>
-            <legend className="mb-2 text-xs font-semibold text-slate-600">Elige un sabor</legend>
-            <div className="flex flex-wrap gap-2">
+          <label className="block">
+            <span className="mb-2 block text-xs font-semibold text-slate-600">Elige un sabor</span>
+            <select
+              value={selectedFlavorId}
+              onChange={(event) => setSelectedFlavorId(event.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500"
+            >
+              {!selectedFlavor && (
+                <option value="" disabled>
+                  {hasStock ? 'Selecciona un sabor' : 'Sin sabores disponibles'}
+                </option>
+              )}
               {availableFlavors.map((flavor) => (
-                <button
-                  key={flavor.id}
-                  type="button"
-                  disabled={flavor.stock === 0}
-                  aria-pressed={selectedFlavorId === flavor.id}
-                  onClick={() => setSelectedFlavorId(flavor.id)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 ${
-                    selectedFlavorId === flavor.id
-                      ? 'border-emerald-600 bg-emerald-600 text-white'
-                      : 'border-slate-300 text-slate-700 hover:border-emerald-400'
-                  }`}
-                >
-                  {flavor.flavor}
-                </button>
+                <option key={flavor.id} value={flavor.id} disabled={flavor.stock === 0}>
+                  {flavor.flavor} · {flavor.stock > 0 ? `${flavor.stock} disponibles` : 'Agotado'}
+                </option>
               ))}
-            </div>
-          </fieldset>
+            </select>
+          </label>
         )}
         <button
           type="button"
