@@ -2,7 +2,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { StoreSettingsContext } from './storeSettingsContext.js';
 
-const defaults = { storeName: 'MySale Shop', logoUrl: '' };
+const defaults = {
+  storeName: 'MySale Shop',
+  logoUrl: '',
+  bannerUrl: '',
+  backgroundImageUrl: '',
+  adsensePublisherId: '',
+  adsenseLeftSlot: '',
+  adsenseRightSlot: '',
+};
 
 export function StoreSettingsProvider({ children }) {
   const [settings, setSettings] = useState(defaults);
@@ -10,7 +18,9 @@ export function StoreSettingsProvider({ children }) {
   const refreshStoreSettings = useCallback(async () => {
     const { data, error } = await supabase
       .from('site_settings')
-      .select('store_name, logo_url')
+      .select(
+        'store_name, logo_url, banner_url, background_image_url, adsense_publisher_id, adsense_left_slot, adsense_right_slot',
+      )
       .eq('id', true)
       .single();
 
@@ -19,6 +29,11 @@ export function StoreSettingsProvider({ children }) {
     setSettings({
       storeName: data.store_name?.trim() || defaults.storeName,
       logoUrl: data.logo_url?.trim() || '',
+      bannerUrl: data.banner_url?.trim() || '',
+      backgroundImageUrl: data.background_image_url?.trim() || '',
+      adsensePublisherId: data.adsense_publisher_id?.trim() || '',
+      adsenseLeftSlot: data.adsense_left_slot?.trim() || '',
+      adsenseRightSlot: data.adsense_right_slot?.trim() || '',
     });
   }, []);
 

@@ -6,13 +6,27 @@ const initialSettings = {
   whatsapp_number: '',
   store_name: '',
   logo_url: '',
+  banner_url: '',
+  background_image_url: '',
   whatsapp_message: '',
   currency_code: '',
   shipping_fee: '',
+  adsense_publisher_id: '',
+  adsense_left_slot: '',
+  adsense_right_slot: '',
 };
 
 const inputClass =
   'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500';
+
+const isHttpUrl = (value) => {
+  if (!value.trim()) return true;
+  try {
+    return ['http:', 'https:'].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+};
 
 export default function ConfigSettings() {
   const { refreshStoreSettings } = useStoreSettings();
@@ -22,13 +36,15 @@ export default function ConfigSettings() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [logoPreviewError, setLogoPreviewError] = useState(false);
+  const [bannerPreviewError, setBannerPreviewError] = useState(false);
+  const [backgroundPreviewError, setBackgroundPreviewError] = useState(false);
 
   useEffect(() => {
     let active = true;
 
     supabase
       .from('site_settings')
-      .select('whatsapp_number, store_name, logo_url, whatsapp_message, currency_code, shipping_fee')
+      .select('whatsapp_number, store_name, logo_url, banner_url, background_image_url, whatsapp_message, currency_code, shipping_fee, adsense_publisher_id, adsense_left_slot, adsense_right_slot')
       .eq('id', true)
       .single()
       .then(({ data, error: loadError }) => {
@@ -41,9 +57,14 @@ export default function ConfigSettings() {
           whatsapp_number: data.whatsapp_number ?? '',
           store_name: data.store_name ?? '',
           logo_url: data.logo_url ?? '',
+          banner_url: data.banner_url ?? '',
+          background_image_url: data.background_image_url ?? '',
           whatsapp_message: data.whatsapp_message ?? '',
           currency_code: data.currency_code ?? 'MXN',
           shipping_fee: String(data.shipping_fee ?? 5),
+          adsense_publisher_id: data.adsense_publisher_id ?? '',
+          adsense_left_slot: data.adsense_left_slot ?? '',
+          adsense_right_slot: data.adsense_right_slot ?? '',
         });
       })
       .catch((loadError) => {
@@ -62,6 +83,8 @@ export default function ConfigSettings() {
     const { name, value } = event.target;
     setSettings((current) => ({ ...current, [name]: value }));
     if (name === 'logo_url') setLogoPreviewError(false);
+    if (name === 'banner_url') setBannerPreviewError(false);
+    if (name === 'background_image_url') setBackgroundPreviewError(false);
   };
 
   const handleSave = async (event) => {
@@ -76,6 +99,24 @@ export default function ConfigSettings() {
       setError('El costo de envío debe ser un número válido mayor o igual a cero.');
       return;
     }
+    if (!isHttpUrl(settings.banner_url) || !isHttpUrl(settings.background_image_url)) {
+      setSaving(false);
+      setError('Las imágenes del banner y fondo deben usar una URL pública HTTP o HTTPS válida.');
+      return;
+    }
+    const publisherId = settings.adsense_publisher_id.trim();
+    const leftSlot = settings.adsense_left_slot.trim();
+    const rightSlot = settings.adsense_right_slot.trim();
+    if (publisherId && !/^ca-pub-\d+$/.test(publisherId)) {
+      setSaving(false);
+      setError('El ID de editor de AdSense debe tener el formato ca-pub- seguido de números.');
+      return;
+    }
+    if ([leftSlot, rightSlot].some((slot) => slot && !/^\d+$/.test(slot))) {
+      setSaving(false);
+      setError('Los IDs de las unidades de anuncio deben contener solo números.');
+      return;
+    }
 
     const { data, error: saveError } = await supabase
       .from('site_settings')
@@ -83,9 +124,14 @@ export default function ConfigSettings() {
         whatsapp_number: settings.whatsapp_number.trim() || null,
         store_name: settings.store_name.trim(),
         logo_url: settings.logo_url.trim() || null,
+        banner_url: settings.banner_url.trim() || null,
+        background_image_url: settings.background_image_url.trim() || null,
         whatsapp_message: settings.whatsapp_message.trim() || null,
         currency_code: settings.currency_code.trim().toUpperCase(),
         shipping_fee: shippingFee,
+        adsense_publisher_id: publisherId || null,
+        adsense_left_slot: leftSlot || null,
+        adsense_right_slot: rightSlot || null,
       })
       .eq('id', true)
       .select('id')
@@ -127,6 +173,60 @@ export default function ConfigSettings() {
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-slate-700">Nombre de la tienda *</span>
             <input name="store_name" required value={settings.store_name} onChange={updateSetting} className={inputClass} />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">URL del banner horizontal</span>
+            <input
+              name="banner_url"
+              type="url"
+              maxLength={2048}
+              value={settings.banner_url}
+              onChange={updateSetting}
+              className={inputClass}
+              placeholder="https://"
+            />
+            <span className="mt-1 block text-xs text-slate-500">Se muestra debajo de la barra de navegación y se adapta al ancho de pantalla.</span>
+            {settings.banner_url && (
+              <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                {bannerPreviewError ? (
+                  <p role="alert" className="p-3 text-sm text-red-700">No se pudo cargar la imagen del banner.</p>
+                ) : (
+                  <img
+                    src={settings.banner_url}
+                    alt="Vista previa del banner"
+                    onError={() => setBannerPreviewError(true)}
+                    className="aspect-[6/1] w-full object-cover"
+                  />
+                )}
+              </div>
+            )}
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">URL de imagen de fondo</span>
+            <input
+              name="background_image_url"
+              type="url"
+              maxLength={2048}
+              value={settings.background_image_url}
+              onChange={updateSetting}
+              className={inputClass}
+              placeholder="https://"
+            />
+            <span className="mt-1 block text-xs text-slate-500">Se muestra detrás del contenido con una capa clara para conservar la legibilidad.</span>
+            {settings.background_image_url && (
+              <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                {backgroundPreviewError ? (
+                  <p role="alert" className="p-3 text-sm text-red-700">No se pudo cargar la imagen de fondo.</p>
+                ) : (
+                  <img
+                    src={settings.background_image_url}
+                    alt="Vista previa del fondo"
+                    onError={() => setBackgroundPreviewError(true)}
+                    className="h-28 w-full object-cover"
+                  />
+                )}
+              </div>
+            )}
           </label>
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-slate-700">Moneda (código ISO) *</span>
@@ -184,6 +284,49 @@ export default function ConfigSettings() {
             <span className="mb-2 block text-sm font-semibold text-slate-700">Mensaje inicial de WhatsApp</span>
             <textarea name="whatsapp_message" rows="4" value={settings.whatsapp_message} onChange={updateSetting} className={inputClass} />
           </label>
+          <fieldset className="space-y-4 rounded-xl border border-slate-200 p-4 md:col-span-2">
+            <legend className="px-2 text-sm font-bold text-slate-800">Anuncios Google AdSense</legend>
+            <p className="text-sm text-slate-600">
+              Al aprobar tu cuenta, agrega el ID de editor y los IDs de las dos unidades. Los anuncios laterales se colocan debajo del contenido en móvil; mientras no haya IDs, se muestran espacios reservados.
+            </p>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">ID de editor</span>
+              <input
+                name="adsense_publisher_id"
+                value={settings.adsense_publisher_id}
+                onChange={updateSetting}
+                className={inputClass}
+                placeholder="ca-pub-0000000000000000"
+                maxLength={40}
+              />
+            </label>
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-700">ID de unidad izquierda</span>
+                <input
+                  name="adsense_left_slot"
+                  inputMode="numeric"
+                  value={settings.adsense_left_slot}
+                  onChange={updateSetting}
+                  className={inputClass}
+                  placeholder="0000000000"
+                  maxLength={32}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-700">ID de unidad derecha</span>
+                <input
+                  name="adsense_right_slot"
+                  inputMode="numeric"
+                  value={settings.adsense_right_slot}
+                  onChange={updateSetting}
+                  className={inputClass}
+                  placeholder="0000000000"
+                  maxLength={32}
+                />
+              </label>
+            </div>
+          </fieldset>
         </div>
 
         <button type="submit" disabled={saving} className="rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white disabled:opacity-60">
