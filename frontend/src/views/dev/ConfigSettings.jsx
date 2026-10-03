@@ -8,6 +8,8 @@ const initialSettings = {
   logo_url: '',
   banner_url: '',
   background_image_url: '',
+  product_card_background_image_url: '',
+  navbar_background_image_url: '',
   whatsapp_message: '',
   currency_code: '',
   shipping_fee: '',
@@ -38,13 +40,15 @@ export default function ConfigSettings() {
   const [logoPreviewError, setLogoPreviewError] = useState(false);
   const [bannerPreviewError, setBannerPreviewError] = useState(false);
   const [backgroundPreviewError, setBackgroundPreviewError] = useState(false);
+  const [cardBackgroundPreviewError, setCardBackgroundPreviewError] = useState(false);
+  const [navbarBackgroundPreviewError, setNavbarBackgroundPreviewError] = useState(false);
 
   useEffect(() => {
     let active = true;
 
     supabase
       .from('site_settings')
-      .select('whatsapp_number, store_name, logo_url, banner_url, background_image_url, whatsapp_message, currency_code, shipping_fee, adsense_publisher_id, adsense_left_slot, adsense_right_slot')
+      .select('whatsapp_number, store_name, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url, whatsapp_message, currency_code, shipping_fee, adsense_publisher_id, adsense_left_slot, adsense_right_slot')
       .eq('id', true)
       .single()
       .then(({ data, error: loadError }) => {
@@ -59,6 +63,8 @@ export default function ConfigSettings() {
           logo_url: data.logo_url ?? '',
           banner_url: data.banner_url ?? '',
           background_image_url: data.background_image_url ?? '',
+          product_card_background_image_url: data.product_card_background_image_url ?? '',
+          navbar_background_image_url: data.navbar_background_image_url ?? '',
           whatsapp_message: data.whatsapp_message ?? '',
           currency_code: data.currency_code ?? 'MXN',
           shipping_fee: String(data.shipping_fee ?? 5),
@@ -85,6 +91,8 @@ export default function ConfigSettings() {
     if (name === 'logo_url') setLogoPreviewError(false);
     if (name === 'banner_url') setBannerPreviewError(false);
     if (name === 'background_image_url') setBackgroundPreviewError(false);
+    if (name === 'product_card_background_image_url') setCardBackgroundPreviewError(false);
+    if (name === 'navbar_background_image_url') setNavbarBackgroundPreviewError(false);
   };
 
   const handleSave = async (event) => {
@@ -99,9 +107,15 @@ export default function ConfigSettings() {
       setError('El costo de envío debe ser un número válido mayor o igual a cero.');
       return;
     }
-    if (!isHttpUrl(settings.banner_url) || !isHttpUrl(settings.background_image_url)) {
+    const imageUrls = [
+      settings.banner_url,
+      settings.background_image_url,
+      settings.product_card_background_image_url,
+      settings.navbar_background_image_url,
+    ];
+    if (imageUrls.some((url) => !isHttpUrl(url))) {
       setSaving(false);
-      setError('Las imágenes del banner y fondo deben usar una URL pública HTTP o HTTPS válida.');
+      setError('Las imágenes del banner y los fondos deben usar una URL pública HTTP o HTTPS válida.');
       return;
     }
     const publisherId = settings.adsense_publisher_id.trim();
@@ -126,6 +140,8 @@ export default function ConfigSettings() {
         logo_url: settings.logo_url.trim() || null,
         banner_url: settings.banner_url.trim() || null,
         background_image_url: settings.background_image_url.trim() || null,
+        product_card_background_image_url: settings.product_card_background_image_url.trim() || null,
+        navbar_background_image_url: settings.navbar_background_image_url.trim() || null,
         whatsapp_message: settings.whatsapp_message.trim() || null,
         currency_code: settings.currency_code.trim().toUpperCase(),
         shipping_fee: shippingFee,
@@ -223,6 +239,60 @@ export default function ConfigSettings() {
                     alt="Vista previa del fondo"
                     onError={() => setBackgroundPreviewError(true)}
                     className="h-28 w-full object-cover"
+                  />
+                )}
+              </div>
+            )}
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">URL del fondo de productos</span>
+            <input
+              name="product_card_background_image_url"
+              type="url"
+              maxLength={2048}
+              value={settings.product_card_background_image_url}
+              onChange={updateSetting}
+              className={inputClass}
+              placeholder="https://"
+            />
+            <span className="mt-1 block text-xs text-slate-500">Se aplica detrás de las tarjetas de producto en Inicio y Catálogo.</span>
+            {settings.product_card_background_image_url && (
+              <div className="mt-3 h-28 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                {cardBackgroundPreviewError ? (
+                  <p role="alert" className="p-3 text-sm text-red-700">No se pudo cargar la imagen de fondo de los productos.</p>
+                ) : (
+                  <img
+                    src={settings.product_card_background_image_url}
+                    alt="Vista previa del fondo de productos"
+                    onError={() => setCardBackgroundPreviewError(true)}
+                    className="h-full w-full object-cover"
+                  />
+                )}
+              </div>
+            )}
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">URL del fondo de la barra de inicio</span>
+            <input
+              name="navbar_background_image_url"
+              type="url"
+              maxLength={2048}
+              value={settings.navbar_background_image_url}
+              onChange={updateSetting}
+              className={inputClass}
+              placeholder="https://"
+            />
+            <span className="mt-1 block text-xs text-slate-500">Se muestra como imagen de fondo de la barra superior.</span>
+            {settings.navbar_background_image_url && (
+              <div className="mt-3 h-20 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                {navbarBackgroundPreviewError ? (
+                  <p role="alert" className="p-3 text-sm text-red-700">No se pudo cargar la imagen de fondo de la barra.</p>
+                ) : (
+                  <img
+                    src={settings.navbar_background_image_url}
+                    alt="Vista previa del fondo de la barra"
+                    onError={() => setNavbarBackgroundPreviewError(true)}
+                    className="h-full w-full object-cover"
                   />
                 )}
               </div>

@@ -27,6 +27,10 @@ const Coupons = lazy(() => import('./views/admin/Coupons'));
 const DevConsole = lazy(() => import('./views/dev/DevConsole'));
 const ConfigSettings = lazy(() => import('./views/dev/ConfigSettings'));
 
+function StorefrontColorTheme({ children }) {
+  return <div className="storefront-color-theme">{children}</div>;
+}
+
 function Storefront() {
   const { backgroundImageUrl } = useStoreSettings();
 
@@ -53,8 +57,8 @@ function Storefront() {
             }
           >
             <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/catalog" element={<Catalog />} />
+            <Route path="/" element={<StorefrontColorTheme><Home /></StorefrontColorTheme>} />
+            <Route path="/catalog" element={<StorefrontColorTheme><Catalog /></StorefrontColorTheme>} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route
               path="/checkout"

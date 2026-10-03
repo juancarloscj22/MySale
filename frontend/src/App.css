@@ -35,3 +35,14 @@
     will-change: auto;
   }
 }
+
+.storefront-color-theme [class*="text-slate-"],
+.storefront-color-theme [class*="text-blue-"] {
+  color: #39ff14 !important;
+  text-shadow: 0 0 7px rgb(57 255 20 / 28%);
+}
+
+.storefront-color-theme [class*="text-emerald-"] {
+  color: #ff6d00 !important;
+  text-shadow: 0 0 7px rgb(255 109 0 / 24%);
+}

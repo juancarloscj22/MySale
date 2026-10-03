@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useCart } from '../context/useCart';
+import { useStoreSettings } from '../context/useStoreSettings';
 
 export default function VapeCard({ product }) {
   const { addItem } = useCart();
+  const { productCardBackgroundImageUrl } = useStoreSettings();
   const availableFlavors = product.flavors.filter((flavor) => flavor.active);
   const [selectedFlavorId, setSelectedFlavorId] = useState(
     () => availableFlavors.find((flavor) => flavor.stock > 0)?.id ?? '',
@@ -12,7 +14,14 @@ export default function VapeCard({ product }) {
   const hasStock = availableFlavors.some((flavor) => flavor.stock > 0);
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+    <article
+      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+      style={productCardBackgroundImageUrl ? {
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.78)), url("${productCardBackgroundImageUrl}")`,
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+      } : undefined}
+    >
       <Link to={`/product/${product.id}`} className="block overflow-hidden">
         <div className="relative">
           <img

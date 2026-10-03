@@ -7,6 +7,8 @@ const defaults = {
   logoUrl: '',
   bannerUrl: '',
   backgroundImageUrl: '',
+  productCardBackgroundImageUrl: '',
+  navbarBackgroundImageUrl: '',
   adsensePublisherId: '',
   adsenseLeftSlot: '',
   adsenseRightSlot: '',
@@ -19,7 +21,7 @@ export function StoreSettingsProvider({ children }) {
     const { data, error } = await supabase
       .from('site_settings')
       .select(
-        'store_name, logo_url, banner_url, background_image_url, adsense_publisher_id, adsense_left_slot, adsense_right_slot',
+        'store_name, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url, adsense_publisher_id, adsense_left_slot, adsense_right_slot',
       )
       .eq('id', true)
       .single();
@@ -31,6 +33,8 @@ export function StoreSettingsProvider({ children }) {
       logoUrl: data.logo_url?.trim() || '',
       bannerUrl: data.banner_url?.trim() || '',
       backgroundImageUrl: data.background_image_url?.trim() || '',
+      productCardBackgroundImageUrl: data.product_card_background_image_url?.trim() || '',
+      navbarBackgroundImageUrl: data.navbar_background_image_url?.trim() || '',
       adsensePublisherId: data.adsense_publisher_id?.trim() || '',
       adsenseLeftSlot: data.adsense_left_slot?.trim() || '',
       adsenseRightSlot: data.adsense_right_slot?.trim() || '',

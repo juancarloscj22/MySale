@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { useStoreSettings } from '../context/useStoreSettings';
 import { useCart } from '../context/useCart';
@@ -14,7 +14,8 @@ const baseNavItems = [
 export default function Navbar() {
   const { totalItems } = useCart();
   const { user, profile, signOut } = useAuth();
-  const { logoUrl, storeName } = useStoreSettings();
+  const { logoUrl, storeName, navbarBackgroundImageUrl } = useStoreSettings();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
   const [signOutError, setSignOutError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function Navbar() {
       : []),
     ...(profile?.role === 'developer' ? [{ to: '/dev', label: 'Dev' }] : []),
   ];
+  const storefrontColorTheme = pathname === '/' || pathname === '/catalog';
 
   const handleSignOut = async () => {
     setSignOutError('');
@@ -38,7 +40,14 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <header
+      className={`sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur ${storefrontColorTheme ? 'storefront-color-theme' : ''}`}
+      style={navbarBackgroundImageUrl ? {
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url("${navbarBackgroundImageUrl}")`,
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+      } : undefined}
+    >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
         <NavLink to="/" className="flex min-w-0 items-center gap-2 text-base font-black text-slate-900 sm:gap-3 sm:text-lg">
           {logoUrl ? (
