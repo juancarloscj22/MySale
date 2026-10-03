@@ -17,7 +17,7 @@ export default function VapeCard({ product }) {
     <article
       className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
       style={productCardBackgroundImageUrl ? {
-        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.78)), url("${productCardBackgroundImageUrl}")`,
+        backgroundImage: `url("${productCardBackgroundImageUrl}")`,
         backgroundPosition: 'center',
         backgroundSize: 'cover',
       } : undefined}

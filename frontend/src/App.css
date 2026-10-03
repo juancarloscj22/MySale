@@ -38,8 +38,8 @@
 
 .storefront-color-theme [class*="text-slate-"],
 .storefront-color-theme [class*="text-blue-"] {
-  color: #008800 !important;
-  text-shadow: 0 0 5px rgb(0 136 0 / 16%);
+  color: #008c00 !important;
+  text-shadow: 0 0 5px rgb(0 140 0 / 16%);
 }
 
 .storefront-color-theme [class*="text-emerald-"] {
