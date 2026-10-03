@@ -34,7 +34,7 @@ function Storefront() {
     <div
       className="relative isolate min-h-screen bg-slate-50 text-slate-900"
       style={backgroundImageUrl ? {
-        backgroundImage: `linear-gradient(rgba(247, 250, 255, 0.84), rgba(247, 250, 255, 0.84)), url("${backgroundImageUrl}")`,
+        backgroundImage: `url("${backgroundImageUrl}")`,
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center',
         backgroundSize: 'cover',
