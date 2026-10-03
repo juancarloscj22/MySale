@@ -32,7 +32,7 @@ function Storefront() {
 
   return (
     <div
-      className="flex min-h-screen flex-col bg-slate-50 text-slate-900"
+      className="relative isolate min-h-screen bg-slate-50 text-slate-900"
       style={backgroundImageUrl ? {
         backgroundImage: `linear-gradient(rgba(247, 250, 255, 0.84), rgba(247, 250, 255, 0.84)), url("${backgroundImageUrl}")`,
         backgroundAttachment: 'fixed',
@@ -40,17 +40,19 @@ function Storefront() {
         backgroundSize: 'cover',
       } : undefined}
     >
-      <Navbar />
-      <StoreBanner />
-      <StoreAdLayout>
-        <Suspense
-          fallback={
-            <p role="status" className="px-4 py-16 text-center text-slate-600">
-              Cargando página...
-            </p>
-          }
-        >
-          <Routes>
+      <div className="halloween-glow-layer" aria-hidden="true" />
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <Navbar />
+        <StoreBanner />
+        <StoreAdLayout>
+          <Suspense
+            fallback={
+              <p role="status" className="px-4 py-16 text-center text-slate-600">
+                Cargando página...
+              </p>
+            }
+          >
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/product/:id" element={<ProductDetail />} />
@@ -161,10 +163,11 @@ function Storefront() {
                 </ProtectedRoute>
               }
             />
-          </Routes>
-        </Suspense>
-      </StoreAdLayout>
-      <Footer />
+            </Routes>
+          </Suspense>
+        </StoreAdLayout>
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -1,1 +1,37 @@
-/* App styles intentionally left minimal for this storefront shell. */
+.halloween-glow-layer {
+  position: fixed;
+  z-index: 0;
+  inset: -30%;
+  pointer-events: none;
+  opacity: 0.52;
+  background:
+    radial-gradient(ellipse at 18% 28%, rgb(249 115 22 / 16%), transparent 32%),
+    radial-gradient(ellipse at 78% 36%, rgb(124 58 237 / 13%), transparent 34%),
+    radial-gradient(ellipse at 48% 82%, rgb(234 88 12 / 9%), transparent 38%);
+  transform: translate3d(0, 0, 0);
+  animation: halloween-glow-drift 34s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes halloween-glow-drift {
+  from {
+    transform: translate3d(-1.5%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(1.5%, 1%, 0) scale(1.035);
+  }
+}
+
+@media (max-width: 640px) {
+  .halloween-glow-layer {
+    opacity: 0.34;
+    animation-duration: 42s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .halloween-glow-layer {
+    animation: none;
+    will-change: auto;
+  }
+}
