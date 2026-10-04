@@ -13,9 +13,6 @@ const initialSettings = {
   whatsapp_message: '',
   currency_code: '',
   shipping_fee: '',
-  adsense_publisher_id: '',
-  adsense_left_slot: '',
-  adsense_right_slot: '',
 };
 
 const inputClass =
@@ -48,7 +45,7 @@ export default function ConfigSettings() {
 
     supabase
       .from('site_settings')
-      .select('whatsapp_number, store_name, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url, whatsapp_message, currency_code, shipping_fee, adsense_publisher_id, adsense_left_slot, adsense_right_slot')
+      .select('whatsapp_number, store_name, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url, whatsapp_message, currency_code, shipping_fee')
       .eq('id', true)
       .single()
       .then(({ data, error: loadError }) => {
@@ -68,9 +65,6 @@ export default function ConfigSettings() {
           whatsapp_message: data.whatsapp_message ?? '',
           currency_code: data.currency_code ?? 'MXN',
           shipping_fee: String(data.shipping_fee ?? 5),
-          adsense_publisher_id: data.adsense_publisher_id ?? '',
-          adsense_left_slot: data.adsense_left_slot ?? '',
-          adsense_right_slot: data.adsense_right_slot ?? '',
         });
       })
       .catch((loadError) => {
@@ -118,20 +112,6 @@ export default function ConfigSettings() {
       setError('Las imágenes del banner y los fondos deben usar una URL pública HTTP o HTTPS válida.');
       return;
     }
-    const publisherId = settings.adsense_publisher_id.trim();
-    const leftSlot = settings.adsense_left_slot.trim();
-    const rightSlot = settings.adsense_right_slot.trim();
-    if (publisherId && !/^ca-pub-\d+$/.test(publisherId)) {
-      setSaving(false);
-      setError('El ID de editor de AdSense debe tener el formato ca-pub- seguido de números.');
-      return;
-    }
-    if ([leftSlot, rightSlot].some((slot) => slot && !/^\d+$/.test(slot))) {
-      setSaving(false);
-      setError('Los IDs de las unidades de anuncio deben contener solo números.');
-      return;
-    }
-
     const { data, error: saveError } = await supabase
       .from('site_settings')
       .update({
@@ -145,9 +125,6 @@ export default function ConfigSettings() {
         whatsapp_message: settings.whatsapp_message.trim() || null,
         currency_code: settings.currency_code.trim().toUpperCase(),
         shipping_fee: shippingFee,
-        adsense_publisher_id: publisherId || null,
-        adsense_left_slot: leftSlot || null,
-        adsense_right_slot: rightSlot || null,
       })
       .eq('id', true)
       .select('id')
@@ -354,49 +331,6 @@ export default function ConfigSettings() {
             <span className="mb-2 block text-sm font-semibold text-slate-700">Mensaje inicial de WhatsApp</span>
             <textarea name="whatsapp_message" rows="4" value={settings.whatsapp_message} onChange={updateSetting} className={inputClass} />
           </label>
-          <fieldset className="space-y-4 rounded-xl border border-slate-200 p-4 md:col-span-2">
-            <legend className="px-2 text-sm font-bold text-slate-800">Anuncios Google AdSense</legend>
-            <p className="text-sm text-slate-600">
-              Al aprobar tu cuenta, agrega el ID de editor y los IDs de las dos unidades. Los anuncios laterales se colocan debajo del contenido en móvil; mientras no haya IDs, se muestran espacios reservados.
-            </p>
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-700">ID de editor</span>
-              <input
-                name="adsense_publisher_id"
-                value={settings.adsense_publisher_id}
-                onChange={updateSetting}
-                className={inputClass}
-                placeholder="ca-pub-0000000000000000"
-                maxLength={40}
-              />
-            </label>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-slate-700">ID de unidad izquierda</span>
-                <input
-                  name="adsense_left_slot"
-                  inputMode="numeric"
-                  value={settings.adsense_left_slot}
-                  onChange={updateSetting}
-                  className={inputClass}
-                  placeholder="0000000000"
-                  maxLength={32}
-                />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-slate-700">ID de unidad derecha</span>
-                <input
-                  name="adsense_right_slot"
-                  inputMode="numeric"
-                  value={settings.adsense_right_slot}
-                  onChange={updateSetting}
-                  className={inputClass}
-                  placeholder="0000000000"
-                  maxLength={32}
-                />
-              </label>
-            </div>
-          </fieldset>
         </div>
 
         <button type="submit" disabled={saving} className="rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white disabled:opacity-60">

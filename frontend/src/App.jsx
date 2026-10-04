@@ -1,8 +1,7 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import StoreAdLayout from './components/StoreAdLayout';
 import StoreBanner from './components/StoreBanner';
 import { CartProvider } from './context/CartContext.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
@@ -34,6 +33,30 @@ function StorefrontColorTheme({ children }) {
 function Storefront() {
   const { backgroundImageUrl } = useStoreSettings();
 
+  useEffect(() => {
+    if (!import.meta.env.PROD) return;
+
+    const accountMeta = document.querySelector('meta[name="google-adsense-account"]');
+    const publisherId = accountMeta?.getAttribute('content')?.trim();
+    if (!publisherId || !/^ca-pub-\d+$/.test(publisherId)) {
+      console.error('No se pudo cargar AdSense Auto ads: falta un ID de editor válido.');
+      return;
+    }
+
+    if (document.querySelector('script[data-google-adsense-auto]')) return;
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    script.dataset.googleAdsenseAuto = 'true';
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
+    script.onerror = () => {
+      console.error('No se pudo cargar el script de Google AdSense Auto ads.');
+      script.remove();
+    };
+    document.head.appendChild(script);
+  }, []);
+
   return (
     <div
       className="relative isolate min-h-screen bg-slate-50 text-slate-900"
@@ -48,7 +71,7 @@ function Storefront() {
       <div className="relative z-10 flex min-h-screen flex-col">
         <Navbar />
         <StoreBanner />
-        <StoreAdLayout>
+        <main className="flex-1">
           <Suspense
             fallback={
               <p role="status" className="px-4 py-16 text-center text-slate-600">
@@ -169,7 +192,7 @@ function Storefront() {
             />
             </Routes>
           </Suspense>
-        </StoreAdLayout>
+        </main>
         <Footer />
       </div>
     </div>
