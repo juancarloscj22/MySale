@@ -67,11 +67,11 @@ export default function ProductDetail() {
 
         <div className="space-y-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">{product.brand}</p>
-            <h1 className="mt-3 text-4xl font-black text-slate-900">{product.name}</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white">{product.brand}</p>
+            <h1 className="mt-3 text-4xl font-black text-white">{product.name}</h1>
           </div>
 
-          <div className="flex items-center gap-3 text-sm text-slate-500">
+          <div className="flex items-center gap-3 text-sm text-white">
             <span>{product.nicotine || 'Nicotina no especificada'}</span>
             <span>•</span>
             <span>{product.puffs ? `${product.puffs} puffs` : 'Caladas no especificadas'}</span>
@@ -79,19 +79,19 @@ export default function ProductDetail() {
 
           <div>
             {product.discount_percent > 0 && (
-              <span className="inline-block rounded-full bg-pink-100 px-3 py-1 text-sm font-bold text-pink-700">
+              <span className="inline-block rounded-full bg-pink-700 px-3 py-1 text-sm font-bold text-white">
                 Oferta -{product.discount_percent}%
               </span>
             )}
             {product.discount_percent > 0 && (
-              <p className="mt-2 text-lg text-slate-500 line-through">${product.originalPrice.toFixed(2)}</p>
+              <p className="mt-2 text-lg text-white line-through">${product.originalPrice.toFixed(2)}</p>
             )}
-            <p className="text-3xl font-black text-slate-900">${product.price.toFixed(2)}</p>
+            <p className="text-3xl font-black text-white">${product.price.toFixed(2)}</p>
           </div>
-          <p className="text-base leading-7 text-slate-600">{product.description}</p>
+          <p className="text-base leading-7 text-white">{product.description}</p>
 
           <label className="block">
-            <span className="text-sm font-semibold text-slate-700">Selecciona un sabor *</span>
+            <span className="text-sm font-semibold text-white">Selecciona un sabor *</span>
             <select
               value={selectedFlavor?.id ?? ''}
               onChange={(event) => setSelectedFlavorId(event.target.value)}
@@ -119,12 +119,12 @@ export default function ProductDetail() {
             >
               {selectedFlavor ? 'Agregar al carrito' : 'Sin sabores disponibles'}
             </button>
-            <Link to="/catalog" className="rounded-full border border-slate-300 px-6 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+            <Link to="/catalog" className="rounded-full border border-slate-700 bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-700">
               Volver
             </Link>
           </div>
 
-          <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          <div className="grid gap-3 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-sm text-white">
             <div className="flex justify-between"><span>Marca</span><strong>{product.brand}</strong></div>
             <div className="flex justify-between"><span>Stock total</span><strong>{product.stock > 0 ? `${product.stock} unidades` : 'Agotado'}</strong></div>
             <div className="flex justify-between"><span>Disponibilidad</span><strong>{product.active ? 'Activo' : 'Inactivo'}</strong></div>
