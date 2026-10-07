@@ -47,8 +47,8 @@
   text-shadow: 0 0 5px rgb(0 0 0 / 24%);
 }
 
-.storefront-color-theme select,
-.storefront-color-theme select option,
+.storefront-color-theme .flavor-select,
+.storefront-color-theme .flavor-select option,
 .storefront-color-theme article span[class*="text-emerald-"] {
   color: #000 !important;
   text-shadow: none;

@@ -72,14 +72,14 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => changeMode(true)}
-              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold ${isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold text-white ${isLogin ? 'bg-slate-900 shadow-sm' : 'bg-slate-700'}`}
             >
               Iniciar sesión
             </button>
             <button
               type="button"
               onClick={() => changeMode(false)}
-              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold ${!isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold text-white ${!isLogin ? 'bg-slate-900 shadow-sm' : 'bg-slate-700'}`}
             >
               Registrarse
             </button>
@@ -165,7 +165,7 @@ export default function Auth() {
           <button
             type="submit"
             disabled={submitting || loading}
-            className="w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600 disabled:cursor-wait disabled:opacity-60"
+            className="w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-600 disabled:cursor-wait disabled:opacity-60"
           >
             {submitting ? 'Procesando...' : isLogin ? 'Entrar' : 'Crear cuenta'}
           </button>

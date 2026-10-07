@@ -132,7 +132,7 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="text-4xl font-black text-slate-900">Dashboard</h1>
+      <h1 className="text-4xl font-black text-white">Dashboard</h1>
       <OrderAcceptanceControl />
       {loading && <p className="mt-8 text-slate-600">Cargando métricas...</p>}
       {error && (
@@ -150,7 +150,7 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-white">
             Stock bajo: 5 unidades o menos. Ventas estimadas: pedidos de hoy excepto los cancelados.
           </p>
         </>
@@ -251,7 +251,7 @@ export default function Dashboard() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-2xl font-bold text-slate-900">Administración de la tienda</h2>
+        <h2 className="text-2xl font-bold text-white">Administración de la tienda</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
             {

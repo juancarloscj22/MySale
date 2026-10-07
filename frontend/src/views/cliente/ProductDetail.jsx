@@ -96,7 +96,7 @@ export default function ProductDetail() {
               value={selectedFlavor?.id ?? ''}
               onChange={(event) => setSelectedFlavorId(event.target.value)}
               disabled={availableFlavors.length === 0}
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="flavor-select mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-100"
             >
               {availableFlavors.length === 0 && <option value="">Sin sabores disponibles</option>}
               {availableFlavors.length > 0 && !selectedFlavor && (

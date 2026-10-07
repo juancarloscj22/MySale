@@ -69,7 +69,7 @@ export default function VapeCard({ product }) {
             <select
               value={selectedFlavorId}
               onChange={(event) => setSelectedFlavorId(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-1.5 py-1.5 text-[0.65rem] font-semibold text-slate-700 outline-none focus:border-emerald-500 sm:px-4 sm:py-3 sm:text-sm"
+              className="flavor-select w-full rounded-xl border border-slate-300 bg-white px-1.5 py-1.5 text-[0.65rem] font-semibold text-slate-700 outline-none focus:border-emerald-500 sm:px-4 sm:py-3 sm:text-sm"
             >
               {!selectedFlavor && (
                 <option value="" disabled>

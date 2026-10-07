@@ -103,9 +103,9 @@ export default function DevConsole() {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">Herramientas técnicas</p>
-          <h1 className="mt-2 text-4xl font-black text-slate-900">Consola de desarrollador</h1>
-          <p className="mt-3 text-slate-600">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white">Herramientas técnicas</p>
+          <h1 className="mt-2 text-4xl font-black text-white">Consola de desarrollador</h1>
+          <p className="mt-3 text-white">
             Sesión: {user?.email ?? 'Sin correo'} · Rol: {profile?.role ?? 'Sin perfil'}
           </p>
         </div>
@@ -113,7 +113,7 @@ export default function DevConsole() {
           type="button"
           onClick={refreshDiagnostics}
           disabled={diagnostics.loading}
-          className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          className="rounded-full border border-slate-700 bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
         >
           Actualizar diagnóstico
         </button>
@@ -123,8 +123,8 @@ export default function DevConsole() {
 
       <section className="mt-8">
         <div className="mb-4">
-          <h2 className="text-2xl font-bold text-slate-900">Diagnóstico</h2>
-          <p className="mt-1 text-sm text-slate-500">Proyecto conectado: {projectHost}</p>
+          <h2 className="text-2xl font-bold text-white">Diagnóstico</h2>
+          <p className="mt-1 text-sm text-white">Proyecto conectado: {projectHost}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <DiagnosticCard
@@ -143,7 +143,7 @@ export default function DevConsole() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-2xl font-bold text-slate-900">Herramientas</h2>
+        <h2 className="text-2xl font-bold text-white">Herramientas</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {tools.map((tool) => (
             <Link
