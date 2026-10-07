@@ -31,7 +31,7 @@ export default function Home() {
           </p>
         )}
         {saleProducts.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-5 sm:gap-6 xl:grid-cols-3">
             {saleProducts.map((product) => <VapeCard key={product.id} product={product} />)}
           </div>
         )}

@@ -156,27 +156,27 @@ export default function Dashboard() {
         </>
       )}
 
-      <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+      <section className="mt-10 rounded-3xl border border-slate-700 bg-slate-900 p-5 text-white shadow-sm sm:p-7">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Calendario de entregas</h2>
-            <p className="mt-1 text-sm text-slate-600">Pedidos organizados por fecha y hora preferida.</p>
+            <h2 className="text-2xl font-bold text-white">Calendario de entregas</h2>
+            <p className="mt-1 text-sm text-slate-300">Pedidos organizados por fecha y hora preferida.</p>
           </div>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => moveCalendar(-1)}
               aria-label="Mes anterior"
-              className="rounded-full border border-slate-300 px-3 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-full border border-slate-600 px-3 py-2 font-semibold text-white hover:bg-slate-700"
             >
               ←
             </button>
-            <h3 className="min-w-36 text-center font-bold capitalize text-slate-900">{monthTitle}</h3>
+            <h3 className="min-w-36 text-center font-bold capitalize text-white">{monthTitle}</h3>
             <button
               type="button"
               onClick={() => moveCalendar(1)}
               aria-label="Mes siguiente"
-              className="rounded-full border border-slate-300 px-3 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-full border border-slate-600 px-3 py-2 font-semibold text-white hover:bg-slate-700"
             >
               →
             </button>
@@ -191,7 +191,7 @@ export default function Dashboard() {
 
         <div className="mt-6 grid grid-cols-7 gap-1 sm:gap-2">
           {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
-            <div key={day} className="py-2 text-center text-xs font-bold uppercase text-slate-500">{day}</div>
+            <div key={day} className="py-2 text-center text-xs font-bold uppercase text-slate-300">{day}</div>
           ))}
           {calendarCells.map((day, index) => {
             if (day === null) return <div key={`empty-${index}`} aria-hidden="true" />;
@@ -206,13 +206,13 @@ export default function Dashboard() {
                 onClick={() => setSelectedDate(dayDate)}
                 className={`min-h-16 rounded-xl border p-2 text-left transition sm:min-h-20 ${
                   selected
-                    ? 'border-emerald-600 bg-emerald-50'
-                    : 'border-slate-100 bg-slate-50 hover:border-emerald-300'
+                    ? 'border-emerald-400 bg-emerald-800'
+                    : 'border-slate-700 bg-slate-800 hover:border-emerald-400'
                 }`}
               >
-                <span className="text-sm font-semibold text-slate-800">{day}</span>
+                <span className="text-sm font-semibold text-white">{day}</span>
                 {dayOrders.length > 0 && (
-                  <span className="mt-1 block text-xs font-bold text-emerald-700">
+                  <span className="mt-1 block text-xs font-bold text-emerald-300">
                     {dayOrders.length} {dayOrders.length === 1 ? 'pedido' : 'pedidos'}
                   </span>
                 )}
@@ -220,26 +220,26 @@ export default function Dashboard() {
             );
           })}
         </div>
-        {calendarLoading && <p className="mt-4 text-sm text-slate-500">Cargando pedidos del mes...</p>}
+        {calendarLoading && <p className="mt-4 text-sm text-slate-300">Cargando pedidos del mes...</p>}
 
-        <div className="mt-6 border-t border-slate-100 pt-5">
-          <h3 className="font-bold capitalize text-slate-900">{selectedDateLabel}</h3>
+        <div className="mt-6 border-t border-slate-700 pt-5">
+          <h3 className="font-bold capitalize text-white">{selectedDateLabel}</h3>
           {!calendarLoading && selectedDayOrders.length === 0 && (
-            <p className="mt-3 text-sm text-slate-500">No hay pedidos programados para este día.</p>
+            <p className="mt-3 text-sm text-slate-300">No hay pedidos programados para este día.</p>
           )}
           {selectedDayOrders.length > 0 && (
             <ul className="mt-3 space-y-2">
               {selectedDayOrders.map((order) => (
-                <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
+                <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-800 p-3">
                   <div>
-                    <p className="font-semibold text-slate-900">{order.delivery_name}</p>
-                    <p className="break-all font-mono text-xs text-slate-500">{order.id}</p>
+                    <p className="font-semibold text-white">{order.delivery_name}</p>
+                    <p className="break-all font-mono text-xs text-slate-300">{order.id}</p>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <span className="font-bold text-emerald-700">
+                    <span className="font-bold text-emerald-300">
                       {order.delivery_time ? String(order.delivery_time).slice(0, 5) : 'Hora no especificada'}
                     </span>
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                    <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold text-white">
                       {statusLabels[order.status] ?? order.status}
                     </span>
                   </div>

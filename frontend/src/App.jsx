@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import StoreBanner from './components/StoreBanner';
@@ -32,6 +32,12 @@ function StorefrontColorTheme({ children }) {
 
 function Storefront() {
   const { backgroundImageUrl, buttonBackgroundImageUrl } = useStoreSettings();
+  const { pathname } = useLocation();
+  const whiteOutsidePanels =
+    pathname === '/mi-cuenta' ||
+    pathname === '/mis-pedidos' ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/dev');
 
   useEffect(() => {
     if (!import.meta.env.PROD) return;
@@ -77,7 +83,7 @@ function Storefront() {
       <div className="relative z-10 flex min-h-screen flex-col">
         <Navbar />
         <StoreBanner />
-        <main className="flex-1">
+        <main className={`flex-1${whiteOutsidePanels ? ' white-outside-panels' : ''}`}>
           <Suspense
             fallback={
               <p role="status" className="px-4 py-16 text-center text-slate-600">

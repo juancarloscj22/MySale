@@ -47,6 +47,26 @@
   text-shadow: 0 0 5px rgb(0 0 0 / 24%);
 }
 
+.storefront-color-theme select,
+.storefront-color-theme select option,
+.storefront-color-theme article span[class*="text-emerald-"] {
+  color: #000 !important;
+  text-shadow: none;
+}
+
+main.white-outside-panels :is(h1, h2, h3, h4, p, span, a, label, li, strong, small, legend):not([class*="bg-"]):not(:where([class*="bg-"] *)),
+main.white-outside-panels button:not(:where([class*="bg-"] *)) {
+  color: #fff !important;
+}
+
+header.storefront-color-theme nav a,
+header.storefront-color-theme nav button,
+header.storefront-color-theme > div > a[href="/checkout"],
+header.storefront-color-theme > div > a[href="/checkout"] span {
+  color: #000 !important;
+  text-shadow: none;
+}
+
 .relative[data-store-button-background="enabled"] button,
 .relative[data-store-button-background="enabled"] a[class*="rounded-full"] {
   background-image: var(--store-button-background-image);

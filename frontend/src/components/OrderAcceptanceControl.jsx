@@ -65,8 +65,8 @@ export default function OrderAcceptanceControl() {
           disabled={loading || saving || acceptingOrders === null}
           className={`rounded-full px-5 py-3 text-sm font-bold disabled:cursor-wait disabled:opacity-60 ${
             acceptingOrders
-              ? 'bg-red-100 text-red-800 hover:bg-red-200'
-              : 'bg-emerald-500 text-slate-900 hover:bg-emerald-600'
+              ? 'bg-red-100 text-white hover:bg-red-200'
+              : 'bg-emerald-500 text-white hover:bg-emerald-600'
           }`}
         >
           {loading
