@@ -9,6 +9,7 @@ const defaults = {
   backgroundImageUrl: '',
   productCardBackgroundImageUrl: '',
   navbarBackgroundImageUrl: '',
+  buttonBackgroundImageUrl: '',
 };
 
 export function StoreSettingsProvider({ children }) {
@@ -18,7 +19,7 @@ export function StoreSettingsProvider({ children }) {
     const { data, error } = await supabase
       .from('site_settings')
       .select(
-        'store_name, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url',
+        'store_name, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url, button_background_image_url',
       )
       .eq('id', true)
       .single();
@@ -32,6 +33,7 @@ export function StoreSettingsProvider({ children }) {
       backgroundImageUrl: data.background_image_url?.trim() || '',
       productCardBackgroundImageUrl: data.product_card_background_image_url?.trim() || '',
       navbarBackgroundImageUrl: data.navbar_background_image_url?.trim() || '',
+      buttonBackgroundImageUrl: data.button_background_image_url?.trim() || '',
     });
   }, []);
 

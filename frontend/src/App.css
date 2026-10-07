@@ -46,3 +46,10 @@
   color: #ff6d00 !important;
   text-shadow: 0 0 7px rgb(255 109 0 / 24%);
 }
+
+.relative[data-store-button-background="enabled"] button,
+.relative[data-store-button-background="enabled"] a[class*="rounded-full"] {
+  background-image: var(--store-button-background-image);
+  background-position: center;
+  background-size: cover;
+}

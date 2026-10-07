@@ -31,7 +31,7 @@ function StorefrontColorTheme({ children }) {
 }
 
 function Storefront() {
-  const { backgroundImageUrl } = useStoreSettings();
+  const { backgroundImageUrl, buttonBackgroundImageUrl } = useStoreSettings();
 
   useEffect(() => {
     if (!import.meta.env.PROD) return;
@@ -60,12 +60,18 @@ function Storefront() {
   return (
     <div
       className="relative isolate min-h-screen bg-slate-50 text-slate-900"
-      style={backgroundImageUrl ? {
-        backgroundImage: `url("${backgroundImageUrl}")`,
-        backgroundAttachment: 'fixed',
-        backgroundPosition: 'center',
-        backgroundSize: 'cover',
-      } : undefined}
+      data-store-button-background={buttonBackgroundImageUrl ? 'enabled' : undefined}
+      style={{
+        ...(backgroundImageUrl ? {
+          backgroundImage: `url("${backgroundImageUrl}")`,
+          backgroundAttachment: 'fixed',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+        } : {}),
+        ...(buttonBackgroundImageUrl ? {
+          '--store-button-background-image': `url("${buttonBackgroundImageUrl}")`,
+        } : {}),
+      }}
     >
       <div className="halloween-glow-layer" aria-hidden="true" />
       <div className="relative z-10 flex min-h-screen flex-col">
