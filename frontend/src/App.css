@@ -38,13 +38,13 @@
 
 .storefront-color-theme [class*="text-slate-"],
 .storefront-color-theme [class*="text-blue-"] {
-  color: #008c00 !important;
-  text-shadow: 0 0 5px rgb(0 140 0 / 16%);
+  color: #fff !important;
+  text-shadow: 0 0 5px rgb(0 0 0 / 24%);
 }
 
 .storefront-color-theme [class*="text-emerald-"] {
-  color: #ff6d00 !important;
-  text-shadow: 0 0 7px rgb(255 109 0 / 24%);
+  color: #fff !important;
+  text-shadow: 0 0 5px rgb(0 0 0 / 24%);
 }
 
 .relative[data-store-button-background="enabled"] button,
