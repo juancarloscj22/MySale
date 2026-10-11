@@ -63,10 +63,10 @@ export default function OrderAcceptanceControl() {
           type="button"
           onClick={() => void toggleAcceptance()}
           disabled={loading || saving || acceptingOrders === null}
-          className={`rounded-full px-5 py-3 text-sm font-bold disabled:cursor-wait disabled:opacity-60 ${
+          className={`order-acceptance-toggle rounded-full px-5 py-3 text-sm font-bold disabled:cursor-wait disabled:opacity-60 ${
             acceptingOrders
-              ? 'bg-red-100 text-white hover:bg-red-200'
-              : 'bg-emerald-500 text-white hover:bg-emerald-600'
+              ? 'border-2 border-emerald-600 bg-emerald-100 hover:bg-emerald-200'
+              : 'border-2 border-red-600 bg-red-100 hover:bg-red-200'
           }`}
         >
           {loading

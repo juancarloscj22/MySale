@@ -131,8 +131,8 @@ export default function Dashboard() {
     : [];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="text-4xl font-black text-white">Dashboard</h1>
+    <div className="mx-auto flex max-w-7xl flex-col px-4 py-12 sm:px-6 lg:px-8">
+      <h1 className="admin-dashboard-title text-4xl font-black text-white">Dashboard</h1>
       <OrderAcceptanceControl />
       {loading && <p className="mt-8 text-slate-600">Cargando métricas...</p>}
       {error && (
@@ -142,7 +142,7 @@ export default function Dashboard() {
       )}
       {metrics && (
         <>
-          <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
             {cards.map((item) => (
               <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${item.tone}`}>{item.label}</div>
@@ -156,7 +156,7 @@ export default function Dashboard() {
         </>
       )}
 
-      <section className="mt-10 rounded-3xl border border-slate-700 bg-slate-900 p-5 text-white shadow-sm sm:p-7">
+      <section className="order-last mt-2 rounded-3xl border border-slate-700 bg-slate-900 p-5 text-white shadow-sm sm:p-7">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-white">Calendario de entregas</h2>
@@ -206,13 +206,13 @@ export default function Dashboard() {
                 onClick={() => setSelectedDate(dayDate)}
                 className={`min-h-16 rounded-xl border p-2 text-left transition sm:min-h-20 ${
                   selected
-                    ? 'border-emerald-400 bg-emerald-800'
-                    : 'border-slate-700 bg-slate-800 hover:border-emerald-400'
+                    ? 'calendar-day-selected border-emerald-400 bg-emerald-200'
+                    : 'calendar-day border-slate-300 bg-white hover:border-emerald-400'
                 }`}
               >
                 <span className="text-sm font-semibold text-white">{day}</span>
                 {dayOrders.length > 0 && (
-                  <span className="mt-1 block text-xs font-bold text-emerald-300">
+                  <span className="calendar-day-orders mt-1 block text-xs font-bold text-emerald-300">
                     {dayOrders.length} {dayOrders.length === 1 ? 'pedido' : 'pedidos'}
                   </span>
                 )}
@@ -250,9 +250,9 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <section className="mt-10">
+      <section className="mt-2">
         <h2 className="text-2xl font-bold text-white">Administración de la tienda</h2>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {[
             {
               to: '/admin/inventory',

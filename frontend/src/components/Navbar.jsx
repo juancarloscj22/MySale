@@ -41,36 +41,36 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur ${storefrontColorTheme ? 'storefront-color-theme' : ''}`}
+      className={`sticky top-0 z-50 border-0 transition-colors ${storefrontColorTheme ? 'bg-transparent storefront-color-theme' : 'bg-slate-950/90 backdrop-blur'}`}
       style={navbarBackgroundImageUrl ? {
-        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url("${navbarBackgroundImageUrl}")`,
+        backgroundImage: `url("${navbarBackgroundImageUrl}")`,
         backgroundPosition: 'center',
         backgroundSize: 'cover',
       } : undefined}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
-        <NavLink to="/" className="flex min-w-0 items-center gap-2 text-base font-black text-slate-900 sm:gap-3 sm:text-lg">
+        <NavLink to="/" className="flex min-w-0 items-center gap-4 text-base font-black text-slate-900 sm:gap-6 sm:text-lg">
           {logoUrl ? (
             <img
               src={logoUrl}
               alt=""
-              className="h-10 w-10 rounded-full border border-slate-200 bg-white object-contain p-1"
+              className="store-logo h-[120px] w-[120px] rounded-full bg-white object-contain p-1"
             />
           ) : (
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold text-slate-900">
               MS
             </span>
           )}
-          <span className="truncate">{storeName}</span>
+          <span className="store-name truncate">{storeName}</span>
         </NavLink>
 
-        <nav aria-label="Navegación principal" className="hidden items-center gap-6 md:flex">
+        <nav aria-label="Navegación principal" className="hidden items-center gap-6 md:-ml-4 md:flex">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `text-sm font-medium transition ${
+                `text-base font-medium transition ${
                   isActive ? 'text-emerald-600' : 'text-slate-600 hover:text-slate-900'
                 }`
               }
@@ -79,11 +79,11 @@ export default function Navbar() {
             </NavLink>
           ))}
           {user ? (
-            <button type="button" onClick={handleSignOut} className="text-sm font-medium text-slate-600 hover:text-slate-900">
+            <button type="button" onClick={handleSignOut} className="sign-out-button rounded-full bg-[#39E639] px-4 py-2 text-base font-semibold transition hover:bg-[#2fcf2f]">
               Cerrar sesión
             </button>
           ) : (
-            <NavLink to="/auth" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+            <NavLink to="/auth" className="text-base font-medium text-slate-600 hover:text-slate-900">
               Acceso
             </NavLink>
           )}
@@ -92,10 +92,10 @@ export default function Navbar() {
         <NavLink
           to="/checkout"
           onClick={() => setMobileMenuOpen(false)}
-          className="inline-flex shrink-0 items-center gap-2 rounded-full bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-700 sm:px-4"
+          className="navbar-cart-button inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-slate-700 sm:px-4"
         >
           Carrito
-          <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-slate-900">
+          <span className="navbar-cart-count rounded-full bg-emerald-500 px-2 py-0.5 text-sm font-semibold text-slate-900">
             {totalItems}
           </span>
         </NavLink>
@@ -112,7 +112,7 @@ export default function Navbar() {
         </button>
       </div>
       {mobileMenuOpen && (
-        <nav id="mobile-navigation" aria-label="Navegación móvil" className="border-t border-slate-200 bg-white px-4 py-3 md:hidden">
+        <nav id="mobile-navigation" aria-label="Navegación móvil" className="border-t border-slate-700 bg-slate-950 px-4 py-3 md:hidden">
           <div className="mx-auto flex max-w-7xl flex-col">
             {navItems.map((item) => (
               <NavLink
@@ -132,7 +132,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="rounded-xl px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="sign-out-button rounded-xl bg-[#39E639] px-4 py-3 text-left text-sm font-semibold transition hover:bg-[#2fcf2f]"
               >
                 Cerrar sesión
               </button>

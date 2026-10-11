@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 @import 'tailwindcss';
 
 @theme {
@@ -114,7 +115,7 @@
 }
 
 :root {
-  font-family: Inter, 'Segoe UI', sans-serif;
+  font-family: 'Orbitron', sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: #19263d;
@@ -146,8 +147,14 @@ img {
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
 }
 
 #root {

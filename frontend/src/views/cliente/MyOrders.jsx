@@ -44,9 +44,9 @@ export default function MyOrders() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white">Tu cuenta</p>
-      <h1 className="mt-2 text-4xl font-black text-white">Mis pedidos</h1>
+    <div className="my-orders-page mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <p className="my-orders-heading text-sm font-semibold uppercase tracking-[0.2em] text-white">Tu cuenta</p>
+      <h1 className="my-orders-heading mt-2 text-4xl font-black text-white">Mis pedidos</h1>
 
       {loading && <p className="py-10 text-slate-600">Cargando pedidos...</p>}
       {error && <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">No se pudieron cargar tus pedidos: {error}</p>}

@@ -227,7 +227,7 @@ export default function Inventory() {
         <button
           type="button"
           onClick={openNewForm}
-          className="rounded-full bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600"
+          className="rounded-full border-2 border-emerald-700 bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600"
         >
           Nuevo producto
         </button>
@@ -333,7 +333,7 @@ export default function Inventory() {
                   )}
                 </div>
               ))}
-              <button type="button" onClick={addFlavor} className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              <button type="button" onClick={addFlavor} className="rounded-full border-2 border-blue-700 bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-200">
                 Agregar sabor
               </button>
             </fieldset>
@@ -346,10 +346,10 @@ export default function Inventory() {
           {formError && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{formError}</p>}
 
           <div className="flex flex-wrap gap-3">
-            <button type="submit" disabled={saving} className="rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white disabled:opacity-60">
+            <button type="submit" disabled={saving} className="rounded-full border-2 border-emerald-700 bg-emerald-100 px-6 py-3 text-sm font-bold text-emerald-700 transition hover:bg-emerald-200 disabled:opacity-60">
               {saving ? 'Guardando...' : 'Guardar producto'}
             </button>
-            <button type="button" onClick={() => setFormOpen(false)} className="rounded-full border border-slate-300 px-6 py-3 text-sm font-bold text-slate-700">
+            <button type="button" onClick={() => setFormOpen(false)} className="rounded-full border-2 border-red-700 bg-red-100 px-6 py-3 text-sm font-bold text-red-700 transition hover:bg-red-200">
               Cancelar
             </button>
           </div>

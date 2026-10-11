@@ -27,15 +27,15 @@ export default function Catalog() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="catalog-page mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+        <div className="catalog-intro">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">Catálogo</p>
-          <h1 className="mt-2 text-4xl font-black text-slate-900">Encuentra tu próximo favorito</h1>
+          <h1 className="catalog-headline mt-2 text-4xl font-black text-slate-900">Encuentra tu próximo favorito</h1>
         </div>
 
         {!loading && !error && (
-          <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
+          <div className="catalog-count rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
             {products.length} productos disponibles
           </div>
         )}

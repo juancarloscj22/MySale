@@ -4,6 +4,7 @@ import { StoreSettingsContext } from './storeSettingsContext.js';
 
 const defaults = {
   storeName: 'MySale Shop',
+  whatsappNumber: '',
   logoUrl: '',
   bannerUrl: '',
   backgroundImageUrl: '',
@@ -19,7 +20,7 @@ export function StoreSettingsProvider({ children }) {
     const { data, error } = await supabase
       .from('site_settings')
       .select(
-        'store_name, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url, button_background_image_url',
+        'store_name, whatsapp_number, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url, button_background_image_url',
       )
       .eq('id', true)
       .single();
@@ -28,6 +29,7 @@ export function StoreSettingsProvider({ children }) {
 
     setSettings({
       storeName: data.store_name?.trim() || defaults.storeName,
+      whatsappNumber: data.whatsapp_number?.trim() || '',
       logoUrl: data.logo_url?.trim() || '',
       bannerUrl: data.banner_url?.trim() || '',
       backgroundImageUrl: data.background_image_url?.trim() || '',

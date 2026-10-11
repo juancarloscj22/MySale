@@ -104,8 +104,8 @@ export default function DevConsole() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white">Herramientas técnicas</p>
-          <h1 className="mt-2 text-4xl font-black text-white">Consola de desarrollador</h1>
-          <p className="mt-3 text-white">
+          <h1 className="dev-console-title mt-2 text-4xl font-black text-white">Consola de desarrollador</h1>
+          <p className="dev-console-session mt-3 text-white">
             Sesión: {user?.email ?? 'Sin correo'} · Rol: {profile?.role ?? 'Sin perfil'}
           </p>
         </div>

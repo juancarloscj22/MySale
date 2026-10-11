@@ -177,7 +177,9 @@ function Storefront() {
               element={
                 <ProtectedRoute>
                   <DeveloperRoute>
-                    <DevConsole />
+                    <div className="developer-section">
+                      <DevConsole />
+                    </div>
                   </DeveloperRoute>
                 </ProtectedRoute>
               }
@@ -187,7 +189,9 @@ function Storefront() {
               element={
                 <ProtectedRoute>
                   <DeveloperRoute>
-                    <ConfigSettings />
+                    <div className="developer-section">
+                      <ConfigSettings />
+                    </div>
                   </DeveloperRoute>
                 </ProtectedRoute>
               }
@@ -197,7 +201,9 @@ function Storefront() {
               element={
                 <ProtectedRoute>
                   <DeveloperRoute>
-                    <Coupons />
+                    <div className="developer-section">
+                      <Coupons />
+                    </div>
                   </DeveloperRoute>
                 </ProtectedRoute>
               }

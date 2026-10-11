@@ -15,7 +15,7 @@ export default function VapeCard({ product }) {
 
   return (
     <article
-      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+      className="storefront-product-card group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
       style={productCardBackgroundImageUrl ? {
         backgroundImage: `url("${productCardBackgroundImageUrl}")`,
         backgroundPosition: 'center',
@@ -38,28 +38,28 @@ export default function VapeCard({ product }) {
       </Link>
 
       <div className="space-y-2 p-2 sm:space-y-4 sm:p-5">
-        <div className="flex items-center justify-between">
-          <span className="rounded-full bg-emerald-100 px-1.5 py-1 text-[0.65rem] font-semibold leading-tight text-emerald-700 sm:px-2 sm:text-xs">
+        <div className="flex items-center justify-between gap-2">
+          <span className="product-tag rounded-full bg-emerald-100 px-1.5 py-1 text-[0.7rem] font-semibold leading-tight text-emerald-700 sm:px-2 sm:text-xs">
             {product.category}
           </span>
-          <span className="text-[0.65rem] text-slate-500 sm:text-xs">{hasStock ? `${availableFlavors.length} sabores` : 'Agotado'}</span>
+          <span className="product-meta text-[0.7rem] text-slate-500 sm:text-xs">{hasStock ? `${availableFlavors.length} sabores` : 'Agotado'}</span>
         </div>
 
         <div>
-          <p className="text-[0.6rem] uppercase tracking-[0.12em] text-slate-400 sm:text-xs sm:tracking-[0.2em]">{product.brand}</p>
-          <h3 className="mt-1 text-sm font-bold leading-tight text-slate-900 sm:text-xl">{product.name}</h3>
+          <p className="product-brand text-[0.7rem] uppercase tracking-[0.12em] text-slate-400 sm:text-xs sm:tracking-[0.2em]">{product.brand}</p>
+          <h3 className="product-name mt-1 text-base font-bold leading-tight text-slate-900 sm:text-xl">{product.name}</h3>
         </div>
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[0.65rem] leading-tight text-slate-500 sm:text-sm">{selectedFlavor ? `${selectedFlavor.flavor} · ${selectedFlavor.stock} disponibles` : 'Selecciona un sabor'}</p>
+            <p className="product-meta text-[0.7rem] leading-tight text-slate-500 sm:text-sm">{selectedFlavor ? `${selectedFlavor.flavor} · ${selectedFlavor.stock} disponibles` : 'Selecciona un sabor'}</p>
             {product.discount_percent > 0 ? (
               <>
-                <p className="text-xs text-slate-500 line-through">${product.originalPrice.toFixed(2)}</p>
-                <p className="text-lg font-black text-slate-900 sm:text-2xl">${product.price.toFixed(2)}</p>
+                <p className="product-original-price text-xs text-slate-500 line-through">${product.originalPrice.toFixed(2)}</p>
+                <p className="product-price text-lg font-black text-slate-900 sm:text-2xl">${product.price.toFixed(2)}</p>
               </>
             ) : (
-              <p className="text-lg font-black text-slate-900 sm:text-2xl">${product.price.toFixed(2)}</p>
+              <p className="product-price text-lg font-black text-slate-900 sm:text-2xl">${product.price.toFixed(2)}</p>
             )}
           </div>
         </div>

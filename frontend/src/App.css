@@ -54,17 +54,231 @@
   text-shadow: none;
 }
 
+.catalog-intro,
+.catalog-intro *,
+.catalog-count,
+.product-description {
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+.catalog-intro .catalog-headline {
+  text-shadow:
+    0 -2px 0 rgb(255 255 255 / 85%),
+    0 2px 0 rgb(15 23 42 / 35%),
+    2px 4px 5px rgb(15 23 42 / 35%) !important;
+}
+
+.catalog-page,
+.catalog-page :not(.storefront-product-card):not(.storefront-product-card *) {
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+.product-detail-copy :is(h1, h2, h3, p, span, label, strong) {
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+.product-detail-copy .product-stock-panel,
+.product-detail-copy .product-stock-panel * {
+  color: #fff !important;
+}
+
+.product-detail-flavor {
+  border: 2px solid #39e639 !important;
+  box-shadow:
+    inset 4px 4px 7px rgb(255 255 255 / 90%),
+    inset -4px -4px 7px rgb(15 23 42 / 30%),
+    3px 5px 9px rgb(15 23 42 / 35%);
+}
+
+.product-detail-action {
+  border: 2px solid #39e639 !important;
+  box-shadow:
+    inset 3px 3px 5px rgb(255 255 255 / 60%),
+    inset -3px -3px 5px rgb(0 0 0 / 35%),
+    3px 5px 8px rgb(15 23 42 / 42%);
+}
+
+.product-detail-image {
+  border-color: #39e639 !important;
+  box-shadow:
+    inset 5px 5px 10px rgb(255 255 255 / 85%),
+    inset -5px -5px 10px rgb(15 23 42 / 34%),
+    4px 7px 14px rgb(15 23 42 / 42%);
+}
+
+.developer-section button:not(.order-acceptance-toggle) {
+  color: #000 !important;
+  text-shadow: none !important;
+  border: 2px solid #39e639;
+}
+
+.order-acceptance-toggle {
+  color: #dc2626 !important;
+  text-shadow: none !important;
+}
+
+.order-acceptance-toggle[class*="border-emerald-600"] {
+  color: #16a34a !important;
+}
+
+.calendar-day,
+.calendar-day *,
+.calendar-day-selected,
+.calendar-day-selected *,
+.calendar-day-orders {
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+.storefront-color-theme .storefront-product-card,
+.storefront-color-theme .storefront-product-card * {
+  color: #111827 !important;
+  text-shadow: none !important;
+}
+
+.storefront-color-theme .storefront-product-card .product-tag {
+  text-shadow:
+    0 -1px 0 rgb(255 255 255 / 90%),
+    0 1px 0 rgb(15 23 42 / 35%),
+    1px 2px 3px rgb(15 23 42 / 35%) !important;
+}
+
+.storefront-color-theme .storefront-product-card {
+  border-color: #39e639 !important;
+  box-shadow:
+    inset 4px 4px 7px rgb(255 255 255 / 88%),
+    inset -4px -4px 7px rgb(15 23 42 / 28%),
+    3px 5px 10px rgb(15 23 42 / 36%);
+}
+
+.storefront-color-theme .storefront-product-card button {
+  border: 2px solid #39e639 !important;
+  box-shadow:
+    inset 3px 3px 5px rgb(255 255 255 / 45%),
+    inset -3px -3px 5px rgb(0 0 0 / 35%),
+    3px 4px 7px rgb(15 23 42 / 38%);
+}
+
+.storefront-color-theme .storefront-product-card .flavor-select {
+  border-color: #39e639 !important;
+  box-shadow:
+    inset 3px 3px 6px rgb(15 23 42 / 16%),
+    inset -3px -3px 5px rgb(255 255 255 / 90%),
+    2px 4px 7px rgb(15 23 42 / 28%);
+}
+
+.storefront-product-card .product-name {
+  font-size: clamp(1rem, 1.5vw, 1.5rem);
+}
+
+.storefront-product-card .product-price {
+  font-size: clamp(1.2rem, 1.8vw, 2rem);
+}
+
+.store-name {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 0.035em;
+  text-shadow:
+    0 -1px 0 rgb(255 255 255 / 55%),
+    0 1px 0 rgb(0 0 0 / 35%),
+    1px 2px 2px rgb(0 0 0 / 45%) !important;
+}
+
+.store-logo {
+  border: 3px solid #39e639;
+  box-shadow:
+    inset 4px 4px 6px rgb(255 255 255 / 90%),
+    inset -4px -4px 6px rgb(0 0 0 / 35%),
+    3px 5px 9px rgb(0 0 0 / 45%);
+}
+
+.footer-policy-button,
+.footer-policy-button:hover {
+  background-color: #111a2c !important;
+  background-image: none !important;
+}
+
+.navbar-cart-button {
+  box-shadow:
+    inset 4px 4px 6px rgb(255 255 255 / 30%),
+    inset -4px -4px 6px rgb(0 0 0 / 42%),
+    3px 5px 9px rgb(15 23 42 / 42%) !important;
+}
+
+.navbar-cart-count {
+  border: 2px solid #39e639;
+  box-shadow:
+    inset 2px 2px 4px rgb(255 255 255 / 75%),
+    inset -2px -2px 4px rgb(15 23 42 / 34%),
+    2px 3px 6px rgb(15 23 42 / 36%) !important;
+}
+
 main.white-outside-panels :is(h1, h2, h3, h4, p, span, a, label, li, strong, small, legend):not([class*="bg-"]):not(:where([class*="bg-"] *)),
 main.white-outside-panels button:not(:where([class*="bg-"] *)) {
   color: #fff !important;
 }
 
+main.white-outside-panels .admin-dashboard-title {
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+.developer-section .dev-console-title,
+.developer-section .dev-console-session {
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+.my-orders-page .my-orders-heading {
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+header.storefront-color-theme {
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+header nav a,
+header nav button,
+header > div > a:first-child,
+header > div > a:first-child span,
+header > div > a[href="/checkout"],
+header > div > a[href="/checkout"] span {
+  color: #fff !important;
+  text-shadow:
+    0 -1px 0 rgb(255 255 255 / 45%),
+    0 1px 0 rgb(0 0 0 / 45%),
+    1px 2px 2px rgb(0 0 0 / 55%);
+}
+
 header.storefront-color-theme nav a,
 header.storefront-color-theme nav button,
-header.storefront-color-theme > div > a[href="/checkout"],
-header.storefront-color-theme > div > a[href="/checkout"] span {
+header.storefront-color-theme > div > a:first-child,
+header.storefront-color-theme > div > a:first-child span {
+  text-shadow:
+    0 -1px 0 rgb(255 255 255 / 65%),
+    0 1px 0 rgb(0 0 0 / 65%),
+    1px 2px 3px rgb(0 0 0 / 70%) !important;
+}
+
+header button,
+header > div > a[href="/checkout"],
+header > div > a[href="/checkout"] span {
   color: #000 !important;
-  text-shadow: none;
+  text-shadow:
+    0 -1px 0 rgb(255 255 255 / 45%),
+    0 1px 0 rgb(0 0 0 / 35%),
+    1px 2px 2px rgb(0 0 0 / 35%) !important;
+}
+
+header .sign-out-button {
+  color: #2e8b57 !important;
 }
 
 .relative[data-store-button-background="enabled"] button,
@@ -72,4 +286,24 @@ header.storefront-color-theme > div > a[href="/checkout"] span {
   background-image: var(--store-button-background-image);
   background-position: center;
   background-size: cover;
+}
+
+:is([class*="rounded-"][class*="border"]) {
+  border: 2px solid #39e639 !important;
+  box-shadow:
+    inset 4px 4px 7px rgb(255 255 255 / 82%),
+    inset -4px -4px 7px rgb(15 23 42 / 32%),
+    3px 5px 10px rgb(15 23 42 / 38%) !important;
+}
+
+.checkout-quantity-decrease.checkout-quantity-decrease {
+  border-color: #ef4444 !important;
+}
+
+.order-acceptance-toggle[class*="border-red-600"] {
+  border-color: #ef4444 !important;
+}
+
+.order-acceptance-toggle[class*="border-emerald-600"] {
+  border-color: #39e639 !important;
 }

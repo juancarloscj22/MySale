@@ -105,11 +105,6 @@ export default function Checkout() {
       return;
     }
 
-    if (!delivery.date) {
-      setError('Selecciona la fecha preferida de entrega.');
-      return;
-    }
-
     if (items.some((item) => !item.flavor_id)) {
       setError('El carrito tiene productos sin sabor seleccionado. Elimínalos y vuelve a agregarlos eligiendo un sabor.');
       return;
@@ -241,7 +236,7 @@ export default function Checkout() {
                     aria-label={`Quitar una unidad de ${item.name}`}
                     onClick={() => updateQuantity(item.cartKey ?? item.id, item.quantity - 1)}
                     disabled={submitting}
-                    className="h-8 w-8 rounded-full border border-slate-300 text-lg"
+                    className="checkout-quantity-decrease h-8 w-8 rounded-full border border-red-500 text-lg"
                   >
                     −
                   </button>
@@ -321,17 +316,16 @@ export default function Checkout() {
               </span>
             </fieldset>
             <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-700">Fecha preferida de entrega *</span>
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Fecha preferida de entrega</span>
               <input
                 name="date"
                 type="date"
                 min={today}
-                required
                 value={delivery.date}
                 onChange={updateDelivery}
                 className={inputClass}
               />
-              <span className="mt-1 block text-xs text-slate-500">La tienda confirmará la disponibilidad de la fecha.</span>
+              <span className="mt-1 block text-xs text-slate-500">Si eliges una fecha, la tienda confirmará su disponibilidad.</span>
             </label>
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">Hora preferida de entrega</span>

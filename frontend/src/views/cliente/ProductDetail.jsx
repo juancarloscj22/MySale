@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCart } from '../../context/useCart';
+import { getOrderAcceptance } from '../../services/orderAcceptance';
 import { getProductById } from '../../services/products';
 
 export default function ProductDetail() {
@@ -8,9 +9,19 @@ export default function ProductDetail() {
   const { addItem } = useCart();
   const [selectedFlavorId, setSelectedFlavorId] = useState('');
   const [result, setResult] = useState({ id: null, product: null, error: '' });
+  const [acceptingOrders, setAcceptingOrders] = useState(null);
+  const [acceptanceError, setAcceptanceError] = useState('');
 
   useEffect(() => {
     let active = true;
+
+    getOrderAcceptance()
+      .then((isAccepting) => {
+        if (active) setAcceptingOrders(isAccepting);
+      })
+      .catch((loadError) => {
+        if (active) setAcceptanceError(loadError.message);
+      });
 
     getProductById(id)
       .then((result) => {
@@ -57,7 +68,7 @@ export default function ProductDetail() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="grid gap-10 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
+        <div className="product-detail-image overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
           <img
             src={selectedFlavor?.image_url || product.image}
             alt={selectedFlavor ? `${product.name} - ${selectedFlavor.flavor}` : product.name}
@@ -65,7 +76,7 @@ export default function ProductDetail() {
           />
         </div>
 
-        <div className="space-y-6">
+        <div className="product-detail-copy space-y-6">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white">{product.brand}</p>
             <h1 className="mt-3 text-4xl font-black text-white">{product.name}</h1>
@@ -88,7 +99,7 @@ export default function ProductDetail() {
             )}
             <p className="text-3xl font-black text-white">${product.price.toFixed(2)}</p>
           </div>
-          <p className="text-base leading-7 text-white">{product.description}</p>
+          <p className="product-description text-base leading-7 text-white">{product.description}</p>
 
           <label className="block">
             <span className="text-sm font-semibold text-white">Selecciona un sabor *</span>
@@ -96,7 +107,7 @@ export default function ProductDetail() {
               value={selectedFlavor?.id ?? ''}
               onChange={(event) => setSelectedFlavorId(event.target.value)}
               disabled={availableFlavors.length === 0}
-              className="flavor-select mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="product-detail-flavor flavor-select mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-100"
             >
               {availableFlavors.length === 0 && <option value="">Sin sabores disponibles</option>}
               {availableFlavors.length > 0 && !selectedFlavor && (
@@ -111,20 +122,40 @@ export default function ProductDetail() {
           </label>
 
           <div className="flex flex-wrap gap-4">
-            <button
-              type="button"
-              onClick={() => addItem(product, selectedFlavor)}
-              disabled={!selectedFlavor}
-              className="rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-            >
-              {selectedFlavor ? 'Agregar al carrito' : 'Sin sabores disponibles'}
-            </button>
-            <Link to="/catalog" className="rounded-full border border-slate-700 bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-700">
-              Volver
-            </Link>
+            {acceptingOrders ? (
+              <button
+                type="button"
+                onClick={() => addItem(product, selectedFlavor)}
+                disabled={!selectedFlavor}
+                className="product-detail-action rounded-full border border-slate-900 bg-[#39E639] px-6 py-3 text-sm font-bold text-black transition hover:bg-[#2fcf2f] disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300"
+              >
+                {selectedFlavor ? 'Agregar al carrito' : 'Sin sabores disponibles'}
+              </button>
+            ) : acceptingOrders === false ? (
+              <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-sm font-bold text-black transition hover:bg-[#2fcf2f]">
+                Volver
+              </Link>
+            ) : acceptanceError ? (
+              <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-sm font-bold text-black transition hover:bg-[#2fcf2f]">
+                Volver
+              </Link>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="product-detail-action rounded-full bg-slate-300 px-6 py-3 text-sm font-bold text-slate-700"
+              >
+                Verificando pedidos...
+              </button>
+            )}
           </div>
+          {acceptanceError && (
+            <p role="alert" className="text-sm text-red-700">
+              No se pudo verificar si la tienda está aceptando pedidos: {acceptanceError}
+            </p>
+          )}
 
-          <div className="grid gap-3 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-sm text-white">
+          <div className="product-stock-panel grid gap-3 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-sm text-white">
             <div className="flex justify-between"><span>Marca</span><strong>{product.brand}</strong></div>
             <div className="flex justify-between"><span>Stock total</span><strong>{product.stock > 0 ? `${product.stock} unidades` : 'Agotado'}</strong></div>
             <div className="flex justify-between"><span>Disponibilidad</span><strong>{product.active ? 'Activo' : 'Inactivo'}</strong></div>
