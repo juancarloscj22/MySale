@@ -188,6 +188,29 @@
   font-size: clamp(2.4rem, 3.6vw, 4rem);
 }
 
+@media (max-width: 639px) {
+  .storefront-product-card,
+  .storefront-product-card img,
+  .storefront-product-card select,
+  .storefront-product-card button {
+    max-width: 100%;
+  }
+
+  .storefront-product-card img {
+    width: 100%;
+  }
+
+  .storefront-product-card :is(.product-tag, .product-brand, .product-name, .product-meta, .product-price, .product-original-price, .product-discount-tag, label > span) {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .storefront-product-card .product-discount-tag {
+    right: 0.5rem;
+  }
+}
+
 .store-name {
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 900;

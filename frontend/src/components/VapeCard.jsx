@@ -27,7 +27,7 @@ export default function VapeCard({ product }) {
           <img
             src={selectedFlavor?.image_url || product.image}
             alt={selectedFlavor ? `${product.name} - ${selectedFlavor.flavor}` : product.name}
-            className="h-[26rem] w-full object-cover transition duration-300 group-hover:scale-105 sm:h-[32rem] lg:h-[36rem]"
+            className="block h-[26rem] w-full max-w-full object-cover transition duration-300 group-hover:scale-105 sm:h-[32rem] lg:h-[36rem]"
           />
           {product.discount_percent > 0 && (
             <span className="product-discount-tag absolute left-2 top-2 rounded-full bg-pink-100 px-2 py-1 text-2xl font-black text-pink-700 shadow sm:left-3 sm:top-3 sm:px-3 sm:text-3xl">
@@ -37,21 +37,21 @@ export default function VapeCard({ product }) {
         </div>
       </Link>
 
-      <div className="space-y-2 p-2 sm:space-y-4 sm:p-5">
-        <div className="flex items-center justify-between gap-2">
+      <div className="product-card-copy min-w-0 space-y-2 p-2 sm:space-y-4 sm:p-5">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
           <span className="product-tag rounded-full bg-emerald-100 px-1.5 py-1 text-[1.4rem] font-semibold leading-tight text-emerald-700 sm:px-2 sm:text-2xl">
             {product.category}
           </span>
           <span className="product-meta product-flavor-count text-2xl text-slate-500 sm:text-3xl">{hasStock ? `${availableFlavors.length} sabores` : 'Agotado'}</span>
-        </div>
+          </div>
 
-        <div>
+        <div className="min-w-0">
           <p className="product-brand text-6xl uppercase tracking-[0.12em] text-slate-400 sm:text-7xl sm:tracking-[0.2em]">{product.brand}</p>
           <h3 className="product-name mt-1 text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">{product.name}</h3>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex min-w-0 items-center justify-between">
+          <div className="min-w-0">
             <p className="product-meta text-[1.4rem] leading-tight text-slate-500 sm:text-3xl">{selectedFlavor ? `${selectedFlavor.flavor} · ${selectedFlavor.stock} disponibles` : 'Selecciona un sabor'}</p>
             {product.discount_percent > 0 ? (
               <>
@@ -88,7 +88,7 @@ export default function VapeCard({ product }) {
           type="button"
           onClick={() => addItem(product, selectedFlavor)}
           disabled={!selectedFlavor || selectedFlavor.stock === 0}
-          className="w-full rounded-full bg-slate-900 px-2 py-2 text-2xl font-semibold leading-tight text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:px-4 sm:py-2 sm:text-3xl"
+          className="w-full max-w-full whitespace-normal break-words rounded-full bg-slate-900 px-2 py-2 text-2xl font-semibold leading-tight text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:px-4 sm:py-2 sm:text-3xl"
         >
           {hasStock ? 'Agregar al carrito' : 'Sin stock'}
         </button>
