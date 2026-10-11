@@ -146,6 +146,16 @@
     1px 2px 3px rgb(15 23 42 / 35%) !important;
 }
 
+.storefront-color-theme .storefront-product-card :is(.product-brand, .product-meta, .product-price, .product-original-price, .product-discount-tag, label > span) {
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 85%) !important;
+}
+
+.storefront-color-theme .storefront-product-card .product-name {
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 85%) !important;
+}
+
 .storefront-color-theme .storefront-product-card {
   border-color: #39e639 !important;
   box-shadow:
@@ -171,11 +181,11 @@
 }
 
 .storefront-product-card .product-name {
-  font-size: clamp(1rem, 1.5vw, 1.5rem);
+  font-size: clamp(2.5rem, 4vw, 3.25rem);
 }
 
 .storefront-product-card .product-price {
-  font-size: clamp(1.2rem, 1.8vw, 2rem);
+  font-size: clamp(2.4rem, 3.6vw, 4rem);
 }
 
 .store-name {
@@ -235,6 +245,24 @@ main.white-outside-panels .admin-dashboard-title {
 
 .my-orders-page .my-orders-heading {
   color: #000 !important;
+  text-shadow: none !important;
+}
+
+.auth-action-button,
+.auth-action-button:hover {
+  border-color: #39e639 !important;
+  background-color: #111a2c !important;
+  background-image: none !important;
+  color: #39e639 !important;
+  text-shadow: none !important;
+}
+
+.auth-promo-panel {
+  border: 2px solid #39e639;
+}
+
+.auth-promo-title {
+  color: #39e639 !important;
   text-shadow: none !important;
 }
 
@@ -306,4 +334,8 @@ header .sign-out-button {
 
 .order-acceptance-toggle[class*="border-emerald-600"] {
   border-color: #39e639 !important;
+}
+
+.storefront-product-card .product-name {
+  color: #fff !important;
 }

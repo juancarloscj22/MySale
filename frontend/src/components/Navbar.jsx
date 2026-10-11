@@ -61,7 +61,7 @@ export default function Navbar() {
               MS
             </span>
           )}
-          <span className="store-name truncate">{storeName}</span>
+          <span className="sr-only">{storeName}</span>
         </NavLink>
 
         <nav aria-label="Navegación principal" className="hidden items-center gap-6 md:-ml-4 md:flex">

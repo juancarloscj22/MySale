@@ -353,7 +353,7 @@ export default function ConfigSettings() {
                     src={settings.logo_url}
                     alt="Vista previa del logotipo"
                     onError={() => setLogoPreviewError(true)}
-                    className="h-14 w-14 rounded-lg bg-white object-contain p-1"
+                    className="store-logo h-14 w-14 rounded-full bg-white object-contain p-1"
                   />
                 )}
                 {!logoPreviewError && <span className="text-sm text-slate-600">Vista previa del logotipo</span>}

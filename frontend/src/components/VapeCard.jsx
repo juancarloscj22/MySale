@@ -27,10 +27,10 @@ export default function VapeCard({ product }) {
           <img
             src={selectedFlavor?.image_url || product.image}
             alt={selectedFlavor ? `${product.name} - ${selectedFlavor.flavor}` : product.name}
-            className="h-28 w-full object-cover transition duration-300 group-hover:scale-105 sm:h-48 lg:h-56"
+            className="h-[26rem] w-full object-cover transition duration-300 group-hover:scale-105 sm:h-[32rem] lg:h-[36rem]"
           />
           {product.discount_percent > 0 && (
-            <span className="absolute left-2 top-2 rounded-full bg-pink-100 px-2 py-1 text-xs font-black text-pink-700 shadow sm:left-3 sm:top-3 sm:px-3 sm:text-sm">
+            <span className="product-discount-tag absolute left-2 top-2 rounded-full bg-pink-100 px-2 py-1 text-2xl font-black text-pink-700 shadow sm:left-3 sm:top-3 sm:px-3 sm:text-3xl">
               -{product.discount_percent}% OFF
             </span>
           )}
@@ -39,37 +39,37 @@ export default function VapeCard({ product }) {
 
       <div className="space-y-2 p-2 sm:space-y-4 sm:p-5">
         <div className="flex items-center justify-between gap-2">
-          <span className="product-tag rounded-full bg-emerald-100 px-1.5 py-1 text-[0.7rem] font-semibold leading-tight text-emerald-700 sm:px-2 sm:text-xs">
+          <span className="product-tag rounded-full bg-emerald-100 px-1.5 py-1 text-[1.4rem] font-semibold leading-tight text-emerald-700 sm:px-2 sm:text-2xl">
             {product.category}
           </span>
-          <span className="product-meta text-[0.7rem] text-slate-500 sm:text-xs">{hasStock ? `${availableFlavors.length} sabores` : 'Agotado'}</span>
+          <span className="product-meta product-flavor-count text-2xl text-slate-500 sm:text-3xl">{hasStock ? `${availableFlavors.length} sabores` : 'Agotado'}</span>
         </div>
 
         <div>
-          <p className="product-brand text-[0.7rem] uppercase tracking-[0.12em] text-slate-400 sm:text-xs sm:tracking-[0.2em]">{product.brand}</p>
-          <h3 className="product-name mt-1 text-base font-bold leading-tight text-slate-900 sm:text-xl">{product.name}</h3>
+          <p className="product-brand text-6xl uppercase tracking-[0.12em] text-slate-400 sm:text-7xl sm:tracking-[0.2em]">{product.brand}</p>
+          <h3 className="product-name mt-1 text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">{product.name}</h3>
         </div>
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="product-meta text-[0.7rem] leading-tight text-slate-500 sm:text-sm">{selectedFlavor ? `${selectedFlavor.flavor} · ${selectedFlavor.stock} disponibles` : 'Selecciona un sabor'}</p>
+            <p className="product-meta text-[1.4rem] leading-tight text-slate-500 sm:text-3xl">{selectedFlavor ? `${selectedFlavor.flavor} · ${selectedFlavor.stock} disponibles` : 'Selecciona un sabor'}</p>
             {product.discount_percent > 0 ? (
               <>
-                <p className="product-original-price text-xs text-slate-500 line-through">${product.originalPrice.toFixed(2)}</p>
-                <p className="product-price text-lg font-black text-slate-900 sm:text-2xl">${product.price.toFixed(2)}</p>
+                <p className="product-original-price text-2xl text-slate-500 line-through">${product.originalPrice.toFixed(2)}</p>
+                <p className="product-price text-4xl font-black text-slate-900 sm:text-5xl">${product.price.toFixed(2)}</p>
               </>
             ) : (
-              <p className="product-price text-lg font-black text-slate-900 sm:text-2xl">${product.price.toFixed(2)}</p>
+              <p className="product-price text-4xl font-black text-slate-900 sm:text-5xl">${product.price.toFixed(2)}</p>
             )}
           </div>
         </div>
         {availableFlavors.length > 0 && (
           <label className="block">
-            <span className="mb-1 block text-[0.65rem] font-semibold text-slate-600 sm:mb-2 sm:text-xs">Elige un sabor</span>
+            <span className="mb-1 block text-xl font-semibold text-slate-600 sm:mb-2 sm:text-2xl">Elige un sabor</span>
             <select
               value={selectedFlavorId}
               onChange={(event) => setSelectedFlavorId(event.target.value)}
-              className="flavor-select w-full rounded-xl border border-slate-300 bg-white px-1.5 py-1.5 text-[0.65rem] font-semibold text-slate-700 outline-none focus:border-emerald-500 sm:px-4 sm:py-3 sm:text-sm"
+              className="flavor-select w-full rounded-xl border border-slate-300 bg-white px-1.5 py-1.5 text-xl font-semibold text-slate-700 outline-none focus:border-emerald-500 sm:px-4 sm:py-3 sm:text-3xl"
             >
               {!selectedFlavor && (
                 <option value="" disabled>
@@ -88,7 +88,7 @@ export default function VapeCard({ product }) {
           type="button"
           onClick={() => addItem(product, selectedFlavor)}
           disabled={!selectedFlavor || selectedFlavor.stock === 0}
-          className="w-full rounded-full bg-slate-900 px-2 py-2 text-xs font-semibold leading-tight text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:px-4 sm:py-2 sm:text-sm"
+          className="w-full rounded-full bg-slate-900 px-2 py-2 text-2xl font-semibold leading-tight text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:px-4 sm:py-2 sm:text-3xl"
         >
           {hasStock ? 'Agregar al carrito' : 'Sin stock'}
         </button>

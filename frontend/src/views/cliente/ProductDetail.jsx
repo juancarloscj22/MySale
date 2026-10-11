@@ -78,11 +78,11 @@ export default function ProductDetail() {
 
         <div className="product-detail-copy space-y-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white">{product.brand}</p>
-            <h1 className="mt-3 text-4xl font-black text-white">{product.name}</h1>
+            <p className="text-3xl font-semibold uppercase tracking-[0.2em] text-white">{product.brand}</p>
+            <h1 className="mt-3 text-2xl font-black text-white">{product.name}</h1>
           </div>
 
-          <div className="flex items-center gap-3 text-sm text-white">
+          <div className="flex items-center gap-3 text-xs text-white">
             <span>{product.nicotine || 'Nicotina no especificada'}</span>
             <span>•</span>
             <span>{product.puffs ? `${product.puffs} puffs` : 'Caladas no especificadas'}</span>
@@ -90,24 +90,24 @@ export default function ProductDetail() {
 
           <div>
             {product.discount_percent > 0 && (
-              <span className="inline-block rounded-full bg-pink-700 px-3 py-1 text-sm font-bold text-white">
+              <span className="inline-block rounded-full bg-pink-700 px-3 py-1 text-xs font-bold text-white">
                 Oferta -{product.discount_percent}%
               </span>
             )}
             {product.discount_percent > 0 && (
-              <p className="mt-2 text-lg text-white line-through">${product.originalPrice.toFixed(2)}</p>
+              <p className="mt-2 text-xs text-white line-through">${product.originalPrice.toFixed(2)}</p>
             )}
             <p className="text-3xl font-black text-white">${product.price.toFixed(2)}</p>
           </div>
           <p className="product-description text-base leading-7 text-white">{product.description}</p>
 
           <label className="block">
-            <span className="text-sm font-semibold text-white">Selecciona un sabor *</span>
+            <span className="text-xs font-semibold text-white">Selecciona un sabor *</span>
             <select
               value={selectedFlavor?.id ?? ''}
               onChange={(event) => setSelectedFlavorId(event.target.value)}
               disabled={availableFlavors.length === 0}
-              className="product-detail-flavor flavor-select mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="product-detail-flavor flavor-select mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-100"
             >
               {availableFlavors.length === 0 && <option value="">Sin sabores disponibles</option>}
               {availableFlavors.length > 0 && !selectedFlavor && (
@@ -127,35 +127,35 @@ export default function ProductDetail() {
                 type="button"
                 onClick={() => addItem(product, selectedFlavor)}
                 disabled={!selectedFlavor}
-                className="product-detail-action rounded-full border border-slate-900 bg-[#39E639] px-6 py-3 text-sm font-bold text-black transition hover:bg-[#2fcf2f] disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300"
+                className="product-detail-action rounded-full border border-slate-900 bg-[#39E639] px-6 py-3 text-xs font-bold text-black transition hover:bg-[#2fcf2f] disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300"
               >
                 {selectedFlavor ? 'Agregar al carrito' : 'Sin sabores disponibles'}
               </button>
             ) : acceptingOrders === false ? (
-              <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-sm font-bold text-black transition hover:bg-[#2fcf2f]">
+              <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-xs font-bold text-black transition hover:bg-[#2fcf2f]">
                 Volver
               </Link>
             ) : acceptanceError ? (
-              <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-sm font-bold text-black transition hover:bg-[#2fcf2f]">
+              <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-xs font-bold text-black transition hover:bg-[#2fcf2f]">
                 Volver
               </Link>
             ) : (
               <button
                 type="button"
                 disabled
-                className="product-detail-action rounded-full bg-slate-300 px-6 py-3 text-sm font-bold text-slate-700"
+                className="product-detail-action rounded-full bg-slate-300 px-6 py-3 text-xs font-bold text-slate-700"
               >
                 Verificando pedidos...
               </button>
             )}
           </div>
           {acceptanceError && (
-            <p role="alert" className="text-sm text-red-700">
+            <p role="alert" className="text-xs text-red-700">
               No se pudo verificar si la tienda está aceptando pedidos: {acceptanceError}
             </p>
           )}
 
-          <div className="product-stock-panel grid gap-3 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-sm text-white">
+          <div className="product-stock-panel grid gap-3 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-xs text-white">
             <div className="flex justify-between"><span>Marca</span><strong>{product.brand}</strong></div>
             <div className="flex justify-between"><span>Stock total</span><strong>{product.stock > 0 ? `${product.stock} unidades` : 'Agotado'}</strong></div>
             <div className="flex justify-between"><span>Disponibilidad</span><strong>{product.active ? 'Activo' : 'Inactivo'}</strong></div>

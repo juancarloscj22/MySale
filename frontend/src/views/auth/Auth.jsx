@@ -59,9 +59,9 @@ export default function Auth() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="grid gap-8 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm lg:grid-cols-2">
-        <div className="rounded-[1.5rem] bg-slate-900 p-8 text-white">
+        <div className="auth-promo-panel rounded-[1.5rem] bg-slate-900 p-8 text-white">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">MySale</p>
-          <h1 className="mt-4 text-4xl font-black">Tu cuenta de compra</h1>
+          <h1 className="auth-promo-title mt-4 text-4xl font-black">Tu cuenta de compra</h1>
           <p className="mt-4 text-slate-300">
             Accede a tu historial, carrito y gestión de pedidos en cualquier momento.
           </p>
@@ -72,14 +72,14 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => changeMode(true)}
-              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold text-white ${isLogin ? 'bg-slate-900 shadow-sm' : 'bg-slate-700'}`}
+              className="auth-action-button flex-1 rounded-full border-2 border-emerald-500 px-4 py-2 text-sm font-bold"
             >
               Iniciar sesión
             </button>
             <button
               type="button"
               onClick={() => changeMode(false)}
-              className={`flex-1 rounded-full px-4 py-2 text-sm font-bold text-white ${!isLogin ? 'bg-slate-900 shadow-sm' : 'bg-slate-700'}`}
+              className="auth-action-button flex-1 rounded-full border-2 border-emerald-500 px-4 py-2 text-sm font-bold"
             >
               Registrarse
             </button>
@@ -165,7 +165,7 @@ export default function Auth() {
           <button
             type="submit"
             disabled={submitting || loading}
-            className="w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-600 disabled:cursor-wait disabled:opacity-60"
+            className="auth-action-button w-full rounded-full border-2 border-emerald-500 px-6 py-3 text-sm font-bold transition disabled:cursor-wait disabled:opacity-60"
           >
             {submitting ? 'Procesando...' : isLogin ? 'Entrar' : 'Crear cuenta'}
           </button>
