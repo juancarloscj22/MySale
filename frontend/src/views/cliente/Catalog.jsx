@@ -27,7 +27,7 @@ export default function Catalog() {
   }, []);
 
   return (
-    <div className="catalog-page mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="catalog-page mx-auto max-w-[88rem] px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="catalog-intro">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">Catálogo</p>
