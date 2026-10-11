@@ -78,31 +78,31 @@ export default function ProductDetail() {
 
         <div className="product-detail-copy space-y-6">
           <div>
-            <p className="text-3xl font-semibold uppercase tracking-[0.2em] text-white">{product.brand}</p>
+            <p className="text-4xl font-semibold uppercase tracking-[0.2em] text-white">{product.brand}</p>
             <h1 className="mt-3 text-2xl font-black text-white">{product.name}</h1>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-white">
-            <span>{product.nicotine || 'Nicotina no especificada'}</span>
+          <div className="flex flex-wrap items-center gap-3 text-white">
+            <span className="text-5xl leading-tight">{product.nicotine || 'Nicotina no especificada'}</span>
             <span>•</span>
-            <span>{product.puffs ? `${product.puffs} puffs` : 'Caladas no especificadas'}</span>
+            <span className="text-5xl leading-tight">{product.puffs ? `${product.puffs} puffs` : 'Caladas no especificadas'}</span>
           </div>
 
           <div>
             {product.discount_percent > 0 && (
-              <span className="inline-block rounded-full bg-pink-700 px-3 py-1 text-xs font-bold text-white">
+              <span className="inline-block rounded-full bg-pink-700 px-3 py-1 text-4xl font-bold leading-tight text-white">
                 Oferta -{product.discount_percent}%
               </span>
             )}
             {product.discount_percent > 0 && (
-              <p className="mt-2 text-xs text-white line-through">${product.originalPrice.toFixed(2)}</p>
+              <p className="mt-2 text-4xl leading-tight text-white line-through">${product.originalPrice.toFixed(2)}</p>
             )}
-            <p className="text-3xl font-black text-white">${product.price.toFixed(2)}</p>
+            <p className="text-[2.8125rem] font-black leading-tight text-white">${product.price.toFixed(2)}</p>
           </div>
           <p className="product-description text-base leading-7 text-white">{product.description}</p>
 
           <label className="block">
-            <span className="text-xs font-semibold text-white">Selecciona un sabor *</span>
+            <span className="text-sm font-semibold text-white">Selecciona un sabor *</span>
             <select
               value={selectedFlavor?.id ?? ''}
               onChange={(event) => setSelectedFlavorId(event.target.value)}
