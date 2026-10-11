@@ -24,7 +24,7 @@ export default function Home() {
 
   return (
     <div className="pb-12 pt-6 sm:pb-20 sm:pt-10">
-      <section className="mx-auto max-w-[88rem] px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-[108rem] px-4 sm:px-6 lg:px-8">
         {productsError && (
           <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">
             No se pudieron cargar los productos destacados: {productsError}
