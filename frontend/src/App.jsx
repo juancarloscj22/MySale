@@ -101,7 +101,14 @@ function Storefront() {
             <Routes>
             <Route path="/" element={<StorefrontColorTheme><Home /></StorefrontColorTheme>} />
             <Route path="/catalog" element={<StorefrontColorTheme><Catalog /></StorefrontColorTheme>} />
-            <Route path="/recompensas" element={<StorefrontColorTheme><Rewards /></StorefrontColorTheme>} />
+            <Route
+              path="/recompensas"
+              element={
+                <ProtectedRoute>
+                  <StorefrontColorTheme><Rewards /></StorefrontColorTheme>
+                </ProtectedRoute>
+              }
+            />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route
               path="/checkout"

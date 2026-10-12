@@ -84,7 +84,8 @@ export default function Navbar() {
           {navItems.map((item) => (
             <NavLink
               key={item.to}
-              to={item.to}
+              to={!user && item.to === '/recompensas' ? '/auth' : item.to}
+              state={!user && item.to === '/recompensas' ? { from: item.to } : undefined}
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className={({ isActive }) =>
                 `inline-flex items-center gap-2 text-base font-medium transition ${
@@ -148,7 +149,8 @@ export default function Navbar() {
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
-                to={item.to}
+                to={!user && item.to === '/recompensas' ? '/auth' : item.to}
+                state={!user && item.to === '/recompensas' ? { from: item.to } : undefined}
                 onClick={() => {
                   setMobileMenuOpen(false);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
