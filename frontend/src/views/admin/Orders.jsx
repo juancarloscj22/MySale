@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getPaymentMethodLabel, pendingDeliveryLocation } from '../../lib/orderOptions';
+import { getRewardMissions } from '../../services/rewards';
+import { notifyPurchaseMissionCompleted } from '../../services/messages';
 import { getAllOrders, updateOrderStatus } from '../../services/orders';
 
 const statuses = [
@@ -68,7 +70,29 @@ export default function Orders() {
           item.id === updatedOrder.id ? { ...item, status: updatedOrder.status } : item,
         ),
       );
-      setMessage('Estado del pedido actualizado.');
+      let notificationWarning = '';
+      if (status === 'completed' && order.status !== 'completed' && order.user_id) {
+        try {
+          const allMissions = await getRewardMissions();
+          const eligibleMissions = allMissions.filter((mission) => (
+            mission.active
+            && (
+              (mission.type === 'purchase_total' && Number(order.total) >= Number(mission.targetValue))
+              || (
+                mission.type === 'purchase_quantity'
+                && order.order_items.reduce((quantity, item) => quantity + Number(item.quantity), 0)
+                  >= Number(mission.targetValue)
+              )
+            )
+          ));
+          for (const mission of eligibleMissions) {
+            await notifyPurchaseMissionCompleted({ orderId: order.id, mission });
+          }
+        } catch (notificationError) {
+          notificationWarning = ` El estado se actualizó, pero no se pudo enviar el aviso de misión: ${notificationError.message}`;
+        }
+      }
+      setMessage(`Estado del pedido actualizado.${notificationWarning}`);
     } catch (updateError) {
       setError(updateError.message);
     } finally {

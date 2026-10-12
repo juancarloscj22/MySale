@@ -171,3 +171,14 @@ La tabla Admin → Usuarios muestra acciones de bloquear/desbloquear y eliminar 
 
 29. LOGOTIPO DINÁMICO DE TIENDA
 La URL de logo guardada en Dev → Configuración ahora se consulta globalmente y se muestra en la cabecera y pie de página, reemplazando el monograma predeterminado. Guardar ajustes actualiza el logo al momento sin recargar; se agregó vista previa con error claro si la imagen no es accesible. Lint y build pasaron, y la app local responde en http://localhost:5173/.
+
+30. ACTUALIZACIÓN DE INTERFAZ, MENSAJES Y MIGRACIONES
+Fecha: 11/10/2026
+
+- Se actualizaron la navegación, el acceso, los paneles Admin/Dev, Checkout, el catálogo y las tarjetas de Inicio/Catálogo con los ajustes visuales acordados: tipografía Orbitron, colores, biselado, cursores, fuentes de producto y comportamiento adaptable a móviles. Las tarjetas y sus imágenes ahora usan el ancho disponible en móvil; se habilitó el ajuste de texto para evitar desbordamientos.
+- Se ocultó el nombre comercial visible junto al logotipo de la navegación, manteniéndolo accesible para lectores de pantalla. La URL de logo se conserva y la previsualización en Configuración de Dev usa forma circular.
+- La fecha preferida de entrega pasó a ser opcional. Se creó `20261010220000_optional_delivery_date.sql` y se aplicó al proyecto Supabase remoto.
+- Se implementó mensajería para usuarios: botón junto al carrito, bandeja flotante con indicador de no leídos, avisos generales y mensajes privados enviados desde una nueva sección de Admin/Dev. No hay respuestas de usuarios. La interfaz y las operaciones usan Supabase bajo RLS.
+- La migración `20261011003000_user_messages.sql` crea `messages` y `message_reads` y restringe lectura/escritura según usuario y rol. Se aplicó al proyecto remoto y se verificaron ambas tablas con RLS habilitado y las dos migraciones registradas.
+- Se ejecutaron `npm run lint` y `npm run build` después de los últimos cambios de mensajería; ambos pasaron. Vite reportó una advertencia de tamaño de bundle superior a 500 kB en una compilación antes de dividir la carga del buzón; la compilación final dividió el código de mensajes en chunks separados.
+- Los commits recientes relacionados con UI son `a91d109`, `16705f8`, `df09407`, `9122eb4`, `ade9ea8` y `3075042`. La implementación de mensajería se encuentra actualmente en el árbol de trabajo sin commit.

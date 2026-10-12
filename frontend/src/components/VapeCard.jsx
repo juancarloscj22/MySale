@@ -2,14 +2,17 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useCart } from '../context/useCart';
 import { useStoreSettings } from '../context/useStoreSettings';
+import RewardRedeemButton from './RewardRedeemButton';
+import QuantitySelector from './QuantitySelector';
 
-export default function VapeCard({ product }) {
+export default function VapeCard({ product, acceptingOrders }) {
   const { addItem } = useCart();
   const { productCardBackgroundImageUrl } = useStoreSettings();
   const availableFlavors = product.flavors.filter((flavor) => flavor.active);
   const [selectedFlavorId, setSelectedFlavorId] = useState(
     () => availableFlavors.find((flavor) => flavor.stock > 0)?.id ?? '',
   );
+  const [quantity, setQuantity] = useState(1);
   const selectedFlavor = availableFlavors.find((flavor) => flavor.id === selectedFlavorId);
   const hasStock = availableFlavors.some((flavor) => flavor.stock > 0);
 
@@ -46,7 +49,7 @@ export default function VapeCard({ product }) {
           </div>
 
         <div className="min-w-0">
-          <p className="product-brand text-6xl uppercase tracking-[0.12em] text-slate-400 sm:text-7xl sm:tracking-[0.2em]">{product.brand}</p>
+          <p className="product-brand uppercase tracking-[0.12em] text-slate-400 sm:tracking-[0.2em]">{product.brand}</p>
           <h3 className="product-name mt-1 text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">{product.name}</h3>
         </div>
 
@@ -68,7 +71,10 @@ export default function VapeCard({ product }) {
             <span className="mb-1 block text-xl font-semibold text-slate-600 sm:mb-2 sm:text-2xl">Elige un sabor</span>
             <select
               value={selectedFlavorId}
-              onChange={(event) => setSelectedFlavorId(event.target.value)}
+              onChange={(event) => {
+                setSelectedFlavorId(event.target.value);
+                setQuantity(1);
+              }}
               className="flavor-select w-full rounded-xl border border-slate-300 bg-white px-1.5 py-1.5 text-xl font-semibold text-slate-700 outline-none focus:border-emerald-500 sm:px-4 sm:py-3 sm:text-3xl"
             >
               {!selectedFlavor && (
@@ -84,14 +90,25 @@ export default function VapeCard({ product }) {
             </select>
           </label>
         )}
-        <button
-          type="button"
-          onClick={() => addItem(product, selectedFlavor)}
-          disabled={!selectedFlavor || selectedFlavor.stock === 0}
-          className="w-full max-w-full whitespace-normal break-words rounded-full bg-slate-900 px-2 py-2 text-2xl font-semibold leading-tight text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:px-4 sm:py-2 sm:text-3xl"
-        >
-          {hasStock ? 'Agregar al carrito' : 'Sin stock'}
-        </button>
+        <div className="space-y-3">
+          <RewardRedeemButton product={product} storeOpen={acceptingOrders} />
+          <div className="flex w-full items-stretch gap-2">
+            <QuantitySelector
+              value={quantity}
+              onChange={setQuantity}
+              max={selectedFlavor?.stock ?? 1}
+              disabled={!selectedFlavor || selectedFlavor.stock === 0}
+            />
+            <button
+              type="button"
+              onClick={() => addItem(product, selectedFlavor, quantity)}
+              disabled={!selectedFlavor || selectedFlavor.stock === 0}
+              className="min-w-0 flex-1 whitespace-normal break-words rounded-full bg-slate-900 px-2 py-2 text-2xl font-semibold leading-tight text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:px-4 sm:py-2 sm:text-3xl"
+            >
+              {hasStock ? 'Agregar al carrito' : 'Sin stock'}
+            </button>
+          </div>
+        </div>
       </div>
     </article>
   );

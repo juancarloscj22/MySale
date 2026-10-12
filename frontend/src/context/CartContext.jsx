@@ -20,8 +20,8 @@ export function CartProvider({ children }) {
     localStorage.setItem('vape-cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product, flavor) => {
-    if (!flavor?.id) return;
+  const addItem = (product, flavor, quantity = 1) => {
+    if (!flavor?.id || !Number.isInteger(quantity) || quantity < 1) return;
     const cartKey = `${product.id}:${flavor.id}`;
 
     setItems((current) => {
@@ -29,7 +29,7 @@ export function CartProvider({ children }) {
 
       if (existing) {
         return current.map((item) =>
-          item.cartKey === cartKey ? { ...item, quantity: item.quantity + 1 } : item,
+          item.cartKey === cartKey ? { ...item, quantity: item.quantity + quantity } : item,
         );
       }
 
@@ -40,7 +40,7 @@ export function CartProvider({ children }) {
         flavor: flavor.flavor,
         flavor_image_url: flavor.image_url ?? '',
         flavor_stock: flavor.stock,
-        quantity: 1,
+        quantity,
       }];
     });
   };

@@ -36,6 +36,18 @@ const tools = [
     status: 'Disponible',
   },
   {
+    to: '/dev/rewards',
+    title: 'Misiones de recompensas',
+    description: 'Crear y administrar las misiones de MayCoins del programa de recompensas.',
+    status: 'Disponible',
+  },
+  {
+    to: '/dev/messages',
+    title: 'Mensajes',
+    description: 'Enviar avisos generales o mensajes privados a usuarios registrados.',
+    status: 'Disponible',
+  },
+  {
     to: '/dev/coupons',
     title: 'Cupones',
     description: 'Crear y activar cupones porcentuales con vencimiento opcional.',

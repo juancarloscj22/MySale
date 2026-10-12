@@ -13,7 +13,27 @@ export async function getAdminUsers({ page = 0, pageSize = 25 } = {}) {
     throw new Error('Supabase no devolvió una lista válida de usuarios.');
   }
 
-  return { users: data, total: count };
+  if (data.length === 0) return { users: data, total: count };
+
+  const userIds = data.map((user) => user.id);
+  const { data: balances, error: balancesError } = await supabase
+    .from('user_reward_points')
+    .select('user_id, points')
+    .in('user_id', userIds);
+
+  if (balancesError) throw balancesError;
+  if (!Array.isArray(balances)) {
+    throw new Error('Supabase no devolvió los saldos de MayCoins.');
+  }
+
+  const pointsByUserId = new Map(balances.map((balance) => [balance.user_id, balance.points]));
+  return {
+    users: data.map((user) => ({
+      ...user,
+      reward_points: pointsByUserId.get(user.id) ?? 0,
+    })),
+    total: count,
+  };
 }
 
 export async function manageUser({ userId, action, blocked }) {

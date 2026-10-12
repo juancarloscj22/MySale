@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import StoreBanner from './components/StoreBanner';
+import RewardMissionManager from './components/RewardMissionManager';
 import { CartProvider } from './context/CartContext.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { StoreSettingsProvider } from './context/StoreSettingsProvider.jsx';
@@ -13,6 +14,7 @@ import DeveloperRoute from './routes/DeveloperRoute';
 
 const Home = lazy(() => import('./views/cliente/Home'));
 const Catalog = lazy(() => import('./views/cliente/Catalog'));
+const Rewards = lazy(() => import('./views/cliente/Rewards'));
 const ProductDetail = lazy(() => import('./views/cliente/ProductDetail'));
 const Checkout = lazy(() => import('./views/cliente/Checkout'));
 const MyOrders = lazy(() => import('./views/cliente/MyOrders'));
@@ -23,6 +25,7 @@ const Inventory = lazy(() => import('./views/admin/Inventory'));
 const Orders = lazy(() => import('./views/admin/Orders'));
 const UserManager = lazy(() => import('./views/admin/UserManager'));
 const Coupons = lazy(() => import('./views/admin/Coupons'));
+const Messages = lazy(() => import('./views/admin/Messages'));
 const DevConsole = lazy(() => import('./views/dev/DevConsole'));
 const ConfigSettings = lazy(() => import('./views/dev/ConfigSettings'));
 
@@ -94,6 +97,7 @@ function Storefront() {
             <Routes>
             <Route path="/" element={<StorefrontColorTheme><Home /></StorefrontColorTheme>} />
             <Route path="/catalog" element={<StorefrontColorTheme><Catalog /></StorefrontColorTheme>} />
+            <Route path="/recompensas" element={<StorefrontColorTheme><Rewards /></StorefrontColorTheme>} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route
               path="/checkout"
@@ -127,6 +131,16 @@ function Storefront() {
                 <ProtectedRoute>
                   <AdminRoute>
                     <Dashboard />
+                  </AdminRoute>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/rewards"
+              element={
+                <ProtectedRoute>
+                  <AdminRoute>
+                    <RewardMissionManager />
                   </AdminRoute>
                 </ProtectedRoute>
               }
@@ -171,6 +185,16 @@ function Storefront() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin/messages"
+              element={
+                <ProtectedRoute>
+                  <AdminRoute>
+                    <Messages />
+                  </AdminRoute>
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/dev"
@@ -180,6 +204,16 @@ function Storefront() {
                     <div className="developer-section">
                       <DevConsole />
                     </div>
+                  </DeveloperRoute>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dev/rewards"
+              element={
+                <ProtectedRoute>
+                  <DeveloperRoute>
+                    <RewardMissionManager />
                   </DeveloperRoute>
                 </ProtectedRoute>
               }
@@ -203,6 +237,18 @@ function Storefront() {
                   <DeveloperRoute>
                     <div className="developer-section">
                       <Coupons />
+                    </div>
+                  </DeveloperRoute>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dev/messages"
+              element={
+                <ProtectedRoute>
+                  <DeveloperRoute>
+                    <div className="developer-section">
+                      <Messages />
                     </div>
                   </DeveloperRoute>
                 </ProtectedRoute>

@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { useStoreSettings } from '../context/useStoreSettings';
 import { useCart } from '../context/useCart';
+import { getUserPoints, loadUserRewards, subscribeToRewardPoints } from '../services/rewards';
+import MayCoinAmount from './MayCoinAmount';
+
+const MessageInbox = lazy(() => import('./MessageInbox'));
 
 const baseNavItems = [
   { to: '/', label: 'Inicio' },
   { to: '/catalog', label: 'Catálogo' },
+  { to: '/recompensas', label: 'Recompensas' },
   { to: '/mis-pedidos', label: 'Mis pedidos' },
   { to: '/mi-cuenta', label: 'Mi cuenta' },
 ];
@@ -19,6 +24,17 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [signOutError, setSignOutError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const subscribe = useCallback((callback) => subscribeToRewardPoints(user?.id, callback), [user?.id]);
+  const getSnapshot = useCallback(() => getUserPoints(user?.id), [user?.id]);
+  const userPoints = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    loadUserRewards(user.id).catch((error) => {
+      console.error('No se pudo cargar el saldo de MayCoins:', error);
+    });
+  }, [user?.id]);
+
   const navItems = [
     ...baseNavItems,
     ...(profile?.role === 'admin' || profile?.role === 'developer'
@@ -70,12 +86,17 @@ export default function Navbar() {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `text-base font-medium transition ${
+                `inline-flex items-center gap-2 text-base font-medium transition ${
                   isActive ? 'text-emerald-600' : 'text-slate-600 hover:text-slate-900'
                 }`
               }
             >
-              {item.label}
+              <span>{item.label}</span>
+              {item.to === '/recompensas' && user && (
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black text-amber-800">
+                  <MayCoinAmount amount={userPoints} iconClassName="h-6 w-6" />
+                </span>
+              )}
             </NavLink>
           ))}
           {user ? (
@@ -89,6 +110,15 @@ export default function Navbar() {
           )}
         </nav>
 
+        {user && (
+          <Suspense fallback={null}>
+            <MessageInbox
+              userId={user.id}
+              navbarBackgroundImageUrl={navbarBackgroundImageUrl}
+              onNavigate={() => setMobileMenuOpen(false)}
+            />
+          </Suspense>
+        )}
         <NavLink
           to="/checkout"
           onClick={() => setMobileMenuOpen(false)}
@@ -120,12 +150,17 @@ export default function Navbar() {
                 to={item.to}
                 onClick={() => setMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                  `flex items-center justify-between gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${
                     isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-50'
                   }`
                 }
               >
-                {item.label}
+                <span>{item.label}</span>
+                {item.to === '/recompensas' && user && (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-800">
+                    <MayCoinAmount amount={userPoints} iconClassName="h-5 w-5" />
+                  </span>
+                )}
               </NavLink>
             ))}
             {user ? (

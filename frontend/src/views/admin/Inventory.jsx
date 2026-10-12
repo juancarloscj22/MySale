@@ -8,6 +8,7 @@ const emptyForm = {
   description: '',
   price: '',
   discount_percent: '0',
+  reward_points_cost: '100',
   brand: '',
   category: '',
   flavors: [{ id: null, flavor: '', image_url: '', stock: '0', active: true }],
@@ -109,6 +110,7 @@ export default function Inventory() {
       description: product.description ?? '',
       price: String(product.originalPrice),
       discount_percent: String(product.discount_percent ?? 0),
+      reward_points_cost: String(product.reward_points_cost ?? product.rewardPointsCost ?? 100),
       brand: product.brand ?? '',
       category: product.category === 'Vape' ? '' : product.category,
       flavors: product.flavors.map((flavor) => ({
@@ -133,6 +135,7 @@ export default function Inventory() {
 
     const price = Number(form.price);
     const discountPercent = Number(form.discount_percent);
+    const rewardPointsCost = Number(form.reward_points_cost);
     const puffs = form.puffs === '' ? null : Number(form.puffs);
     const activeFlavors = form.flavors.filter((flavor) => flavor.active);
 
@@ -146,6 +149,10 @@ export default function Inventory() {
     }
     if (!Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent > 100) {
       setFormError('El descuento debe ser un porcentaje entre 0 y 100.');
+      return;
+    }
+    if (!Number.isSafeInteger(rewardPointsCost) || rewardPointsCost <= 0) {
+      setFormError('El costo de canje debe ser un entero mayor que cero.');
       return;
     }
     if (activeFlavors.length === 0) {
@@ -261,6 +268,20 @@ export default function Inventory() {
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">Descuento (%)</span>
               <input name="discount_percent" type="number" min="0" max="100" step="0.01" value={form.discount_percent} onChange={updateForm} className={inputClass} />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Costo para canjear (MayCoins) *</span>
+              <input
+                name="reward_points_cost"
+                type="number"
+                min="1"
+                step="1"
+                required
+                value={form.reward_points_cost}
+                onChange={updateForm}
+                className={inputClass}
+              />
+              <span className="mt-1 block text-xs text-slate-500">Cantidad de MayCoins que se descontará para canjear este producto.</span>
             </label>
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">Categoría</span>

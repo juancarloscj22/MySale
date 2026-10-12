@@ -1,27 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCart } from '../../context/useCart';
-import { getOrderAcceptance } from '../../services/orderAcceptance';
+import RewardRedeemButton from '../../components/RewardRedeemButton';
+import QuantitySelector from '../../components/QuantitySelector';
+import { useOrderAcceptance } from '../../hooks/useOrderAcceptance';
 import { getProductById } from '../../services/products';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { addItem } = useCart();
   const [selectedFlavorId, setSelectedFlavorId] = useState('');
+  const [quantity, setQuantity] = useState(1);
   const [result, setResult] = useState({ id: null, product: null, error: '' });
-  const [acceptingOrders, setAcceptingOrders] = useState(null);
-  const [acceptanceError, setAcceptanceError] = useState('');
+  const { acceptingOrders, error: acceptanceError } = useOrderAcceptance();
 
   useEffect(() => {
     let active = true;
-
-    getOrderAcceptance()
-      .then((isAccepting) => {
-        if (active) setAcceptingOrders(isAccepting);
-      })
-      .catch((loadError) => {
-        if (active) setAcceptanceError(loadError.message);
-      });
 
     getProductById(id)
       .then((result) => {
@@ -105,7 +99,11 @@ export default function ProductDetail() {
             <span className="text-sm font-semibold text-white">Selecciona un sabor *</span>
             <select
               value={selectedFlavor?.id ?? ''}
-              onChange={(event) => setSelectedFlavorId(event.target.value)}
+              onChange={(event) => {
+                setSelectedFlavorId(event.target.value);
+                setQuantity(1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               disabled={availableFlavors.length === 0}
               className="product-detail-flavor flavor-select mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-100"
             >
@@ -121,33 +119,44 @@ export default function ProductDetail() {
             </select>
           </label>
 
-          <div className="flex flex-wrap gap-4">
-            {acceptingOrders ? (
-              <button
-                type="button"
-                onClick={() => addItem(product, selectedFlavor)}
-                disabled={!selectedFlavor}
-                className="product-detail-action rounded-full border border-slate-900 bg-[#39E639] px-6 py-3 text-xs font-bold text-black transition hover:bg-[#2fcf2f] disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300"
-              >
-                {selectedFlavor ? 'Agregar al carrito' : 'Sin sabores disponibles'}
-              </button>
-            ) : acceptingOrders === false ? (
-              <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-xs font-bold text-black transition hover:bg-[#2fcf2f]">
-                Volver
-              </Link>
-            ) : acceptanceError ? (
-              <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-xs font-bold text-black transition hover:bg-[#2fcf2f]">
-                Volver
-              </Link>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="product-detail-action rounded-full bg-slate-300 px-6 py-3 text-xs font-bold text-slate-700"
-              >
-                Verificando pedidos...
-              </button>
-            )}
+          <div className="space-y-4">
+            <RewardRedeemButton product={product} storeOpen={acceptingOrders} />
+            <div className="flex w-full items-stretch gap-2">
+              {acceptingOrders ? (
+                <>
+                  <QuantitySelector
+                    value={quantity}
+                    onChange={setQuantity}
+                    max={selectedFlavor?.stock ?? 1}
+                    disabled={!selectedFlavor || selectedFlavor.stock === 0}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => addItem(product, selectedFlavor, quantity)}
+                    disabled={!selectedFlavor || selectedFlavor.stock === 0}
+                    className="product-detail-action min-w-0 flex-1 rounded-full border border-slate-900 bg-[#39E639] px-4 py-3 text-xl font-bold text-black transition hover:bg-[#2fcf2f] disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300 sm:text-2xl"
+                  >
+                    {selectedFlavor ? 'Agregar al carrito' : 'Sin sabores disponibles'}
+                  </button>
+                </>
+              ) : acceptingOrders === false ? (
+                <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-xs font-bold text-black transition hover:bg-[#2fcf2f]">
+                  Volver
+                </Link>
+              ) : acceptanceError ? (
+                <Link to="/catalog" className="product-detail-action rounded-full bg-[#39E639] px-6 py-3 text-xs font-bold text-black transition hover:bg-[#2fcf2f]">
+                  Volver
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="product-detail-action rounded-full bg-slate-300 px-6 py-3 text-xs font-bold text-slate-700"
+                >
+                  Verificando pedidos...
+                </button>
+              )}
+            </div>
           </div>
           {acceptanceError && (
             <p role="alert" className="text-xs text-red-700">

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import VapeCard from '../../components/VapeCard';
+import { useOrderAcceptance } from '../../hooks/useOrderAcceptance';
 import { getProducts } from '../../services/products';
 
 export default function Home() {
+  const { acceptingOrders } = useOrderAcceptance();
   const [saleProducts, setSaleProducts] = useState([]);
   const [productsError, setProductsError] = useState('');
 
@@ -32,7 +34,9 @@ export default function Home() {
         )}
         {saleProducts.length > 0 && (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
-            {saleProducts.map((product) => <VapeCard key={product.id} product={product} />)}
+            {saleProducts.map((product) => (
+              <VapeCard key={product.id} product={product} acceptingOrders={acceptingOrders} />
+            ))}
           </div>
         )}
       </section>

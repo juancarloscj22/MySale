@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/useAuth';
 import { getAdminUsers, manageUser } from '../../services/users';
+import MayCoinAmount from '../../components/MayCoinAmount';
 
 const pageSize = 25;
 const roles = {
@@ -153,6 +154,7 @@ export default function UserManager() {
                   <th scope="col" className="p-4">Usuario</th>
                   <th scope="col" className="p-4">Contacto</th>
                   <th scope="col" className="p-4">Rol</th>
+                  <th scope="col" className="p-4">MayCoins</th>
                   <th scope="col" className="p-4">Estado</th>
                   <th scope="col" className="p-4">Registro</th>
                   {profile?.role === 'developer' && <th scope="col" className="p-4">Acciones Dev</th>}
@@ -167,6 +169,9 @@ export default function UserManager() {
                     </td>
                     <td className="p-4 text-slate-600">{user.phone || 'Sin teléfono'}</td>
                     <td className="p-4 text-slate-700">{roles[user.role] ?? user.role}</td>
+                    <td className="whitespace-nowrap p-4 font-semibold text-slate-900">
+                      <MayCoinAmount amount={user.reward_points} iconClassName="h-5 w-5" />
+                    </td>
                     <td className="p-4">
                       <span className={`rounded-full px-2 py-1 text-xs font-semibold ${
                         user.blocked

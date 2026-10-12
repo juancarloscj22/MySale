@@ -1,11 +1,13 @@
 import { supabase } from '../lib/supabaseClient';
 
 const productFields =
-  'id, name, description, price, discount_percent, stock, brand, category_id, flavor, nicotine, puffs, image_url, active, categories(id, name), product_flavors(id, flavor, image_url, stock, active)';
+  'id, name, description, price, discount_percent, reward_points_cost, stock, brand, category_id, flavor, nicotine, puffs, image_url, active, categories(id, name), product_flavors(id, flavor, image_url, stock, active)';
 
 const mapProduct = (row) => {
   const originalPrice = Number(row.price);
   const discountPercent = Number(row.discount_percent ?? 0);
+  const discountedPrice = Number((originalPrice * (100 - discountPercent) / 100).toFixed(2));
+  const rewardPointsCost = Number(row.reward_points_cost ?? row.rewardPointsCost ?? Math.max(100, Math.round(originalPrice * 8)));
 
   return {
     ...row,
@@ -15,7 +17,9 @@ const mapProduct = (row) => {
     })),
     originalPrice,
     discount_percent: discountPercent,
-    price: Number((originalPrice * (100 - discountPercent) / 100).toFixed(2)),
+    price: discountedPrice,
+    reward_points_cost: rewardPointsCost,
+    rewardPointsCost: rewardPointsCost,
     puffs: row.puffs ? String(row.puffs) : '',
     image:
       row.image_url ||
@@ -87,6 +91,11 @@ async function getOrCreateCategory(categoryName) {
 
 export async function saveProduct(product) {
   const categoryId = await getOrCreateCategory(product.category ?? '');
+  const rewardPointsCost = Number(product.reward_points_cost ?? product.rewardPointsCost);
+  if (!Number.isSafeInteger(rewardPointsCost) || rewardPointsCost <= 0) {
+    throw new Error('El costo de canje debe ser un entero mayor que cero.');
+  }
+
   const { data: productId, error } = await supabase.rpc('save_product', {
     p_product_id: product.id || null,
     p_name: product.name.trim(),
@@ -107,6 +116,12 @@ export async function saveProduct(product) {
     })),
   });
   if (error) throw error;
+
+  const { error: rewardCostError } = await supabase.rpc('set_product_reward_points_cost', {
+    p_product_id: productId,
+    p_reward_points_cost: rewardPointsCost,
+  });
+  if (rewardCostError) throw rewardCostError;
 
   const { error: flavorImagesError } = await supabase.rpc('save_product_flavor_images', {
     p_product_id: productId,

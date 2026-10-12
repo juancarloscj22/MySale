@@ -11,6 +11,7 @@ const initialSettings = {
   product_card_background_image_url: '',
   navbar_background_image_url: '',
   button_background_image_url: '',
+  rewards_balance_image_url: '',
   whatsapp_message: '',
   currency_code: '',
   shipping_fee: '',
@@ -41,13 +42,14 @@ export default function ConfigSettings() {
   const [cardBackgroundPreviewError, setCardBackgroundPreviewError] = useState(false);
   const [navbarBackgroundPreviewError, setNavbarBackgroundPreviewError] = useState(false);
   const [buttonBackgroundPreviewError, setButtonBackgroundPreviewError] = useState(false);
+  const [rewardsImagePreviewError, setRewardsImagePreviewError] = useState(false);
 
   useEffect(() => {
     let active = true;
 
     supabase
       .from('site_settings')
-      .select('whatsapp_number, store_name, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url, button_background_image_url, whatsapp_message, currency_code, shipping_fee')
+      .select('whatsapp_number, store_name, logo_url, banner_url, background_image_url, product_card_background_image_url, navbar_background_image_url, button_background_image_url, rewards_balance_image_url, whatsapp_message, currency_code, shipping_fee')
       .eq('id', true)
       .single()
       .then(({ data, error: loadError }) => {
@@ -65,6 +67,7 @@ export default function ConfigSettings() {
           product_card_background_image_url: data.product_card_background_image_url ?? '',
           navbar_background_image_url: data.navbar_background_image_url ?? '',
           button_background_image_url: data.button_background_image_url ?? '',
+          rewards_balance_image_url: data.rewards_balance_image_url ?? '',
           whatsapp_message: data.whatsapp_message ?? '',
           currency_code: data.currency_code ?? 'MXN',
           shipping_fee: String(data.shipping_fee ?? 5),
@@ -91,6 +94,7 @@ export default function ConfigSettings() {
     if (name === 'product_card_background_image_url') setCardBackgroundPreviewError(false);
     if (name === 'navbar_background_image_url') setNavbarBackgroundPreviewError(false);
     if (name === 'button_background_image_url') setButtonBackgroundPreviewError(false);
+    if (name === 'rewards_balance_image_url') setRewardsImagePreviewError(false);
   };
 
   const handleSave = async (event) => {
@@ -111,6 +115,7 @@ export default function ConfigSettings() {
       settings.product_card_background_image_url,
       settings.navbar_background_image_url,
       settings.button_background_image_url,
+      settings.rewards_balance_image_url,
     ];
     if (imageUrls.some((url) => !isHttpUrl(url))) {
       setSaving(false);
@@ -128,6 +133,7 @@ export default function ConfigSettings() {
         product_card_background_image_url: settings.product_card_background_image_url.trim() || null,
         navbar_background_image_url: settings.navbar_background_image_url.trim() || null,
         button_background_image_url: settings.button_background_image_url.trim() || null,
+        rewards_balance_image_url: settings.rewards_balance_image_url.trim() || null,
         whatsapp_message: settings.whatsapp_message.trim() || null,
         currency_code: settings.currency_code.trim().toUpperCase(),
         shipping_fee: shippingFee,
@@ -302,6 +308,33 @@ export default function ConfigSettings() {
                     src={settings.button_background_image_url}
                     alt="Vista previa del fondo de los botones"
                     onError={() => setButtonBackgroundPreviewError(true)}
+                    className="h-full w-full object-cover"
+                  />
+                )}
+              </div>
+            )}
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">URL de imagen de recompensas</span>
+            <input
+              name="rewards_balance_image_url"
+              type="url"
+              maxLength={2048}
+              value={settings.rewards_balance_image_url}
+              onChange={updateSetting}
+              className={inputClass}
+              placeholder="https://"
+            />
+            <span className="mt-1 block text-xs text-slate-500">Se mostrará a la derecha del saldo de MayCoins en la sección Recompensas.</span>
+            {settings.rewards_balance_image_url && (
+              <div className="mt-3 h-28 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                {rewardsImagePreviewError ? (
+                  <p role="alert" className="p-3 text-sm text-red-700">No se pudo cargar la imagen de recompensas.</p>
+                ) : (
+                  <img
+                    src={settings.rewards_balance_image_url}
+                    alt="Vista previa de la imagen de recompensas"
+                    onError={() => setRewardsImagePreviewError(true)}
                     className="h-full w-full object-cover"
                   />
                 )}

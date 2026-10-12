@@ -57,7 +57,7 @@ export async function createOrder({
 }
 
 const orderFields =
-  'id, total, shipping_fee, coupon_code, coupon_discount, currency_code, status, created_at, delivery_name, delivery_phone, delivery_address, delivery_date, delivery_time, payment_method, cash_change_required, adjacent_zone, order_items(product_name, flavor_name, quantity, unit_price, subtotal)';
+  'id, user_id, total, shipping_fee, coupon_code, coupon_discount, currency_code, status, created_at, delivery_name, delivery_phone, delivery_address, delivery_date, delivery_time, payment_method, cash_change_required, adjacent_zone, order_items(product_name, flavor_name, quantity, unit_price, subtotal)';
 
 export async function validateCoupon(code) {
   const { data, error } = await supabase.rpc('validate_order_coupon', {

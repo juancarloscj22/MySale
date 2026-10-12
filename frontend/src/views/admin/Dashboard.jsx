@@ -273,10 +273,22 @@ export default function Dashboard() {
               action: 'Ver usuarios',
             },
             {
+              to: '/admin/rewards',
+              title: 'Misiones de recompensas',
+              description: 'Crear y administrar las misiones del programa de recompensas MayCoins.',
+              action: 'Administrar recompensas',
+            },
+            {
               to: '/admin/coupons',
               title: 'Cupones',
               description: 'Crear códigos promocionales porcentuales y administrar su vigencia.',
               action: 'Administrar cupones',
+            },
+            {
+              to: '/admin/messages',
+              title: 'Mensajes',
+              description: 'Enviar avisos generales o mensajes privados a usuarios registrados.',
+              action: 'Administrar mensajes',
             },
           ].map((section) => (
             <Link
