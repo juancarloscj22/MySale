@@ -70,7 +70,7 @@ export default function Navbar() {
             <img
               src={logoUrl}
               alt=""
-              className="store-logo aspect-square h-[120px] w-[120px] shrink-0 rounded-full bg-white object-contain p-1"
+              className="store-logo aspect-square h-16 w-16 shrink-0 rounded-full bg-white object-contain p-1 sm:h-[120px] sm:w-[120px]"
             />
           ) : (
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold text-slate-900">
@@ -85,6 +85,7 @@ export default function Navbar() {
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className={({ isActive }) =>
                 `inline-flex items-center gap-2 text-base font-medium transition ${
                   isActive ? 'text-emerald-600' : 'text-slate-600 hover:text-slate-900'
@@ -148,7 +149,10 @@ export default function Navbar() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className={({ isActive }) =>
                   `flex items-center justify-between gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${
                     isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-50'

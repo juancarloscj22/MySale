@@ -43,6 +43,10 @@ function Storefront() {
     pathname.startsWith('/dev');
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname]);
+
+  useEffect(() => {
     if (!import.meta.env.PROD) return;
 
     const accountMeta = document.querySelector('meta[name="google-adsense-account"]');

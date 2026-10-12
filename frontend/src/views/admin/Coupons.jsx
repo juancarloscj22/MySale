@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../context/useAuth';
+import { useStoreSettings } from '../../context/useStoreSettings';
 import { createCoupon, deleteCoupon, getCoupons, setCouponActive } from '../../services/coupons';
 
-const emptyForm = { code: '', discountPercent: '', maxUses: '', expiresAt: '' };
+const emptyForm = { code: '', discountType: 'percent', discountValue: '', maxUses: '', expiresAt: '' };
 const inputClass =
   'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500';
 const today = new Date().toLocaleDateString('en-CA');
@@ -14,6 +15,7 @@ const formatDate = (value) =>
 
 export default function Coupons() {
   const { profile } = useAuth();
+  const { currencyCode } = useStoreSettings();
   const [coupons, setCoupons] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
@@ -130,17 +132,39 @@ export default function Coupons() {
           <span className="mt-1 block text-xs text-slate-500">3-32 letras, números, guion o guion bajo.</span>
         </label>
         <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Descuento (%) *</span>
+          <span className="mb-2 block text-sm font-semibold text-slate-700">Tipo de descuento *</span>
+          <select
+            value={form.discountType}
+            onChange={(event) => setForm((current) => ({
+              ...current,
+              discountType: event.target.value,
+              discountValue: '',
+            }))}
+            className={inputClass}
+          >
+            <option value="percent">Porcentaje</option>
+            <option value="amount">Monto fijo</option>
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-sm font-semibold text-slate-700">
+            {form.discountType === 'percent' ? 'Descuento (%) *' : `Monto fijo (${currencyCode}) *`}
+          </span>
           <input
             required
             type="number"
             min="0.01"
-            max="100"
+            max={form.discountType === 'percent' ? '100' : undefined}
             step="0.01"
-            value={form.discountPercent}
-            onChange={(event) => setForm((current) => ({ ...current, discountPercent: event.target.value }))}
+            value={form.discountValue}
+            onChange={(event) => setForm((current) => ({ ...current, discountValue: event.target.value }))}
             className={inputClass}
           />
+          <span className="mt-1 block text-xs text-slate-500">
+            {form.discountType === 'percent'
+              ? 'Porcentaje que se descuenta del subtotal de productos.'
+              : 'Monto que se resta del subtotal de productos, sin incluir el envío y limitado al subtotal.'}
+          </span>
         </label>
         <label className="block">
           <span className="mb-2 block text-sm font-semibold text-slate-700">Cantidad máxima de usos</span>
@@ -169,7 +193,7 @@ export default function Coupons() {
           <button
             type="submit"
             disabled={saving}
-            className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-600 disabled:opacity-60"
+            className="rounded-full border-2 border-emerald-700 bg-white px-6 py-3 text-sm font-extrabold text-emerald-800 transition hover:bg-emerald-50 disabled:opacity-60"
           >
             {saving ? 'Creando...' : 'Crear cupón'}
           </button>
@@ -210,7 +234,11 @@ export default function Coupons() {
               {coupons.map((coupon) => (
                 <tr key={coupon.id} className="border-t border-slate-200">
                   <td className="p-4 font-mono font-bold text-slate-900">{coupon.code}</td>
-                  <td className="p-4">{Number(coupon.discount_percent)}%</td>
+                  <td className="p-4">
+                    {coupon.discount_type === 'amount'
+                      ? `${currencyCode} ${Number(coupon.discount_value).toFixed(2)}`
+                      : `${Number(coupon.discount_value)}%`}
+                  </td>
                   <td className="p-4">
                     {coupon.max_uses === null
                       ? `${coupon.used_count} / Sin límite`

@@ -41,6 +41,7 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
         const result = await getMyMessages(userId);
         if (!active) return;
         setMessages(result);
+        window.dispatchEvent(new Event('mysale:messages-loaded'));
         const unread = result.filter((item) => !item.readAt).map((item) => item.id);
         await markMessagesRead(userId, unread);
         if (!active) return;

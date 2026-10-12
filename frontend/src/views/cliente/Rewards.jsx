@@ -29,6 +29,7 @@ export default function Rewards() {
   const [loadingMissions, setLoadingMissions] = useState(true);
   const [purchaseRewards, setPurchaseRewards] = useState([]);
   const [loadingPurchaseRewards, setLoadingPurchaseRewards] = useState(true);
+  const [purchaseRewardsError, setPurchaseRewardsError] = useState('');
   const [productRedemptions, setProductRedemptions] = useState([]);
   const [loadingProductRedemptions, setLoadingProductRedemptions] = useState(true);
   const [redemptionsError, setRedemptionsError] = useState('');
@@ -50,14 +51,12 @@ export default function Rewards() {
     if (!user?.id) return undefined;
     let active = true;
     Promise.all([
-      getPurchaseMissionRewards(user.id),
       getRewardMissions(),
       getClaimedDailyRewardMissionIds(),
       loadUserRewards(user.id),
     ])
-      .then(([purchaseMissionRewards, rewardMissions, dailyClaims]) => {
+      .then(([rewardMissions, dailyClaims]) => {
         if (!active) return;
-        setPurchaseRewards(purchaseMissionRewards);
         setMissions(rewardMissions);
         setClaimedDailyMissionIds(dailyClaims);
       })
@@ -65,10 +64,7 @@ export default function Rewards() {
         if (active) setClaimError(error.message);
       })
       .finally(() => {
-        if (active) {
-          setLoadingPurchaseRewards(false);
-          setLoadingMissions(false);
-        }
+        if (active) setLoadingMissions(false);
       });
     getProductRedemptions(user.id)
       .then((redemptions) => {
@@ -82,6 +78,45 @@ export default function Rewards() {
       });
     return () => {
       active = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return undefined;
+    let active = true;
+    let refreshing = false;
+
+    const refreshPurchaseRewards = async () => {
+      if (refreshing) return;
+      refreshing = true;
+      try {
+        const rewards = await getPurchaseMissionRewards(user.id);
+        if (active) {
+          setPurchaseRewards(rewards);
+          setPurchaseRewardsError('');
+        }
+      } catch (error) {
+        if (active) setPurchaseRewardsError(error.message);
+      } finally {
+        refreshing = false;
+        if (active) setLoadingPurchaseRewards(false);
+      }
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') void refreshPurchaseRewards();
+    };
+    const refreshTimer = window.setInterval(refreshWhenVisible, 5000);
+
+    void refreshPurchaseRewards();
+    window.addEventListener('mysale:messages-loaded', refreshWhenVisible);
+    window.addEventListener('focus', refreshWhenVisible);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    return () => {
+      active = false;
+      window.clearInterval(refreshTimer);
+      window.removeEventListener('mysale:messages-loaded', refreshWhenVisible);
+      window.removeEventListener('focus', refreshWhenVisible);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
     };
   }, [user?.id]);
 
@@ -262,14 +297,27 @@ export default function Rewards() {
         )}
       </section>
 
-      {(loadingPurchaseRewards || purchaseRewards.length > 0) && (
+      {purchaseRewardsError && (
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-black text-slate-900">Misiones de compra completadas</h2>
-          {loadingPurchaseRewards && (
-            <p role="status" className="text-sm text-slate-600">Cargando recompensas de compra...</p>
-          )}
+          <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">
+            No se pudieron cargar las recompensas de compra: {purchaseRewardsError}
+          </p>
+        </section>
+      )}
+
+      {!loadingPurchaseRewards && purchaseRewards.some((reward) => (
+        !missions.some((mission) => mission.id === reward.mission_id && mission.active)
+      )) && (
+        <section className="mb-8">
+          <h2 className="mb-4 text-2xl font-black text-slate-900">Recompensas de misiones anteriores</h2>
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {purchaseRewards.map((reward) => (
+            {purchaseRewards
+              .filter((reward) => !missions.some(
+                (mission) => mission.id === reward.mission_id && mission.active,
+              ))
+              .filter((reward) => !reward.claimed_at)
+              .map((reward) => (
               <article
                 key={reward.mission_id}
                 className="overflow-hidden rounded-3xl border border-slate-200 bg-transparent p-2 shadow-sm"
@@ -302,7 +350,7 @@ export default function Rewards() {
                   </button>
                 </div>
               </article>
-            ))}
+              ))}
           </div>
         </section>
       )}
@@ -313,7 +361,16 @@ export default function Rewards() {
           <p className="text-sm text-slate-600">No hay misiones disponibles ahora.</p>
         )}
         {missions
-          .filter((mission) => mission.active)
+          .filter((mission) => (
+            mission.active
+            && (
+              mission.type === 'daily_login'
+                ? !claimedDailyMissionIds.includes(mission.id)
+                : !purchaseRewards.some(
+                  (reward) => reward.mission_id === mission.id && reward.claimed_at,
+                )
+            )
+          ))
           .map((mission) => (
             <article
               key={mission.id}
@@ -340,6 +397,32 @@ export default function Rewards() {
                 <div className="mt-4 text-sm text-slate-600">
                   {getRewardMissionTargetLabel(mission)}
                 </div>
+                {mission.type !== 'daily_login' && (() => {
+                  const reward = purchaseRewards.find((item) => item.mission_id === mission.id);
+
+                  return (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (reward) void handlePurchaseMissionClaim(reward.mission_id);
+                        }}
+                        disabled={!reward || Boolean(reward.claimed_at) || claimingPurchaseMissionId !== ''}
+                        className="rewards-daily-claim-button mt-5 w-full rounded-full bg-fuchsia-300 px-5 py-2.5 text-xl font-bold text-black transition hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
+                      >
+                        {reward && claimingPurchaseMissionId === reward.mission_id
+                          ? 'Canjeando...'
+                          : reward?.claimed_at
+                            ? 'Recompensa recibida'
+                            : reward
+                              ? <span className="text-xl">Canjear recompensa</span>
+                              : loadingPurchaseRewards
+                                ? 'Verificando recompensa...'
+                                : 'Completa la misión para canjear'}
+                      </button>
+                    </>
+                  );
+                })()}
                 {mission.type === 'daily_login' && (
                   <button
                     type="button"

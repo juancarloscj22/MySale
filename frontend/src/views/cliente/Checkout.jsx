@@ -90,8 +90,8 @@ export default function Checkout() {
 
     setValidatingCoupon(true);
     try {
-      const discountPercent = await validateCoupon(couponCode);
-      setAppliedCoupon({ code: couponCode.trim().toUpperCase(), discountPercent });
+      const discount = await validateCoupon(couponCode);
+      setAppliedCoupon({ code: couponCode.trim().toUpperCase(), ...discount });
     } catch (validationError) {
       setCouponError(validationError.message);
     } finally {
@@ -99,10 +99,12 @@ export default function Checkout() {
     }
   };
 
-  const couponDiscount = appliedCoupon
-    ? Number((subtotal * appliedCoupon.discountPercent / 100).toFixed(2))
-    : 0;
   const shippingFee = delivery.adjacentZone === true ? settings?.shippingFee ?? 0 : 0;
+  const couponDiscount = appliedCoupon
+    ? appliedCoupon.type === 'amount'
+      ? Math.min(subtotal + shippingFee, appliedCoupon.value)
+      : Number((subtotal * appliedCoupon.value / 100).toFixed(2))
+    : 0;
   const estimatedTotal = subtotal - couponDiscount + shippingFee;
 
   const handleSubmitOrder = async (event) => {
@@ -431,7 +433,10 @@ export default function Checkout() {
               </div>
               {appliedCoupon && (
                 <p role="status" className="mt-2 text-sm font-semibold text-emerald-700">
-                  Cupón {appliedCoupon.code} aplicado: {appliedCoupon.discountPercent}% de descuento.
+                  Cupón {appliedCoupon.code} aplicado:{' '}
+                  {appliedCoupon.type === 'amount'
+                    ? `descuento de ${settings?.currencyCode ?? '$'} ${appliedCoupon.value.toFixed(2)}`
+                    : `${appliedCoupon.value}% de descuento`}
                 </p>
               )}
               {couponError && <p role="alert" className="mt-2 text-sm text-pink-700">{couponError}</p>}
@@ -488,7 +493,10 @@ export default function Checkout() {
             </div>
             {appliedCoupon && (
               <div className="flex justify-between text-purple-700">
-                <span>Cupón {appliedCoupon.code} (-{appliedCoupon.discountPercent}%)</span>
+                <span>
+                  Cupón {appliedCoupon.code}
+                  {appliedCoupon.type === 'amount' ? '' : ` (-${appliedCoupon.value}%)`}
+                </span>
                 <span>-{settings ? `${settings.currencyCode} ${couponDiscount.toFixed(2)}` : `$${couponDiscount.toFixed(2)}`}</span>
               </div>
             )}
