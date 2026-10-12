@@ -3,14 +3,21 @@ import { supabase } from '../lib/supabaseClient';
 export async function getCoupons() {
   const { data, error } = await supabase
     .from('coupons')
-    .select('id, code, discount_type, discount_value, max_uses, used_count, expires_at, active, created_at')
+    .select('id, code, discount_type, discount_value, only_undiscounted_products, max_uses, used_count, expires_at, active, created_at')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
   return data;
 }
 
-export async function createCoupon({ code, discountType, discountValue, maxUses, expiresAt }) {
+export async function createCoupon({
+  code,
+  discountType,
+  discountValue,
+  maxUses,
+  expiresAt,
+  onlyUndiscountedProducts,
+}) {
   const parsedMaxUses = maxUses === '' ? null : Number(maxUses);
   if (parsedMaxUses !== null && (!Number.isInteger(parsedMaxUses) || parsedMaxUses < 1)) {
     throw new Error('La cantidad máxima de usos debe ser un entero mayor que cero.');
@@ -36,6 +43,7 @@ export async function createCoupon({ code, discountType, discountValue, maxUses,
     p_discount_value: parsedDiscountValue,
     p_max_uses: parsedMaxUses,
     p_expires_at: expiresAt ? new Date(`${expiresAt}T23:59:59`).toISOString() : null,
+    p_only_undiscounted_products: Boolean(onlyUndiscountedProducts),
   });
 
   if (error) throw error;

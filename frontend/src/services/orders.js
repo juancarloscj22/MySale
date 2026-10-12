@@ -66,10 +66,18 @@ export async function validateCoupon(code) {
   });
 
   if (error) throw error;
-  if (!['percent', 'amount'].includes(data?.type) || !Number.isFinite(Number(data.value))) {
+  if (
+    !['percent', 'amount'].includes(data?.type)
+    || !Number.isFinite(Number(data.value))
+    || typeof data.only_undiscounted_products !== 'boolean'
+  ) {
     throw new Error('Supabase devolvió un tipo de cupón inválido.');
   }
-  return { type: data.type, value: Number(data.value) };
+  return {
+    type: data.type,
+    value: Number(data.value),
+    onlyUndiscountedProducts: data.only_undiscounted_products,
+  };
 }
 
 export async function getMyOrders() {

@@ -52,6 +52,12 @@ export default function Checkout() {
   const [couponError, setCouponError] = useState('');
   const [validatingCoupon, setValidatingCoupon] = useState(false);
 
+  const undiscountedSubtotal = items.reduce((sum, item) => (
+    item.reward_redemption_id || Number(item.discount_percent) > 0
+      ? sum
+      : sum + Number(item.price) * Number(item.quantity)
+  ), 0);
+
   useEffect(() => {
     let active = true;
 
@@ -91,6 +97,9 @@ export default function Checkout() {
     setValidatingCoupon(true);
     try {
       const discount = await validateCoupon(couponCode);
+      if (discount.onlyUndiscountedProducts && undiscountedSubtotal <= 0) {
+        throw new Error('Este cupón solo aplica a productos sin descuento y tu carrito no tiene productos elegibles.');
+      }
       setAppliedCoupon({ code: couponCode.trim().toUpperCase(), ...discount });
     } catch (validationError) {
       setCouponError(validationError.message);
@@ -102,8 +111,14 @@ export default function Checkout() {
   const shippingFee = delivery.adjacentZone === true ? settings?.shippingFee ?? 0 : 0;
   const couponDiscount = appliedCoupon
     ? appliedCoupon.type === 'amount'
-      ? Math.min(subtotal + shippingFee, appliedCoupon.value)
-      : Number((subtotal * appliedCoupon.value / 100).toFixed(2))
+      ? Math.min(
+        appliedCoupon.onlyUndiscountedProducts ? undiscountedSubtotal : subtotal + shippingFee,
+        appliedCoupon.value,
+      )
+      : Number((
+        (appliedCoupon.onlyUndiscountedProducts ? undiscountedSubtotal : subtotal)
+        * appliedCoupon.value / 100
+      ).toFixed(2))
     : 0;
   const estimatedTotal = subtotal - couponDiscount + shippingFee;
 

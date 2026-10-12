@@ -3,7 +3,14 @@ import { useAuth } from '../../context/useAuth';
 import { useStoreSettings } from '../../context/useStoreSettings';
 import { createCoupon, deleteCoupon, getCoupons, setCouponActive } from '../../services/coupons';
 
-const emptyForm = { code: '', discountType: 'percent', discountValue: '', maxUses: '', expiresAt: '' };
+const emptyForm = {
+  code: '',
+  discountType: 'percent',
+  discountValue: '',
+  maxUses: '',
+  expiresAt: '',
+  onlyUndiscountedProducts: false,
+};
 const inputClass =
   'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-emerald-500';
 const today = new Date().toLocaleDateString('en-CA');
@@ -189,7 +196,7 @@ export default function Coupons() {
             className={inputClass}
           />
         </label>
-        <div className="md:col-span-2">
+        <div className="flex flex-wrap items-center gap-5 md:col-span-2">
           <button
             type="submit"
             disabled={saving}
@@ -197,6 +204,18 @@ export default function Coupons() {
           >
             {saving ? 'Creando...' : 'Crear cupón'}
           </button>
+          <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <input
+              type="checkbox"
+              checked={form.onlyUndiscountedProducts}
+              onChange={(event) => setForm((current) => ({
+                ...current,
+                onlyUndiscountedProducts: event.target.checked,
+              }))}
+              className="h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600"
+            />
+            Aplicar solo a productos sin descuento
+          </label>
         </div>
       </form>
 
@@ -224,6 +243,7 @@ export default function Coupons() {
               <tr>
                 <th scope="col" className="p-4">Código</th>
                 <th scope="col" className="p-4">Descuento</th>
+                <th scope="col" className="p-4">Aplicación</th>
                 <th scope="col" className="p-4">Usos</th>
                 <th scope="col" className="p-4">Vencimiento</th>
                 <th scope="col" className="p-4">Estado</th>
@@ -238,6 +258,9 @@ export default function Coupons() {
                     {coupon.discount_type === 'amount'
                       ? `${currencyCode} ${Number(coupon.discount_value).toFixed(2)}`
                       : `${Number(coupon.discount_value)}%`}
+                  </td>
+                  <td className="p-4">
+                    {coupon.only_undiscounted_products ? 'Solo sin descuento' : 'Todos los productos'}
                   </td>
                   <td className="p-4">
                     {coupon.max_uses === null
