@@ -1,6 +1,3 @@
-update public.user_reward_points
-set points = 0;
-
 insert into public.user_reward_points (user_id, points)
 select profiles.id, 0
 from public.profiles

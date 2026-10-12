@@ -80,11 +80,11 @@ export default function Messages() {
         recipientUserId: form.audience === 'user' ? form.recipientUserId : null,
         title: form.title,
         body: form.body,
-        pointsAmount: form.awardPoints ? Number(form.pointsAmount) : 0,
+        pointsAmount: form.awardPoints && canAwardPoints ? Number(form.pointsAmount) : 0,
       });
       setForm(emptyForm);
       setNotice(
-        form.awardPoints
+        form.awardPoints && canAwardPoints
           ? (
             <span className="inline-flex flex-wrap items-center gap-1">
               Mensaje enviado con <MayCoinAmount amount={Number(form.pointsAmount)} iconClassName="h-4 w-4" />
@@ -104,16 +104,18 @@ export default function Messages() {
   const recipientLabels = new Map(
     recipients.map((recipient) => [
       recipient.id,
-      recipient.full_name?.trim() || recipient.email || 'Usuario',
+      `${recipient.full_name?.trim() || recipient.email || 'Usuario'}${recipient.role === 'developer' ? ' · Dev' : recipient.role === 'admin' ? ' · Admin' : ''}`,
     ]),
   );
+  const selectedRecipient = recipients.find((recipient) => recipient.id === form.recipientUserId);
+  const canAwardPoints = form.audience === 'all' || ['customer', 'admin', 'developer'].includes(selectedRecipient?.role);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">Comunicación</p>
       <h1 className="mt-2 text-4xl font-black text-slate-900">Mensajes</h1>
       <p className="mt-3 text-slate-600">
-        Envía avisos a todos los usuarios o mensajes privados a un cliente. Las respuestas no están habilitadas.
+        Envía avisos a todos los usuarios o mensajes privados a clientes, administradores y desarrolladores. También puedes incluir MayCoins en mensajes privados.
       </p>
 
       {error && <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
@@ -142,7 +144,16 @@ export default function Messages() {
             <select
               required
               value={form.recipientUserId}
-              onChange={(event) => setForm((current) => ({ ...current, recipientUserId: event.target.value }))}
+              onChange={(event) => {
+                const recipient = recipients.find((item) => item.id === event.target.value);
+                setForm((current) => ({
+                  ...current,
+                  recipientUserId: event.target.value,
+                  awardPoints: !['customer', 'admin', 'developer'].includes(recipient?.role)
+                    ? false
+                    : current.awardPoints,
+                }));
+              }}
               className={inputClass}
             >
               <option value="">Selecciona un usuario</option>
@@ -150,11 +161,13 @@ export default function Messages() {
                 <option key={recipient.id} value={recipient.id}>
                   {recipient.full_name?.trim() || recipient.email || recipient.id}
                   {recipient.email && recipient.full_name?.trim() ? ` · ${recipient.email}` : ''}
+                  {recipient.role === 'developer' ? ' · Dev' : ''}
+                  {recipient.role === 'admin' ? ' · Admin' : ''}
                 </option>
               ))}
             </select>
             {recipients.length === 0 && !loading && (
-              <span className="mt-1 block text-sm text-slate-500">No hay clientes activos disponibles.</span>
+              <span className="mt-1 block text-sm text-slate-500">No hay destinatarios activos disponibles.</span>
             )}
           </label>
         )}
@@ -189,24 +202,28 @@ export default function Messages() {
             disabled={
               saving ||
               (form.audience === 'user' && recipients.length === 0) ||
-              (form.awardPoints && (!Number.isInteger(Number(form.pointsAmount)) || Number(form.pointsAmount) <= 0))
+              (form.awardPoints && canAwardPoints && (!Number.isInteger(Number(form.pointsAmount)) || Number(form.pointsAmount) <= 0))
             }
             className="message-submit-button rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white disabled:cursor-wait disabled:opacity-60"
           >
             {saving ? 'Enviando...' : 'Enviar mensaje'}
           </button>
-          <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <input
-              type="checkbox"
-              checked={form.awardPoints}
-              onChange={(event) => setForm((current) => ({
-                ...current,
-                awardPoints: event.target.checked,
-              }))}
-              className="h-4 w-4 accent-emerald-600"
-            />
-            Enviar MayCoins
-          </label>
+          {canAwardPoints ? (
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <input
+                type="checkbox"
+                checked={form.awardPoints}
+                onChange={(event) => setForm((current) => ({
+                  ...current,
+                  awardPoints: event.target.checked,
+                }))}
+                className="h-4 w-4 accent-emerald-600"
+              />
+              Enviar MayCoins
+            </label>
+          ) : (
+            <span className="text-sm text-slate-500">Selecciona un destinatario elegible para enviar MayCoins.</span>
+          )}
           {form.awardPoints && (
             <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
               Cantidad

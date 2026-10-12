@@ -232,6 +232,9 @@
 }
 
 .store-logo {
+  flex: none;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
   border: 3px solid #39e639;
   box-shadow:
     inset 4px 4px 6px rgb(255 255 255 / 90%),
@@ -261,6 +264,12 @@
 .developer-section .message-submit-button {
   border: 2px solid #39e639 !important;
   background-color: #111a2c !important;
+  color: #39e639 !important;
+  text-shadow: none !important;
+}
+
+.message-claim-button.message-claim-button,
+.message-claim-button.message-claim-button:hover:not(:disabled) {
   color: #39e639 !important;
   text-shadow: none !important;
 }

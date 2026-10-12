@@ -27,6 +27,26 @@ export default function Orders() {
   const [busyOrderId, setBusyOrderId] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [rewardNotificationErrors, setRewardNotificationErrors] = useState({});
+
+  const processPurchaseMissionRewards = async (order) => {
+    const allMissions = await getRewardMissions();
+    const eligibleMissions = allMissions.filter((mission) => (
+      mission.active
+      && (
+        (mission.type === 'purchase_total' && Number(order.total) >= Number(mission.targetValue))
+        || (
+          mission.type === 'purchase_quantity'
+          && order.order_items.reduce((quantity, item) => quantity + Number(item.quantity), 0)
+            >= Number(mission.targetValue)
+        )
+      )
+    ));
+    for (const mission of eligibleMissions) {
+      await notifyPurchaseMissionCompleted({ orderId: order.id, mission });
+    }
+    return eligibleMissions.length;
+  };
 
   const loadOrders = useCallback(async () => {
     try {
@@ -70,29 +90,22 @@ export default function Orders() {
           item.id === updatedOrder.id ? { ...item, status: updatedOrder.status } : item,
         ),
       );
-      let notificationWarning = '';
       if (status === 'completed' && order.status !== 'completed' && order.user_id) {
         try {
-          const allMissions = await getRewardMissions();
-          const eligibleMissions = allMissions.filter((mission) => (
-            mission.active
-            && (
-              (mission.type === 'purchase_total' && Number(order.total) >= Number(mission.targetValue))
-              || (
-                mission.type === 'purchase_quantity'
-                && order.order_items.reduce((quantity, item) => quantity + Number(item.quantity), 0)
-                  >= Number(mission.targetValue)
-              )
-            )
-          ));
-          for (const mission of eligibleMissions) {
-            await notifyPurchaseMissionCompleted({ orderId: order.id, mission });
-          }
+          await processPurchaseMissionRewards(order);
+          setRewardNotificationErrors((current) => {
+            const next = { ...current };
+            delete next[order.id];
+            return next;
+          });
         } catch (notificationError) {
-          notificationWarning = ` El estado se actualizó, pero no se pudo enviar el aviso de misión: ${notificationError.message}`;
+          setRewardNotificationErrors((current) => ({
+            ...current,
+            [order.id]: notificationError.message,
+          }));
         }
       }
-      setMessage(`Estado del pedido actualizado.${notificationWarning}`);
+      setMessage('Estado del pedido actualizado.');
     } catch (updateError) {
       setError(updateError.message);
     } finally {
@@ -150,6 +163,11 @@ export default function Orders() {
                   </select>
                 </label>
               </div>
+              {order.status === 'completed' && order.user_id && rewardNotificationErrors[order.id] && (
+                <p role="alert" className="mt-4 text-sm text-amber-800">
+                  No se pudieron procesar todas las misiones: {rewardNotificationErrors[order.id]}
+                </p>
+              )}
 
               <div className="mt-5 grid gap-4 border-t border-slate-100 pt-5 md:grid-cols-3">
                 <div>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useAuth } from '../../context/useAuth';
 import { useStoreSettings } from '../../context/useStoreSettings';
 import {
@@ -7,6 +7,7 @@ import {
   getRewardMissionTargetLabel,
   getUserPoints,
   getClaimedDailyRewardMissionIds,
+  getProductRedemptions,
   loadUserRewards,
   setUserPoints,
   subscribeToRewardPoints,
@@ -25,9 +26,15 @@ export default function Rewards() {
   const points = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   const [missions, setMissions] = useState([]);
   const [claimedDailyMissionIds, setClaimedDailyMissionIds] = useState([]);
-  const [loadingMissions, setLoadingMissions] = useState(false);
+  const [loadingMissions, setLoadingMissions] = useState(true);
   const [purchaseRewards, setPurchaseRewards] = useState([]);
-  const [loadingPurchaseRewards, setLoadingPurchaseRewards] = useState(false);
+  const [loadingPurchaseRewards, setLoadingPurchaseRewards] = useState(true);
+  const [productRedemptions, setProductRedemptions] = useState([]);
+  const [loadingProductRedemptions, setLoadingProductRedemptions] = useState(true);
+  const [redemptionsError, setRedemptionsError] = useState('');
+  const redemptionsTrackRef = useRef(null);
+  const [canScrollRedemptionsLeft, setCanScrollRedemptionsLeft] = useState(false);
+  const [canScrollRedemptionsRight, setCanScrollRedemptionsRight] = useState(false);
   const [claimingPurchaseMissionId, setClaimingPurchaseMissionId] = useState('');
   const [claimingMissionId, setClaimingMissionId] = useState('');
   const [claimError, setClaimError] = useState('');
@@ -42,8 +49,6 @@ export default function Rewards() {
   useEffect(() => {
     if (!user?.id) return undefined;
     let active = true;
-    setLoadingPurchaseRewards(true);
-    setLoadingMissions(true);
     Promise.all([
       getPurchaseMissionRewards(user.id),
       getRewardMissions(),
@@ -65,10 +70,39 @@ export default function Rewards() {
           setLoadingMissions(false);
         }
       });
+    getProductRedemptions(user.id)
+      .then((redemptions) => {
+        if (active) setProductRedemptions(redemptions);
+      })
+      .catch((error) => {
+        if (active) setRedemptionsError(error.message);
+      })
+      .finally(() => {
+        if (active) setLoadingProductRedemptions(false);
+      });
     return () => {
       active = false;
     };
   }, [user?.id]);
+
+  useEffect(() => {
+    const track = redemptionsTrackRef.current;
+    if (!track) return undefined;
+
+    const updateScrollButtons = () => {
+      setCanScrollRedemptionsLeft(track.scrollLeft > 0);
+      setCanScrollRedemptionsRight(track.scrollLeft + track.clientWidth < track.scrollWidth - 1);
+    };
+
+    updateScrollButtons();
+    track.addEventListener('scroll', updateScrollButtons);
+    const resizeObserver = new ResizeObserver(updateScrollButtons);
+    resizeObserver.observe(track);
+    return () => {
+      track.removeEventListener('scroll', updateScrollButtons);
+      resizeObserver.disconnect();
+    };
+  }, [productRedemptions, loadingProductRedemptions]);
 
   const handleDailyClaim = async (mission) => {
     setClaimError('');
@@ -114,10 +148,10 @@ export default function Rewards() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div
-        className="mb-8 flex flex-col gap-4 overflow-hidden rounded-3xl border border-amber-200 p-2 shadow-sm md:flex-row md:items-center md:justify-between"
+        className="mb-8 flex flex-col gap-4 overflow-hidden rounded-3xl border border-amber-200 bg-transparent p-2 shadow-sm md:flex-row md:items-center md:justify-between"
         style={cardBackgroundStyle}
       >
-        <div className="flex flex-1 items-center justify-between gap-3 rounded-2xl bg-white/35 p-3 sm:gap-5 sm:p-6">
+        <div className="flex flex-1 items-center justify-between gap-3 rounded-2xl bg-transparent p-3 sm:gap-5 sm:p-6">
           <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 sm:text-sm">Recompensas</p>
@@ -145,6 +179,89 @@ export default function Rewards() {
         </p>
       )}
 
+      <section className="mb-8">
+        <h2 className="mb-4 text-2xl font-black text-[#f0abfc]">Productos canjeados</h2>
+        {loadingProductRedemptions && (
+          <p role="status" className="text-sm text-slate-600">Cargando tus productos canjeados...</p>
+        )}
+        {redemptionsError && (
+          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">
+            No se pudo cargar tu historial de canjes: {redemptionsError}
+          </p>
+        )}
+        {!loadingProductRedemptions && !redemptionsError && productRedemptions.length === 0 && (
+          <p className="text-sm text-slate-600">Aún no has canjeado productos.</p>
+        )}
+        {productRedemptions.length > 0 && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              aria-label="Ver productos canjeados anteriores"
+              onClick={() => redemptionsTrackRef.current?.scrollBy({ left: -280, behavior: 'smooth' })}
+              disabled={!canScrollRedemptionsLeft}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-black shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+            <div
+              ref={redemptionsTrackRef}
+              className="flex min-w-0 gap-4 overflow-x-auto overscroll-x-contain pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {productRedemptions.map((redemption) => (
+                <article
+                  key={redemption.id}
+                  className="flex w-64 shrink-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white/80 p-3 shadow-sm"
+                >
+                  {redemption.image_url ? (
+                    <img
+                      src={redemption.image_url}
+                      alt={redemption.product_name}
+                      className="h-16 w-16 shrink-0 rounded-xl object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div
+                      role="img"
+                      aria-label={`Sin imagen para ${redemption.product_name}`}
+                      className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-center text-xs text-slate-500"
+                    >
+                      Sin imagen
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <h3 className="truncate font-bold text-green-600">{redemption.product_name}</h3>
+                    <p className="text-sm font-semibold text-amber-800">
+                      {Number(redemption.points_spent).toLocaleString('es-MX')} MayCoins
+                    </p>
+                    <time
+                      className="text-xs text-slate-500"
+                      dateTime={redemption.redeemed_at}
+                    >
+                      {new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium' }).format(
+                        new Date(redemption.redeemed_at),
+                      )}
+                    </time>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <button
+              type="button"
+              aria-label="Ver más productos canjeados"
+              onClick={() => redemptionsTrackRef.current?.scrollBy({ left: 280, behavior: 'smooth' })}
+              disabled={!canScrollRedemptionsRight}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-black shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+        )}
+      </section>
+
       {(loadingPurchaseRewards || purchaseRewards.length > 0) && (
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-black text-slate-900">Misiones de compra completadas</h2>
@@ -155,10 +272,10 @@ export default function Rewards() {
             {purchaseRewards.map((reward) => (
               <article
                 key={reward.mission_id}
-                className="overflow-hidden rounded-3xl border border-slate-200 p-2 shadow-sm"
+                className="overflow-hidden rounded-3xl border border-slate-200 bg-transparent p-2 shadow-sm"
                 style={cardBackgroundStyle}
               >
-                <div className="h-full rounded-2xl bg-white/35 p-5">
+                <div className="h-full rounded-2xl bg-transparent p-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Compra completada</p>
                   <h3 className="mt-2 text-2xl font-black text-slate-900">{reward.mission_title}</h3>
                   <p className="mt-3 text-base leading-6 text-slate-700">
@@ -200,10 +317,10 @@ export default function Rewards() {
           .map((mission) => (
             <article
               key={mission.id}
-              className="overflow-hidden rounded-3xl border border-slate-200 p-2 shadow-sm"
+              className="overflow-hidden rounded-3xl border border-slate-200 bg-transparent p-2 shadow-sm"
               style={cardBackgroundStyle}
             >
-              <div className="h-full rounded-2xl bg-white/35 p-5">
+              <div className="h-full rounded-2xl bg-transparent p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">

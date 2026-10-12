@@ -9,8 +9,8 @@ export async function getMessageRecipients() {
   while (true) {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, full_name')
-      .eq('role', 'customer')
+      .select('id, email, full_name, role')
+      .in('role', ['customer', 'admin', 'developer'])
       .eq('blocked', false)
       .order('full_name', { ascending: true })
       .range(start, start + recipientPageSize - 1);

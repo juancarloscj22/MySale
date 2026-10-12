@@ -70,7 +70,7 @@ export default function Navbar() {
             <img
               src={logoUrl}
               alt=""
-              className="store-logo h-[120px] w-[120px] rounded-full bg-white object-contain p-1"
+              className="store-logo aspect-square h-[120px] w-[120px] shrink-0 rounded-full bg-white object-contain p-1"
             />
           ) : (
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold text-slate-900">

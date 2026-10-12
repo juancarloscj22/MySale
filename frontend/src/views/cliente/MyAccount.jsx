@@ -79,7 +79,7 @@ export default function MyAccount() {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-600 disabled:cursor-wait disabled:opacity-60"
+          className="rounded-full border-2 border-emerald-700 bg-emerald-100 px-6 py-3 text-sm font-bold text-emerald-800 shadow-[inset_3px_3px_5px_rgba(255,255,255,0.85),inset_-3px_-3px_5px_rgba(15,23,42,0.22)] transition hover:bg-emerald-200 disabled:cursor-wait disabled:opacity-60"
         >
           {saving ? 'Guardando...' : 'Guardar datos'}
         </button>

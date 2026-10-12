@@ -36,6 +36,7 @@ export async function createOrder({
       product_id: item.id,
       flavor_id: item.flavor_id,
       quantity: item.quantity,
+      ...(item.reward_redemption_id ? { redemption_id: item.reward_redemption_id } : {}),
     })),
     p_delivery_name: deliveryName,
     p_delivery_phone: deliveryPhone,
@@ -45,7 +46,7 @@ export async function createOrder({
     p_cash_change_required: cashChangeRequired,
     p_adjacent_zone: adjacentZone,
     p_coupon_code: couponCode || null,
-    p_delivery_date: deliveryDate,
+    p_delivery_date: deliveryDate || null,
   });
 
   if (error) throw error;

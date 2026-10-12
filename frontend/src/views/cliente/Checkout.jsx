@@ -29,7 +29,16 @@ function getPendingRequestId() {
 
 export default function Checkout() {
   const { profile } = useAuth();
-  const { items, subtotal, removeItem, updateQuantity, clearCart } = useCart();
+  const {
+    items,
+    subtotal,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    loadingRedemptions,
+    cartError,
+    redemptionSetupError,
+  } = useCart();
   const [settings, setSettings] = useState(null);
   const [settingsError, setSettingsError] = useState('');
   const [loadingSettings, setLoadingSettings] = useState(true);
@@ -105,13 +114,18 @@ export default function Checkout() {
       return;
     }
 
-    if (items.some((item) => !item.flavor_id)) {
+    if (items.some((item) => !item.flavor_id && !item.reward_redemption_id)) {
       setError('El carrito tiene productos sin sabor seleccionado. Elimínalos y vuelve a agregarlos eligiendo un sabor.');
       return;
     }
 
     if (settings?.acceptingOrders === false) {
       setError('La tienda no está aceptando pedidos por el momento. Inténtalo más tarde.');
+      return;
+    }
+
+    if (cartError || loadingRedemptions) {
+      setError(cartError || 'Espera mientras verificamos tus productos canjeados.');
       return;
     }
 
@@ -152,7 +166,7 @@ export default function Checkout() {
         ...order,
         whatsappUrl: buildWhatsAppUrl(settings.whatsappNumber, orderMessage),
       });
-      clearCart();
+      clearCart({ includeRedeemed: true });
       sessionStorage.removeItem('pending-order-request-id');
       setRequestId(crypto.randomUUID());
     } catch (submitError) {
@@ -177,12 +191,12 @@ export default function Checkout() {
             href={completedOrder.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-flex rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600"
+            className="mt-6 inline-flex rounded-full border-2 border-emerald-700 bg-white px-6 py-3 text-sm font-extrabold text-emerald-800 transition hover:bg-emerald-50"
           >
             Continuar a WhatsApp
           </a>
           <div>
-            <Link to="/mis-pedidos" className="mt-5 inline-block text-sm font-semibold text-slate-600 hover:text-slate-900">
+            <Link to="/mis-pedidos" className="mt-5 inline-flex rounded-full border-2 border-emerald-700 bg-white px-6 py-3 text-sm font-extrabold text-blue-700 transition hover:bg-blue-50">
               Ver mis pedidos
             </Link>
           </div>
@@ -194,8 +208,24 @@ export default function Checkout() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-20 text-center">
-        <h1 className="text-4xl font-black text-slate-900">Tu carrito está vacío</h1>
-        <p className="mt-4 text-slate-600">Agrega algunos productos para continuar con tu pedido.</p>
+        {loadingRedemptions ? (
+          <>
+            <h1 className="text-4xl font-black text-slate-900">Revisando tu carrito</h1>
+            <p role="status" className="mt-4 text-slate-600">Buscando productos canjeados pendientes...</p>
+          </>
+        ) : redemptionSetupError || cartError ? (
+          <>
+            <h1 className="text-4xl font-black text-slate-900">No se pudo cargar tu carrito</h1>
+            <p role="alert" className="mt-4 rounded-xl bg-amber-50 p-4 text-amber-900">
+              {redemptionSetupError || cartError}
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-4xl font-black text-slate-900">Tu carrito está vacío</h1>
+            <p className="mt-4 text-slate-600">Agrega algunos productos para continuar con tu pedido.</p>
+          </>
+        )}
         <Link to="/catalog" className="mt-6 inline-block rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white">
           Explorar catálogo
         </Link>
@@ -214,6 +244,11 @@ export default function Checkout() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_0.9fr]">
         <div className="space-y-8">
+          {loadingRedemptions && (
+            <p role="status" className="rounded-xl bg-slate-100 p-4 text-sm text-slate-700">
+              Verificando tus productos canjeados...
+            </p>
+          )}
           <div className="space-y-4">
             {items.map((item) => (
               <div key={item.cartKey ?? item.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -221,44 +256,57 @@ export default function Checkout() {
                 <div className="min-w-32 flex-1">
                   <h2 className="text-lg font-bold text-slate-900">{item.name}</h2>
                   <p className="text-sm text-slate-500">Sabor: {item.flavor || 'Pendiente de seleccionar'}</p>
-                  {item.discount_percent > 0 && Number.isFinite(item.originalPrice) && (
+                  {item.reward_redemption_id ? (
+                    <p className="mt-2 text-sm font-semibold text-emerald-700">
+                      Canjeado por {Number(item.reward_points_spent).toLocaleString('es-MX')} MayCoins
+                    </p>
+                  ) : null}
+                  {!item.reward_redemption_id && item.discount_percent > 0 && Number.isFinite(item.originalPrice) && (
                     <p className="mt-1 text-sm text-slate-500 line-through">
                       ${item.originalPrice.toFixed(2)}
                     </p>
                   )}
                   <p className="mt-2 text-lg font-black text-slate-900">
-                    {settings?.currencyCode ?? '$'} {(item.price * item.quantity).toFixed(2)}
+                    {item.reward_redemption_id
+                      ? 'Incluido en el canje'
+                      : `${settings?.currencyCode ?? '$'} ${(item.price * item.quantity).toFixed(2)}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    aria-label={`Quitar una unidad de ${item.name}`}
-                    onClick={() => updateQuantity(item.cartKey ?? item.id, item.quantity - 1)}
-                    disabled={submitting}
-                    className="checkout-quantity-decrease h-8 w-8 rounded-full border border-red-500 text-lg"
-                  >
-                    −
-                  </button>
-                  <span className="w-8 text-center font-semibold">{item.quantity}</span>
-                  <button
-                    type="button"
-                    aria-label={`Agregar una unidad de ${item.name}`}
-                    onClick={() => updateQuantity(item.cartKey ?? item.id, item.quantity + 1)}
-                    disabled={submitting}
-                    className="h-8 w-8 rounded-full border border-slate-300 text-lg"
-                  >
-                    +
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeItem(item.cartKey ?? item.id)}
-                  disabled={submitting}
-                  className="text-sm font-semibold text-red-500"
-                >
-                  Eliminar
-                </button>
+                {item.reward_redemption_id ? (
+                  <p className="text-sm font-semibold text-slate-500">No se puede quitar antes de crear el pedido.</p>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label={`Quitar una unidad de ${item.name}`}
+                        onClick={() => updateQuantity(item.cartKey ?? item.id, item.quantity - 1)}
+                        disabled={submitting}
+                        className="checkout-quantity-decrease h-8 w-8 rounded-full border border-red-500 text-lg"
+                      >
+                        −
+                      </button>
+                      <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                      <button
+                        type="button"
+                        aria-label={`Agregar una unidad de ${item.name}`}
+                        onClick={() => updateQuantity(item.cartKey ?? item.id, item.quantity + 1)}
+                        disabled={submitting}
+                        className="h-8 w-8 rounded-full border border-slate-300 text-lg"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(item.cartKey ?? item.id)}
+                      disabled={submitting}
+                      className="text-sm font-semibold text-red-500"
+                    >
+                      Eliminar
+                    </button>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -299,7 +347,7 @@ export default function Checkout() {
                     }
                     className={`rounded-full border px-5 py-2 text-sm font-semibold transition ${
                       delivery.adjacentZone === option.value
-                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
                         : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                     }`}
                   >
@@ -376,7 +424,7 @@ export default function Checkout() {
                   type="button"
                   onClick={() => void handleApplyCoupon()}
                   disabled={validatingCoupon || !couponCode.trim()}
-                  className="rounded-xl bg-purple-200 px-5 py-3 text-sm font-bold text-purple-900 hover:bg-purple-300 disabled:opacity-60"
+                  className="rounded-xl border-2 border-emerald-700 bg-white px-5 py-3 text-sm font-extrabold text-emerald-800 shadow-md shadow-emerald-900/25 transition hover:bg-emerald-50 active:translate-y-0.5 active:shadow-sm disabled:opacity-60"
                 >
                   {validatingCoupon ? 'Validando...' : 'Aplicar'}
                 </button>
@@ -408,7 +456,7 @@ export default function Checkout() {
                       }
                       className={`rounded-full border px-5 py-2 text-sm font-semibold transition ${
                         delivery.cashChangeRequired === option.value
-                          ? 'border-emerald-600 bg-emerald-600 text-white'
+                          ? 'border-emerald-600 bg-emerald-600 text-green-600'
                           : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                       }`}
                     >
@@ -457,9 +505,9 @@ export default function Checkout() {
             </p>
           </div>
 
-          {(settingsError || error) && (
+          {(settingsError || error || cartError) && (
             <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-              {error || `No se pudo cargar la configuración: ${settingsError}`}
+              {error || cartError || `No se pudo cargar la configuración: ${settingsError}`}
             </p>
           )}
 
@@ -472,8 +520,8 @@ export default function Checkout() {
           <button
             type="submit"
             form="checkout-form"
-            disabled={submitting || loadingSettings || !settings?.whatsappNumber || delivery.adjacentZone === null || settings?.acceptingOrders === false}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={submitting || loadingSettings || loadingRedemptions || Boolean(cartError) || !settings?.whatsappNumber || delivery.adjacentZone === null || settings?.acceptingOrders === false}
+            className="mt-6 inline-flex w-full items-center justify-center rounded-full border-2 border-emerald-700 bg-white px-6 py-3 text-sm font-extrabold text-emerald-800 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Validando y guardando...' : 'Crear pedido y continuar a WhatsApp'}
           </button>
@@ -481,10 +529,10 @@ export default function Checkout() {
           <button
             type="button"
             onClick={clearCart}
-            disabled={submitting}
+            disabled={submitting || items.every((item) => item.reward_redemption_id)}
             className="mt-3 w-full rounded-full border border-slate-300 px-6 py-3 text-sm font-bold text-slate-700 disabled:opacity-50"
           >
-            Vaciar carrito
+            Vaciar otros productos
           </button>
         </aside>
       </div>

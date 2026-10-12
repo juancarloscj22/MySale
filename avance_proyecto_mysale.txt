@@ -182,3 +182,39 @@ Fecha: 11/10/2026
 - La migración `20261011003000_user_messages.sql` crea `messages` y `message_reads` y restringe lectura/escritura según usuario y rol. Se aplicó al proyecto remoto y se verificaron ambas tablas con RLS habilitado y las dos migraciones registradas.
 - Se ejecutaron `npm run lint` y `npm run build` después de los últimos cambios de mensajería; ambos pasaron. Vite reportó una advertencia de tamaño de bundle superior a 500 kB en una compilación antes de dividir la carga del buzón; la compilación final dividió el código de mensajes en chunks separados.
 - Los commits recientes relacionados con UI son `a91d109`, `16705f8`, `df09407`, `9122eb4`, `ade9ea8` y `3075042`. La implementación de mensajería se encuentra actualmente en el árbol de trabajo sin commit.
+
+31. SISTEMA DE RECOMPENSAS, MENSAJERÍA Y AJUSTES RESPONSIVOS
+Fecha: 11/10/2026
+
+- Se incorporó un sistema de MayCoins con misiones diarias y de compra por monto o cantidad, configuración del costo de canje por producto, historial de recompensas y notificaciones al completar misiones. Los reclamos se procesan en funciones transaccionales de Supabase.
+- Los canjes de productos validan el rol y estado de la cuenta, saldo, apertura de la tienda y disponibilidad. En una sola transacción descuentan MayCoins y una unidad de inventario; cuando hay sabores, reservan una unidad del sabor disponible. Si una validación falla, no se completa el canje.
+- Se permite canjear varias veces el mismo producto. Cada operación genera su propio registro y descuenta nuevamente saldo y stock; no hay un bloqueo por producto previamente canjeado. La migración `20261011205000_allow_repeated_product_redemptions.sql` se aplicó y verificó en Supabase.
+- En Recompensas se agregó una pasarela horizontal de productos canjeados, ordenada del más reciente al más antiguo. Cada registro muestra la miniatura disponible del producto, su nombre, los MayCoins utilizados y la fecha; también contempla carga, historial vacío y errores de consulta.
+- Admin y Dev pueden canjear productos con sus propios MayCoins y consultar su historial. La migración `20261011204000_allow_staff_product_redemptions.sql` se aplicó y se verificó que el RPC remoto acepta ambos roles.
+- Admin y Dev pueden enviar mensajes privados a clientes, administradores y desarrolladores activos; pueden adjuntar MayCoins a mensajes privados y el destinatario los reclama desde su bandeja. Las difusiones con MayCoins continúan acreditándose solo a clientes. Las migraciones `20261011200000_allow_messages_to_developers.sql`, `20261011201000_message_points_for_staff.sql` y `20261011202000_claim_staff_message_points_once.sql` se aplicaron y verificaron.
+- Se corrigió la acreditación duplicada/inmediata de MayCoins de mensajes de personal y se reabrió el reclamo que había quedado marcado como recibido sin saldo. La migración `20261011203000_reopen_uncredited_staff_message_rewards.sql` se aplicó; el usuario confirmó que pudo recibir los puntos.
+- El indicador de la bandeja cuenta mensajes sin leer y pasa a cero al abrirla. Se ajustaron los colores de las tarjetas de mensajes, el texto y el botón de reclamo.
+- En Admin → Pedidos se puede volver a verificar/procesar misiones de un pedido completado si falló el aviso inicial.
+- Los paneles de Recompensas que usan la imagen de fondo de navegación son transparentes. El logo de la barra conserva su forma circular en móvil, y el botón Guardar datos de Mi cuenta tiene borde, bisel y texto verdes.
+- `20261011194000_reserve_reward_product_stock.sql` se aplicó y verificó en Supabase. La migración local `20261011173000_reset_reward_balances.sql` se corrigió para no reiniciar saldos existentes; la versión anterior ya se había aplicado en remoto antes de esa corrección.
+- Se resolvieron las advertencias de lint y tamaño del bundle mediante una carga de dependencias dividida por Rolldown. `npm run lint` y `npm run build` pasan sin advertencias; el chunk `vendor` queda por debajo de 500 kB. La aplicación local se ejecuta en `http://localhost:5173/`.
+
+32. CANJES DE PRODUCTO INTEGRADOS AL CARRITO
+Fecha: 11/10/2026
+
+- Al canjear un producto, la operación conserva el descuento inmediato de MayCoins y la reserva de una unidad de inventario, y agrega al carrito el producto y el sabor reservados.
+- El artículo canjeado muestra que quedó pagado con MayCoins, mantiene cantidad fija y no se puede quitar ni al vaciar los demás productos. Se conserva en localStorage y los canjes pendientes se recuperan desde Supabase al volver a iniciar sesión.
+- En Checkout el artículo canjeado aparece a precio cero; los artículos regulares, cupones y envío conservan el cálculo existente. El carrito solo se limpia al registrar el pedido correctamente.
+- El pedido envía el identificador del canje. La migración nueva `20261011210000_reward_redemptions_checkout.sql` adapta la función transaccional para validar dueño/producto/sabor y canjes pendientes, asociarlos al pedido, no volver a cobrar ni reservar su unidad, y recalcular subtotal, cupón y total. Si se cancela el pedido, se reembolsan los MayCoins.
+- `20261011210000_reward_redemptions_checkout.sql` se aplicó y verificó en Supabase. También se aplicó `20261011211000_restore_unlinked_reward_redemptions.sql`, que recuperó el canje histórico sin sabor asociado al encontrar que su producto tenía un único sabor activo. Se verificó que hay un canje pendiente listo para aparecer en el carrito y ninguno pendiente sin sabor.
+
+33. AJUSTES DE CHECKOUT, MENSAJES Y RECOMPENSAS
+Fecha: 11/10/2026
+
+- Checkout acepta una fecha preferida vacía enviando `null` a Supabase. Se ajustaron los colores de selección de zona, cupón y confirmación del pedido.
+- La bandeja de mensajes usa un icono moderno; el aviso de puntos recibidos tiene más ancho.
+- Se simplificó el mensaje de canje para quitar la referencia a que Administración coordinará la entrega. La migración `20261011212000_simplify_product_redemption_messages.sql` se aplicó y verificó en remoto.
+- Se eliminó el botón manual de verificación de misiones de pedidos completados; el procesamiento continúa al marcar el pedido como completado.
+- La pasarela de productos canjeados usa flechas izquierda/derecha en lugar de una barra visible.
+- Se eliminó el espacio del botón de misiones retirado y se ajustaron los símbolos de las flechas a negro.
+- Se creó y aplicó `20261011213000_reset_all_reward_points.sql` a petición del usuario. Se verificó que todas las cuentas tienen saldo cero.

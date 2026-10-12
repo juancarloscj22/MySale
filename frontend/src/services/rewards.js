@@ -1,7 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 
 const pointsByUser = new Map();
-const redeemedProductsByUser = new Map();
 
 const dispatchRewardsUpdated = (userId) => {
   window.dispatchEvent(new CustomEvent('mysale:rewards-updated', { detail: { userId } }));
@@ -88,30 +87,58 @@ export function setUserPoints(points, userId) {
 }
 
 export async function loadUserRewards(userId) {
-  if (!userId) return { points: 0, redeemedProductIds: [] };
+  if (!userId) return { points: 0 };
 
-  const [balanceResult, redemptionsResult] = await Promise.all([
-    supabase
-      .from('user_reward_points')
-      .select('points')
-      .eq('user_id', userId)
-      .maybeSingle(),
-    supabase
-      .from('reward_product_redemptions')
-      .select('product_id')
-      .eq('user_id', userId)
-      .not('product_id', 'is', null),
-  ]);
+  const { data, error } = await supabase
+    .from('user_reward_points')
+    .select('points')
+    .eq('user_id', userId)
+    .maybeSingle();
 
-  if (balanceResult.error) throw balanceResult.error;
-  if (redemptionsResult.error) throw redemptionsResult.error;
+  if (error) throw error;
 
-  const points = Number(balanceResult.data?.points ?? 0);
-  const redeemedProductIds = redemptionsResult.data.map((item) => item.product_id);
+  const points = Number(data?.points ?? 0);
   pointsByUser.set(userId, points);
-  redeemedProductsByUser.set(userId, new Set(redeemedProductIds));
   dispatchRewardsUpdated(userId);
-  return { points, redeemedProductIds };
+  return { points };
+}
+
+export async function getProductRedemptions(userId) {
+  if (!userId) return [];
+
+  const { data, error } = await supabase
+    .from('reward_product_redemptions')
+    .select('id, product_id, product_name, points_spent, redeemed_at, products(image_url)')
+    .eq('user_id', userId)
+    .order('redeemed_at', { ascending: false });
+
+  if (error) throw error;
+  if (!Array.isArray(data)) {
+    throw new Error('Supabase devolvió un historial de canjes inválido.');
+  }
+
+  return data.map((redemption) => ({
+    ...redemption,
+    image_url: redemption.products?.image_url ?? '',
+  }));
+}
+
+export async function getPendingProductRedemptions(userId) {
+  if (!userId) return [];
+
+  const { data, error } = await supabase.rpc('get_pending_product_redemptions');
+
+  if (error) throw error;
+  if (!Array.isArray(data)) {
+    throw new Error('Supabase devolvió una lista inválida de canjes pendientes.');
+  }
+
+  return data;
+}
+
+export function isMissingRewardCheckoutFunction(error) {
+  return error?.code === 'PGRST202'
+    && error.message?.includes('get_pending_product_redemptions');
 }
 
 export function subscribeToRewardPoints(userId, callback) {
@@ -120,14 +147,6 @@ export function subscribeToRewardPoints(userId, callback) {
   };
   window.addEventListener('mysale:rewards-updated', handleRewardsUpdated);
   return () => window.removeEventListener('mysale:rewards-updated', handleRewardsUpdated);
-}
-
-export function getRedeemedProducts(userId) {
-  return userId ? [...(redeemedProductsByUser.get(userId) ?? new Set())] : [];
-}
-
-export function isProductRedeemed(productId, userId) {
-  return Boolean(userId && redeemedProductsByUser.get(userId)?.has(productId));
 }
 
 export function getRewardCostForProduct(product) {
@@ -176,28 +195,34 @@ export async function redeemProductForPoints(product, userId) {
     throw new Error('Inicia sesión para canjear productos con MayCoins.');
   }
 
-  const { data, error } = await supabase.rpc('redeem_product_for_points', {
+  const { data, error } = await supabase.rpc('redeem_product_for_points_for_checkout', {
     p_product_id: product.id,
   });
   if (error) throw error;
 
-  const balance = Number(data);
-  if (!Number.isInteger(balance) || balance < 0) {
-    throw new Error('Supabase devolvió un saldo inválido después del canje.');
+  const points = Number(data?.points);
+  const pointsSpent = Number(data?.points_spent);
+  if (
+    !Number.isSafeInteger(points)
+    || points < 0
+    || !Number.isSafeInteger(pointsSpent)
+    || pointsSpent <= 0
+    || typeof data?.redemption_id !== 'string'
+    || typeof data?.flavor_id !== 'string'
+    || typeof data?.flavor !== 'string'
+  ) {
+    throw new Error('Supabase devolvió datos inválidos después del canje.');
   }
 
-  pointsByUser.set(userId, balance);
-  const redeemedProducts = redeemedProductsByUser.get(userId) ?? new Set();
-  redeemedProducts.add(product.id);
-  redeemedProductsByUser.set(userId, redeemedProducts);
+  pointsByUser.set(userId, points);
   dispatchRewardsUpdated(userId);
-  return balance;
+  return { ...data, points, points_spent: pointsSpent };
 }
 
 export function canRedeemProduct(product, userId) {
   const cost = getRewardCostForProduct(product);
   if (!product || cost <= 0 || !userId) return false;
-  return getUserPoints(userId) >= cost && !isProductRedeemed(product.id, userId);
+  return getUserPoints(userId) >= cost;
 }
 
 export function createMissionTemplate(overrides = {}) {

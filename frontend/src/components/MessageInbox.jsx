@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { claimMessagePoints, getMyMessages, markMessagesRead } from '../services/messages';
 import { loadUserRewards } from '../services/rewards';
 import MayCoinAmount from './MayCoinAmount';
@@ -10,6 +10,7 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [messageCount, setMessageCount] = useState(0);
+  const openRef = useRef(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [claimingMessageId, setClaimingMessageId] = useState('');
@@ -17,7 +18,9 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
   const refreshUnreadCount = useCallback(async () => {
     try {
       const result = await getMyMessages(userId);
-      setMessageCount(result.length);
+      if (!openRef.current) {
+        setMessageCount(result.filter((item) => !item.readAt).length);
+      }
       setError('');
     } catch (loadError) {
       setError(loadError.message);
@@ -43,7 +46,7 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
         if (!active) return;
         const viewedAt = new Date().toISOString();
         setMessages(result.map((item) => ({ ...item, readAt: item.readAt ?? viewedAt })));
-        setMessageCount(result.length);
+        setMessageCount(0);
       } catch (loadError) {
         if (active) setError(loadError.message);
       } finally {
@@ -76,7 +79,10 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
   useEffect(() => {
     if (!open) return undefined;
     const closeOnEscape = (event) => {
-      if (event.key === 'Escape') setOpen(false);
+      if (event.key === 'Escape') {
+        openRef.current = false;
+        setOpen(false);
+      }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
@@ -86,20 +92,35 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
     <div className="relative shrink-0">
       <button
         type="button"
-        aria-label={`Mensajes${messageCount ? `, ${messageCount} recibidos` : ''}`}
+        aria-label={`Mensajes${messageCount ? `, ${messageCount} sin leer` : ''}`}
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => {
-          if (!open) {
+          const nextOpen = !open;
+          openRef.current = nextOpen;
+          if (nextOpen) {
             setLoading(true);
             setError('');
           }
-          setOpen(!open);
+          setOpen(nextOpen);
           onNavigate();
         }}
         className="navbar-message-button inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3 py-2 text-base font-semibold text-black shadow-sm transition hover:bg-slate-700 sm:px-4"
       >
-        <span aria-hidden="true">✉</span>
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-5 w-5"
+        >
+          <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z" />
+          <path d="M8 11h8M8 15h5" />
+        </svg>
         <span className="hidden sm:inline">Mensajes</span>
         {messageCount > 0 && (
           <span className="navbar-message-count rounded-full bg-emerald-500 px-2 py-0.5 text-sm font-semibold text-slate-900">
@@ -112,7 +133,7 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
         <section
           role="dialog"
           aria-label="Bandeja de mensajes"
-          className="fixed left-2 right-2 top-36 z-[60] mx-auto max-h-[calc(100dvh-10rem)] w-auto max-w-md overflow-x-hidden overflow-y-auto rounded-2xl border border-slate-200 bg-white/45 p-4 text-white shadow-2xl sm:p-5 md:absolute md:left-auto md:right-0 md:top-full md:mx-0 md:max-h-[min(70vh,36rem)] md:w-[calc(100vw-1rem)]"
+          className="fixed left-2 right-2 top-36 z-[60] mx-auto max-h-[calc(100dvh-10rem)] w-auto max-w-md overflow-x-hidden overflow-y-auto rounded-2xl border border-slate-200 bg-transparent p-4 text-white shadow-2xl sm:p-5 md:absolute md:left-auto md:right-0 md:top-full md:mx-0 md:max-h-[min(70vh,36rem)] md:w-[calc(100vw-1rem)]"
           style={navbarBackgroundImageUrl ? {
             backgroundImage: `url("${navbarBackgroundImageUrl}")`,
             backgroundPosition: 'center',
@@ -123,7 +144,10 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
             <h2 className="text-xl font-bold text-white">Mis mensajes</h2>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                openRef.current = false;
+                setOpen(false);
+              }}
               aria-label="Cerrar mensajes"
               className="rounded-full border border-slate-300 px-3 py-1 font-bold text-black"
             >
@@ -137,7 +161,7 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
           )}
           <ul className="mt-3 space-y-3">
             {messages.map((item) => (
-              <li key={item.id} className="rounded-xl border border-slate-200 bg-white/70 p-3">
+              <li key={item.id} className="rounded-xl border border-slate-200 bg-fuchsia-300 p-3 text-white">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-lg font-bold text-white">{item.title}</h3>
                   {!item.readAt && <span className="shrink-0 text-sm font-semibold text-white">Nuevo</span>}
@@ -146,7 +170,7 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
                 {item.reward_points > 0 && (
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     {item.pointsClaimed ? (
-                      <p className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-900">
+                      <p className="inline-flex min-w-[180px] items-center justify-center gap-2 whitespace-nowrap rounded-full bg-emerald-700 px-5 py-2 text-sm font-bold text-white">
                         Recibiste <MayCoinAmount amount={item.reward_points} iconClassName="h-4 w-4" />
                       </p>
                     ) : (
@@ -158,7 +182,7 @@ export default function MessageInbox({ userId, navbarBackgroundImageUrl, onNavig
                           type="button"
                           onClick={() => void handleClaimPoints(item.id)}
                           disabled={claimingMessageId !== ''}
-                          className="rounded-full bg-amber-400 px-4 py-1.5 text-xs font-bold text-slate-900 transition hover:bg-amber-500 disabled:cursor-wait disabled:opacity-60"
+                          className="message-claim-button rounded-full bg-amber-400 px-4 py-1.5 text-xs font-bold transition hover:bg-amber-500 disabled:cursor-wait disabled:opacity-60"
                         >
                           {claimingMessageId === item.id ? 'Recibiendo...' : 'Recibir'}
                         </button>
